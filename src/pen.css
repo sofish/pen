@@ -1,0 +1,36 @@
+@charset "utf-8";
+
+/* basic reset */
+.pen {font:400 1.36em/1.45 Palatino, Optima, Georgia, serif;color:#331;}
+.pen fieldset, img {border: 0;}
+.pen blockquote{padding-left:10px;margin-left:-14px;border-left:4px solid #1abf89;}
+.pen a{color:#1abf89;}
+.pen del{text-decoration:line-through;}
+.pen sub, .pen sup {font-size:75%;position:relative;vertical-align:text-top\9;}
+:root .pen sub, :root .pen sup{vertical-align:baseline; /* for ie9 and other mordern browsers */}
+.pen sup {top:-0.5em;}
+.pen sub {bottom:-0.25em;}
+.pen hr{border:none;border-bottom:1px solid #cfcfcf;margin-bottom:10px;*color:pink;*filter:chroma(color=pink);height:10px;*margin:-7px 0 2px;}
+.pen small{font-size:0.8em;color:#888;}
+.pen em, .pen b, .pen strong{font-weight:700;}
+
+/* block-level element margin */
+.pen p, .pen pre, .pen ul, .pen ol, .pen dl, .pen form, .pen hr, .pen table{margin-bottom:16px;}
+
+/* headers */
+.pen h1, .pen h2, .pen h3, .pen h4, .pen h5, .pen h6{margin-bottom:16px;font-weight:700;line-height:1.2;}
+.pen h1{font-size:2em;}
+.pen h2{font-size:1.8em;}
+.pen h3{font-size:1.6em;}
+.pen h4{font-size:1.4em;}
+.pen h5, .pen h6{font-size:1.2em;}
+
+/* list */
+.pen ul, .pen-ul{list-style:inside disc;}
+.pen ol, .pen-ol{list-style:inside decimal;}
+.pen li ul, .pen li ol, .pen-ul ul, .pen-ul ol, .pen-ol ul, .pen-ol ol{margin:0 2em 0 0;}
+.pen li ul, .pen-ul ul, .pen-ol ul{list-style: circle;}
+
+.pen-menu{background:rgba(0,0,0,0.8);position:fixed;height:30px;border-radius:3px;}
+.pen-icon{display:inline-block;padding:0 10px;height:30px;line-height:30px;color:#fff;text-align:center;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
+.pen-icon:hover{background:#000;}
