@@ -47,18 +47,12 @@
   };
 
   // get position
-  utils.position = function(e) {
-    var top = e.clientY || e.pageY
-      , left = e.clientX || e.pageX
-      , offset;
+  utils.position = function (menu, range) {
+    var offset = range.getBoundingClientRect()
+      , height = 30 + 10 // menu height and offset
+      , width = offset.width / 2;
 
-    offset = e.target.currentStyle ?
-          e.target.currentStyle.lineHeight :
-          doc.defaultView.getComputedStyle(e.target, null).getPropertyValue('line-height');
-
-    offset = +offset.slice(0, -2);
-
-    return { top: top - offset, left: left };
+    return { top: offset.top - height, left: offset.left + width};
   };
 
   // event handler
@@ -198,7 +192,7 @@
   Pen.prototype.cmd = function(effect) {
 
     var that = this;
-    
+
     var _fonteffect = function(name) {
       return function() {
         doc.execCommand(name, false, null);
@@ -220,9 +214,9 @@
 
   Pen.prototype.menu = function(position) {
 
-    this._menu.style.top = position.top + 'px';
-    this._menu.style.left = position.left + 'px';
     this._menu.style.display = 'block';
+    this._menu.style.top = position.top + 'px';
+    this._menu.style.left = position.left - (this._menu.clientWidth/2) + 'px';
 
     return this;
   };
@@ -238,9 +232,8 @@
       utils.shift('toolbar', function() {
         var range = doc.getSelection();
         if(range.toString().length) {
-          var position = utils.position(e);
           that._range = range.getRangeAt(0);
-          return that.menu(position);
+          return that.menu(utils.position(that._menu, that._range));
         }
       }, 200);
     });
