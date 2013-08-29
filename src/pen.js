@@ -187,6 +187,8 @@
     // add effect
     utils.bind(menu, 'click', function(e) {
       var target = e.target, action = target.getAttribute('data-action');
+
+      doc.getSelection().addRange(that._range);
       that.cmd(action);
     })
 
@@ -195,9 +197,12 @@
 
   Pen.prototype.cmd = function(effect) {
 
+    var that = this;
+    
     var _fonteffect = function(name) {
       return function() {
         doc.execCommand(name, false, null);
+        that._menu.style.display = 'none';
       }
     };
 
@@ -208,7 +213,7 @@
     };
 
     // add effect
-    if(!actions[effect]()) utils.log('fail to add ' + effect + ' effect.');
+    actions[effect]();
 
     return this;
   };
@@ -234,6 +239,7 @@
         var range = doc.getSelection();
         if(range.toString().length) {
           var position = utils.position(e);
+          that._range = range.getRangeAt(0);
           return that.menu(position);
         }
       }, 200);

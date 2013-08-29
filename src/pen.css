@@ -2,6 +2,7 @@
 
 /* basic reset */
 .pen {font:400 1.36em/1.45 Palatino, Optima, Georgia, serif;color:#331;}
+.pen:focus{outline:none;}
 .pen fieldset, img {border: 0;}
 .pen blockquote{padding-left:10px;margin-left:-14px;border-left:4px solid #1abf89;}
 .pen a{color:#1abf89;}
