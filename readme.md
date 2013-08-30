@@ -1,6 +1,7 @@
 # Pen Editor
 > what you see is what you get
 
+**live demo:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
 
 ### 1. Config
 
@@ -26,11 +27,3 @@ var editor = new Pen(documenty.getElementById('#editor'));
   list: ['bold', 'italic', 'underline'] // editor menu list
 }
 ```
-
-### 2. Demo
-
-```bash
-git clone git@github.com:sofish/pen.git
-```
-
-open: `index.html`;
