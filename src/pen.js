@@ -131,7 +131,9 @@
 
     // when to hide
     utils.bind(this.config.editor, 'click', function() {
-      if(doc.getSelection().isCollapsed) that._menu.style.display = 'none';
+      return doc.getSelection().isCollapsed ?
+        (that._menu.style.display = 'none') :
+        (that._menu.getElementsByTagName('input')[0].style.display = 'none');
     });
 
     // work like an editor
@@ -149,10 +151,11 @@
         input.focus();
 
         return input.onkeypress = function(e) {
-          if(e.which === 13 && e.target.value) {
-            doc.getSelection().addRange(that._range);
-            url = e.target.value.replace(/(^\s+)|(\s+$)/g, '');
-            that._actions(action, url);
+          if(e.which === 13) {
+            if(e.target.value) {
+              doc.getSelection().addRange(that._range);
+              that._actions(action, e.target.value.replace(/(^\s+)|(\s+$)/g, ''));
+            }
 
             menu.style.display = 'none';
             input.style.display = 'none';
