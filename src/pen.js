@@ -67,7 +67,7 @@
     var defaults = {
         class: 'pen',
         debug: false,
-        list: ['blockquote', 'h2', 'h3', 'bold', 'italic', 'underline', 'createlink', 'insertimage']
+        list: ['blockquote', 'h2', 'h3', 'bold', 'italic', 'underline', 'createlink']
       }
 
     // user-friendly config
@@ -108,7 +108,9 @@
     var menu, that = this, icons = '';
 
     for(var i = 0, list = this.config.list; i < list.length; i++) {
-      icons += '<i class="pen-icon" data-action="' + list[i] + '">' + list[i] + '</i>';
+      var name = list[i], klass = 'pen-icon icon-' + name;
+      icons += '<i class="' + klass + '" data-action="' + name + '">' + name + '</i>';
+      if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
     }
 
     menu = doc.createElement('div');
@@ -134,12 +136,34 @@
 
     // work like an editor
     utils.bind(menu, 'click', function(e) {
-      var action = e.target.getAttribute('data-action');
-      if(action) {
-        that.config.editor.focus();
-        doc.getSelection().addRange(that._range);
-        that._actions(action);
+      var action = e.target.getAttribute('data-action')
+        , value = null;
+
+      if(!action) return;
+
+      // create link
+      if(action === 'createlink') {
+        var input = menu.getElementsByTagName('input')[0];
+
+        input.style.display = 'block'
+        input.focus();
+
+        return input.onkeypress = function(e) {
+          if(e.which === 13 && e.target.value) {
+            doc.getSelection().addRange(that._range);
+            url = e.target.value.replace(/(^\s+)|(\s+$)/g, '');
+            that._actions(action, url);
+
+            menu.style.display = 'none';
+            input.style.display = 'none';
+            input.value = '';
+          }
+        }
       }
+
+      that.config.editor.focus();
+      doc.getSelection().addRange(that._range);
+      that._actions(action, value);
     });
 
     return this;
@@ -163,8 +187,8 @@
       }
     };
 
-    var inline = function(name) {
-      return doc.execCommand(name, false, null);
+    var inline = function(name, value) {
+      return doc.execCommand(name, false, value);
     };
 
     var block = function(name) {
@@ -179,10 +203,8 @@
     this._actions = function(name, value) {
       if(name.match(reg.block)) {
         return block(name);
-      } else if(name.match(reg.inline)) {
-        return inline(name);
-      } else if(name.match(reg.source)) {
-        return source(name, value);
+      } else if(name.match(reg.inline) || name.match(reg.source)) {
+        return inline(name, value);
       } else {
         if(this.config.debug) log('can\' find command func');
       }
