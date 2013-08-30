@@ -136,6 +136,7 @@
     utils.bind(menu, 'click', function(e) {
       var action = e.target.getAttribute('data-action');
       if(action) {
+        that.config.editor.focus();
         doc.getSelection().addRange(that._range);
         that._actions(action);
       }
@@ -145,30 +146,39 @@
   }
 
   Pen.prototype.actions = function() {
-
-    var that = this, inline, block, map, allow;
+    var that = this;
 
     // allow list
-    allow_block = /^(?:p|h[1-6]|blockquote)$/;
-    allow_inline = /^(?:bold|italic|underline)$/;
-    allow_source = /^(?:insertimage|createlink)$/
+    var reg = {
+      block: /^(?:p|h[1-6]|blockquote)$/,
+      inline: /^(?:bold|italic|underline)$/,
+      source: /^(?:insertimage|createlink)$/
+    }
 
-    inline = function(name) {
+    var currentEffectNode = function(el, tag) {
+      el = el.parentNode;
+      while(el.nodeName !== 'BODY') {
+        if(el.nodeName === tag.toUpperCase()) return el;
+        el = el.parentNode;
+      }
+    };
+
+    var inline = function(name) {
       return doc.execCommand(name, false, null);
     };
 
-    block = function(name) {
-      //var node = that._range.startContainer.parentElement.nodeName;
-      //if(node.match(/^(?:H[1-6]|BLOCKQUOTE)$/i)) name = 'p';
+    var block = function(name) {
+      var node = doc.getSelection().getRangeAt(0).startContainer;
+      if(currentEffectNode(node, name)) name = 'p';
       return document.execCommand('formatblock', false, name);
     };
 
     this._actions = function(name, value) {
-      if(name.match(allow_block)) {
+      if(name.match(reg.block)) {
         return block(name);
-      } else if(name.match(allow_inline)) {
+      } else if(name.match(reg.inline)) {
         return inline(name);
-      } else if(name.match(allow_source)) {
+      } else if(name.match(reg.source)) {
         return source(name, value);
       } else {
         if(this.config.debug) log('can\' find command func');
