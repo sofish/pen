@@ -1,14 +1,6 @@
 ~function(doc) {
 
-  var utils = {};
-
-  // log
-  utils.log = function(message, force) {
-    if(window._pen_debug_mode_on || force) {
-      console.info('Pen Debug Info:');
-      console.log(message);
-    }
-  };
+  var Pen, utils = {};
 
   // type detect
   utils.is = function(obj, type) {
@@ -20,39 +12,16 @@
     for(var p in source) {
       if(source.hasOwnProperty(p)) {
         var val = source[p];
-        if(this.is(val, 'Object')) {
-          defaults[p] = this.copy({}, val);
-        } else if (this.is(val, 'Array')) {
-          defaults[p] = this.copy([], val);
-        } else {
-          defaults[p] = val;
-        }
+        defaults[p] = this.is(val, 'Object') ? this.copy({}, val) :
+          this.is(val, 'Array') ? this.copy([], val) : val;
       }
     }
     return defaults;
   };
 
-  // shift a func
-  utils.shift = function(key, fn, time) {
-    time = time || 100;
-    var queue = this['_shift_fn_' + key]
-      , id = '_shift_timeout_' + key
-      , current;
-    queue ? queue.concat([fn, time]) : (queue = [[fn, time]]);
-    current = queue.pop();
-    clearTimeout(this[id]);
-    this[id] = setTimeout(function() {
-      current[0]();
-    }, current[1]);
-  };
-
-  // get position
-  utils.position = function (menu, range) {
-    var offset = range.getBoundingClientRect()
-      , height = 30 + 10 // menu height and offset
-      , width = offset.width / 2;
-
-    return { top: offset.top - height, left: offset.left + width};
+  // log
+  utils.log = function(message, force) {
+    if(window._pen_debug_mode_on || force) console.log('Pen Debug Info: ' + message);
   };
 
   // event handler
@@ -66,9 +35,7 @@
   };
 
   utils._eventfixer = function(el, fn) {
-
     return function(e) {
-
       // event object
       e = e || window.event;
 
@@ -91,26 +58,9 @@
 
   utils.bind = utils._event;
 
-  /**
-   * Pen - Editor constructor
-   *
-   * @param config {DOM Element | String | Object}
-   *   config can be a DOM Element, or an HTML ID attribute like '#editor', or an Object:
-   *   {
-   *     editor: DOM Element [required]
-   *     class: class of the editor || 'pen'
-   *     debug: enable debug mode || 'false'
-   *   }
-   *
-   * @example
-   *  - var editor = new Pen(documenty.body); // make `document.body` as an editor
-   *  - var editor = new Pen('#editor'); // make `#editor` as an editor
-   *  - var editor = new Pen({
-   *      editor: document.body,
-   *      debug: true
-   *    }); // make `document.body` as an editor and enable debug mode
-   */
-  var Pen = function(config) {
+
+  Pen = function(config) {
+
     if(!config) return utils.log('can\'t find config', true);
 
     // default settings
@@ -122,21 +72,17 @@
 
     // user-friendly config
     if(config.nodeType === 1) {
-      var editor = options;
+      defaults.editor = options;
     } else if(config.match && config.match(/^#[\S]+$/)) {
-      var editor = doc.getElementById(target);
+      defaults.editor = doc.getElementById(target);
     } else {
       defaults = utils.copy(defaults, config);
     }
 
-    // debug flag
+    if(defaults.editor.nodeType !== 1) return utils.log('can\'t find editor');
     if(defaults.debug) window._pen_debug_mode_on = true;
 
-    // pen need a editor-area to work with
-    if(editor) defaults.editor = editor;
-    if(editor && editor.nodeType !== 1) return utils.log('can\'t find editor');
-
-    editor = defaults.editor;
+    var editor = defaults.editor;
 
     // set default class
     var klass = editor.getAttribute('class');
@@ -150,45 +96,49 @@
     // assign config
     this.config = defaults;
 
-    return this.init();
+    // enable toolbar
+    this.toolbar();
   };
 
   Pen.prototype.toolbar = function() {
 
-    var icons = function(list) {
-      var html = ''
-      for(var i = 0, len = list.length; i < len; i++) {
-        html += '<i class="pen-icon" data-action="' + list[i] + '">' + list[i] + '</i>';
-      }
-      return html;
+    var menu, that = this, icons = '';
+
+    for(var i = 0, list = this.config.list; i < list.length; i++) {
+      icons += '<i class="pen-icon" data-action="' + list[i] + '">' + list[i] + '</i>';
     }
 
-    // create toolbar [dom]
-    var menu = doc.createElement('div')
-      , that = this;
-
+    menu = doc.createElement('div');
     menu.setAttribute('class', this.config.class + '-menu pen-menu');
-    menu.innerHTML = icons(this.config.list);
+    menu.innerHTML = icons;
     menu.style.display = 'none';
 
     doc.body.appendChild((this._menu = menu));
 
-    // hide the toolbar & only bind once
-    utils.bind(this.config.editor, 'mousedown', function() {
-      that._menu.style.display = 'none';
+    // show toolbar on select
+    utils.bind(this.config.editor, 'mouseup', function(){
+        var range = doc.getSelection();
+        if(!range.isCollapsed) {
+          that._range = range.getRangeAt(0);
+          return that.menu();
+        }
     });
 
-    // add effect
-    utils.bind(menu, 'click', function(e) {
-      var target = e.target, action = target.getAttribute('data-action');
+    // when to hide
+    utils.bind(this.config.editor, 'click', function() {
+      if(doc.getSelection().isCollapsed) that._menu.style.display = 'none';
+    });
 
+    // work like an editor
+    utils.bind(menu, 'mousedown', function(e) {
       doc.getSelection().addRange(that._range);
-      that.cmd(action);
-    })
+      that.cmd(e.target.getAttribute('data-action'));
+    });
 
     return this;
   }
 
+  // add effects
   Pen.prototype.cmd = function(effect) {
 
     var that = this;
@@ -212,35 +162,23 @@
     return this;
   };
 
-  Pen.prototype.menu = function(position) {
+  // show menu
+  Pen.prototype.menu = function() {
 
-    this._menu.style.display = 'block';
-    this._menu.style.top = position.top + 'px';
-    this._menu.style.left = position.left - (this._menu.clientWidth/2) + 'px';
+    var offset = this._range.getBoundingClientRect()
+      , top = offset.top - 10
+      , left = offset.left + (offset.width / 2)
+      , menu = this._menu;
 
-    return this;
-  };
-
-  Pen.prototype.init = function() {
-
-    var that = this, editor = this.config.editor;
-
-    // embed editor menu
-    this.toolbar();
-
-    utils.bind(editor, 'mouseup', function(e) {
-      utils.shift('toolbar', function() {
-        var range = doc.getSelection();
-        if(range.toString().length) {
-          that._range = range.getRangeAt(0);
-          return that.menu(utils.position(that._menu, that._range));
-        }
-      }, 200);
-    });
+    // display block to caculate it's width & height
+    menu.style.display = 'block';
+    menu.style.top = top - menu.clientHeight + 'px';
+    menu.style.left = left - (menu.clientWidth/2) + 'px';
 
     return this;
   };
 
+  // make it accessible
   this.Pen = Pen;
 
 }(document);

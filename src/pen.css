@@ -32,6 +32,6 @@
 .pen li ul, .pen li ol, .pen-ul ul, .pen-ul ol, .pen-ol ul, .pen-ol ol{margin:0 2em 0 0;}
 .pen li ul, .pen-ul ul, .pen-ol ul{list-style: circle;}
 
-.pen-menu{background:rgba(0,0,0,0.8);position:fixed;height:30px;border-radius:3px;}
+.pen-menu{background:rgba(0,0,0,0.8);position:fixed;height:30px;border-radius:3px;display:none;}
 .pen-icon{display:inline-block;padding:0 10px;height:30px;line-height:30px;color:#fff;text-align:center;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
 .pen-icon:hover{background:#000;}
