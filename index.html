@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>Pen - What You See Is What You Get (WYSIWYG)</title>
+    <style type="text/css">
+    *{padding:0;margin:0;}
+    body{width:800px;margin:0 auto;padding:10% 20px 20px;font-family:Palatino, Optima, Georgia, serif;}
+    @media all and (max-width:780px){ body, pre a{width:80%;} }
+    pre{background:#1abf89;width:100%;text-align:center;padding:10px 0;position:fixed;top:0;left:0;}
+    pre a{display:inline-block;width:800px;padding:0 20px;text-align:left;color:#fff;text-decoration:none;}
+    </style>
+    <link rel="stylesheet" href="src/pen.css" />
+</head>
+<body>
+
+<div data-toggle="pen" placeholder="im a placeholder">
+    <h3>You've got to find what you love</h3>
+    <p><small>@ <u>Steve Jobs</u></small></p>
+    <p>Stewart and his team put out several issues of <a href="The Whole Earth Catalog">The Whole Earth Catalog</a> , and then when it had run its course, they put out a final issue. It was the mid-1970s, and I was your age. On the back cover of their final issue was a photograph of an early morning country road, the kind you might find yourself hitchhiking on if you were so adventurous. Beneath it were the words: "Stay Hungry. Stay Foolish." It was their farewell message as they signed off. Stay Hungry. Stay Foolish. And I have always wished that for myself. And now, as you graduate to begin anew, I wish that for you.</p>
+    <blockquote>Stay Hungry. Stay Foolish.</blockquote>
+</div>
+
+<pre><a href="https://github.com/sofish/pen">https://github.com/sofish/pen</a></pre>
+
+<script src="src/pen.js"></script>
+<script type="text/javascript">
+    var options = {
+        editor: document.querySelector('[data-toggle="pen"]'),
+        debug: true
+    }
+
+    var pen = new Pen(options);
+</script>
+</body>
+</html>
