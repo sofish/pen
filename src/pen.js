@@ -169,7 +169,10 @@
 
     var block = function(name) {
       var node = doc.getSelection().getRangeAt(0).startContainer;
-      if(currentEffectNode(node, name)) name = 'p';
+      if(currentEffectNode(node, name)) {
+        if(name === 'blockquote') return document.execCommand('outdent', false, null);
+        name = 'p';
+      }
       return document.execCommand('formatblock', false, name);
     };
 
