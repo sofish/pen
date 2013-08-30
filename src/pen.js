@@ -67,7 +67,7 @@
     var defaults = {
         class: 'pen',
         debug: false,
-        list: ['bold', 'italic', 'underline']
+        list: ['blockquote', 'h2', 'h3', 'bold', 'italic', 'underline', 'createlink', 'insertimage']
       }
 
     // user-friendly config
@@ -95,6 +95,9 @@
 
     // assign config
     this.config = defaults;
+
+    // map actions
+    this.actions();
 
     // enable toolbar
     this.toolbar();
@@ -130,37 +133,50 @@
     });
 
     // work like an editor
-    utils.bind(menu, 'mousedown', function(e) {
-      doc.getSelection().addRange(that._range);
-      that.cmd(e.target.getAttribute('data-action'));
+    utils.bind(menu, 'click', function(e) {
+      var action = e.target.getAttribute('data-action');
+      if(action) {
+        doc.getSelection().addRange(that._range);
+        that._actions(action);
+      }
     });
 
     return this;
   }
 
-  // add effects
-  Pen.prototype.cmd = function(effect) {
+  Pen.prototype.actions = function() {
 
-    var that = this;
+    var that = this, inline, block, map, allow;
 
-    var _fonteffect = function(name) {
-      return function() {
-        doc.execCommand(name, false, null);
-        that._menu.style.display = 'none';
+    // allow list
+    allow_block = /^(?:p|h[1-6]|blockquote)$/;
+    allow_inline = /^(?:bold|italic|underline)$/;
+    allow_source = /^(?:insertimage|createlink)$/
+
+    inline = function(name) {
+      return doc.execCommand(name, false, null);
+    };
+
+    block = function(name) {
+      //var node = that._range.startContainer.parentElement.nodeName;
+      //if(node.match(/^(?:H[1-6]|BLOCKQUOTE)$/i)) name = 'p';
+      return document.execCommand('formatblock', false, name);
+    };
+
+    this._actions = function(name, value) {
+      if(name.match(allow_block)) {
+        return block(name);
+      } else if(name.match(allow_inline)) {
+        return inline(name);
+      } else if(name.match(allow_source)) {
+        return source(name, value);
+      } else {
+        if(this.config.debug) log('can\' find command func');
       }
-    };
-
-    var actions = {
-      bold: _fonteffect('bold'),
-      italic: _fonteffect('italic'),
-      underline: _fonteffect('underline')
-    };
-
-    // add effect
-    actions[effect]();
+    }
 
     return this;
-  };
+  }
 
   // show menu
   Pen.prototype.menu = function() {
