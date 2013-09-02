@@ -75,7 +75,7 @@
 
     for(var i = 0, list = this.config.list; i < list.length; i++) {
       var name = list[i], klass = 'pen-icon icon-' + name;
-      icons += '<i class="' + klass + '" data-action="' + name + '">' + name + '</i>';
+      icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]$/i) ? name.toUpperCase() : '') + '</i>';
       if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
     }
 

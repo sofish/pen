@@ -33,7 +33,84 @@
 .pen li ul, .pen-ul ul, .pen-ol ul{list-style: circle;}
 
 .pen-menu, .pen-input{font-size:14px;line-height:1;}
-.pen-menu{box-shadow:1px 1px 2px #000;background:rgba(0,0,0,0.8);position:fixed;height:30px;border-radius:3px;display:none;overflow:hidden;}
-.pen-icon{display:inline-block;padding:0 10px;height:30px;line-height:30px;color:#fff;text-align:center;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
+.pen-menu{box-shadow:1px 0 2px #000;background:#333;opacity:0.9;position:fixed;height:36px;border-radius:3px;display:none;overflow:hidden;}
+.pen-icon{font:normal 900 16px Georgia serif;display:inline-block;padding:0 10px;line-height:40px;color:#fff;text-align:center;vertical-align:middle;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
 .pen-icon:hover{background:#000;}
-.pen-input{position:absolute;width:100%;left:0;top:0;height:30px;line-height:20px;background:#333;color:#fff;border:none;text-align:center;display:none;}
+.pen-input{position:absolute;width:100%;left:0;top:0;height:36px;line-height:20px;background:#333;color:#fff;border:none;text-align:center;display:none;}
+
+@font-face {
+    font-family: 'fontello';
+    src: url('font/fontello.eot?53279403');
+    src: url('font/fontello.eot?53279403#iefix') format('embedded-opentype'),
+    url('font/fontello.woff?53279403') format('woff'),
+    url('font/fontello.ttf?53279403') format('truetype'),
+    url('font/fontello.svg?53279403#fontello') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be */
+/*
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: 'fontello';
+    src: url('../font/fontello.svg?53279403#fontello') format('svg');
+  }
+}
+*/
+ 
+ [class^="icon-"]:before, [class*=" icon-"]:before {
+  font-family: "fontello";
+  font-style: normal;
+  font-weight: normal;
+  speak: none;
+ 
+  display: inline-block;
+  text-decoration: inherit;
+  width: 1em;
+  margin-right: .2em;
+  text-align: center;
+  /* opacity: .8; */
+ 
+  /* For safety - reset parent styles, that can break glyph codes*/
+  font-variant: normal;
+  text-transform: none;
+     
+  /* fix buttons height, for twitter bootstrap */
+  line-height: 1em;
+ 
+  /* Animation center compensation - margins should be symmetric */
+  /* remove if not needed */
+  margin-left: .2em;
+ 
+  /* you can be more comfortable with increased icons size */
+  /* font-size: 120%; */
+ 
+  /* Uncomment for 3D effect */
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3); */
+}
+ 
+.icon-location:before { content: '\e815'; } /* '' */
+.icon-fit:before { content: '\e80f'; } /* '' */
+.icon-bold:before { content: '\e805'; } /* '' */
+.icon-italic:before { content: '\e806'; } /* '' */
+.icon-justifyleft:before { content: '\e80a'; } /* '' */
+.icon-justifycenter:before { content: '\e80b'; } /* '' */
+.icon-justifyright:before { content: '\e80c'; } /* '' */
+.icon-justifyfull:before { content: '\e80d'; } /* '' */
+.icon-oudent:before { content: '\e800'; } /* '' */
+.icon-indent:before { content: '\e801'; } /* '' */
+.icon-mode:before { content: '\e813'; } /* '' */
+.icon-fullscreen:before { content: '\e80e'; } /* '' */
+.icon-insertunorderedlist:before { content: '\e802'; } /* '' */
+.icon-insertorderedlist:before { content: '\e803'; } /* '' */
+.icon-strikethrough:before { content: '\e807'; } /* '' */
+.icon-underline:before { content: '\e804'; } /* '' */
+.icon-blockquote:before { content: '\e814'; } /* '' */
+.icon-undo:before { content: '\e817'; } /* '' */
+.icon-code:before { content: '\e816'; } /* '' */
+.icon-unlink:before { content: '\e811'; } /* '' */
+.icon-superscript:before { content: '\e808'; } /* '' */
+.icon-subscript:before { content: '\e809'; } /* '' */
+.icon-inserthorizontalrule:before { content: '\e818'; } /* '' */
+.icon-pin:before { content: '\e812'; } /* '' */
+.icon-createlink:before { content: '\e810'; } /* '' */
