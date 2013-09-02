@@ -24,40 +24,6 @@
     if(window._pen_debug_mode_on || force) console.log('Pen Debug Info: ' + message);
   };
 
-  // event handler
-  utils._event = function(el, event, handler) {
-
-    handler = handler || function() {};
-    handler = utils._eventfixer(el, handler);
-
-    return el.addEventListener ?
-        el.addEventListener(event, handler, false) : el.attachEvent('on' + event, handler);
-  };
-
-  utils._eventfixer = function(el, fn) {
-    return function(e) {
-      // event object
-      e = e || window.event;
-
-      // prevent default
-      if(!e.preventDefault) e.preventDefault = function() {
-        return e.returnValue = false;
-      }
-
-      // stop propagation
-      if(!e.stopPropagation) e.stopPropagation = function() {
-        return e.cancelBubble = true;
-      }
-
-      // event target
-      if(!e.target) e.target = e.srcElement;
-
-      fn.call(el, e);
-    }
-  }
-
-  utils.bind = utils._event;
-
 
   Pen = function(config) {
 
@@ -121,8 +87,8 @@
     doc.body.appendChild((this._menu = menu));
 
     // show toolbar on select
-    utils.bind(this.config.editor, 'mouseup', function(){
-        var range = doc.getSelection();
+    this.config.editor.addEventListener('mouseup', function(){
+        var range = window.getSelection();
         if(!range.isCollapsed) {
           that._range = range.getRangeAt(0);
           return that.menu();
@@ -130,43 +96,45 @@
     });
 
     // when to hide
-    utils.bind(this.config.editor, 'click', function() {
-      return doc.getSelection().isCollapsed ?
+   this.config.editor.addEventListener('click', function() {
+      return window.getSelection().isCollapsed ?
         (that._menu.style.display = 'none') :
         (that._menu.getElementsByTagName('input')[0].style.display = 'none');
     });
 
     // work like an editor
-    utils.bind(menu, 'click', function(e) {
-      var action = e.target.getAttribute('data-action')
-        , value = null;
+    menu.addEventListener('click', function(e) {
+      var action = e.target.getAttribute('data-action');
 
       if(!action) return;
 
+      var apply = function(value) {
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(that._range);
+        that._actions(action, value);
+        that.config.editor.focus();
+        that._range = window.getSelection().getRangeAt(0);
+      }
+
       // create link
       if(action === 'createlink') {
-        var input = menu.getElementsByTagName('input')[0];
+        var input = menu.getElementsByTagName('input')[0], createlink;
 
         input.style.display = 'block'
         input.focus();
 
-        return input.onkeypress = function(e) {
-          if(e.which === 13) {
-            if(e.target.value) {
-              doc.getSelection().addRange(that._range);
-              that._actions(action, e.target.value.replace(/(^\s+)|(\s+$)/g, ''));
-            }
+        createlink = function(input) {
+          if(input.value) apply(input.value.replace(/(^\s+)|(\s+$)/g, ''));
+          input.style.display = 'none';
+          input.value = '';
+        };
 
-            menu.style.display = 'none';
-            input.style.display = 'none';
-            input.value = '';
-          }
+        return input.onkeypress = function(e) {
+          if(e.which === 13) return createlink(e.target);
         }
       }
 
-      that.config.editor.focus();
-      doc.getSelection().addRange(that._range);
-      that._actions(action, value);
+      apply();
     });
 
     return this;
@@ -195,7 +163,7 @@
     };
 
     var block = function(name) {
-      var node = doc.getSelection().getRangeAt(0).startContainer;
+      var node = window.getSelection().getRangeAt(0).startContainer;
       if(currentEffectNode(node, name)) {
         if(name === 'blockquote') return document.execCommand('outdent', false, null);
         name = 'p';
