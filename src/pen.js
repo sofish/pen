@@ -72,10 +72,12 @@
   };
 
   // node effects
-  Pen.prototype._nodeEffect = function(el) {
-    var nodes = [];
+  Pen.prototype._effectNode = function(el, returnAsNodeName) {
+    var nodes = [], result;
     while(el !== this.config.editor) {
-      if(el.nodeName.match(/(?:[pubia]|h[1-6]|blockquote)/i)) nodes.push(el.nodeName.toLocaleLowerCase());
+      if(el.nodeName.match(/(?:[pubia]|h[1-6]|blockquote)/i)) {
+        nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
+      }
       el = el.parentNode;
     }
     return nodes;
@@ -137,9 +139,10 @@
         input.focus();
 
         createlink = function(input) {
-          if(input.value) apply(input.value.replace(/(^\s+)|(\s+$)/g, ''));
           input.style.display = 'none';
-          input.value = '';
+          if(input.value) return apply(input.value.replace(/(^\s+)|(\s+$)/g, ''));
+          action = 'unlink';
+          apply();
         };
 
         return input.onkeypress = function(e) {
@@ -156,7 +159,7 @@
   // highlight menu
   Pen.prototype.highlight = function(target) {
     var node = this._sel.focusNode
-      , effects = this._nodeEffect(node)
+      , effects = this._effectNode(node)
       , menu = this._menu
       , highlight;
 
@@ -172,12 +175,15 @@
     };
 
     effects.forEach(function(item) {
-
-      if(item === 'a') return highlight('createlink');
-      if(item === 'i') return highlight('italic');
-      if(item === 'u') return highlight('underline');
-      if(item === 'b') return highlight('bold');
-      return highlight(item);
+      var tag = item.nodeName.toLowerCase();
+      if(tag === 'a') {
+        menu.querySelector('input').value = item.href;
+        return highlight('createlink');
+      }
+      if(tag === 'i') return highlight('italic');
+      if(tag === 'u') return highlight('underline');
+      if(tag === 'b') return highlight('bold');
+      return highlight(tag);
     });
 
     return this;
@@ -190,7 +196,7 @@
     var reg = {
       block: /^(?:p|h[1-6]|blockquote)$/,
       inline: /^(?:bold|italic|underline)$/,
-      source: /^(?:insertimage|createlink)$/
+      source: /^(?:insertimage|createlink|unlink)$/
     }
 
     var inline = function(name, value) {
@@ -198,7 +204,7 @@
     };
 
     var block = function(name) {
-      if(that._nodeEffect(that._sel.getRangeAt(0).startContainer).indexOf(name) !== -1) {
+      if(that._effectNode(that._sel.getRangeAt(0).startContainer, true).indexOf(name) !== -1) {
         if(name === 'blockquote') return document.execCommand('outdent', false, null);
         name = 'p';
       }
