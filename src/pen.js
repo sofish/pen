@@ -88,7 +88,7 @@
 
     // show toolbar on select
     this.config.editor.addEventListener('mouseup', function(){
-        var range = window.getSelection();
+        var range = doc.getSelection();
         if(!range.isCollapsed) {
           that._range = range.getRangeAt(0);
           return that.menu();
@@ -97,7 +97,7 @@
 
     // when to hide
    this.config.editor.addEventListener('click', function() {
-      return window.getSelection().isCollapsed ?
+      return doc.getSelection().isCollapsed ?
         (that._menu.style.display = 'none') :
         (that._menu.getElementsByTagName('input')[0].style.display = 'none');
     });
@@ -109,11 +109,11 @@
       if(!action) return;
 
       var apply = function(value) {
-        window.getSelection().removeAllRanges();
-        window.getSelection().addRange(that._range);
+        doc.getSelection().removeAllRanges();
+        doc.getSelection().addRange(that._range);
         that._actions(action, value);
         that.config.editor.focus();
-        that._range = window.getSelection().getRangeAt(0);
+        that._range = doc.getSelection().getRangeAt(0);
       }
 
       // create link
@@ -163,7 +163,7 @@
     };
 
     var block = function(name) {
-      var node = window.getSelection().getRangeAt(0).startContainer;
+      var node = doc.getSelection().getRangeAt(0).startContainer;
       if(currentEffectNode(node, name)) {
         if(name === 'blockquote') return document.execCommand('outdent', false, null);
         name = 'p';
