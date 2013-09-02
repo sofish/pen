@@ -61,6 +61,9 @@
     // assign config
     this.config = defaults;
 
+    // save the selection obj
+    this._sel = doc.getSelection();
+
     // map actions
     this.actions();
 
@@ -97,7 +100,7 @@
 
     // show toolbar on select
     this.config.editor.addEventListener('mouseup', function(){
-        var range = doc.getSelection();
+        var range = that._sel;
         if(!range.isCollapsed) {
           that._range = range.getRangeAt(0);
           that.menu();
@@ -107,7 +110,7 @@
 
     // when to hide
    this.config.editor.addEventListener('click', function() {
-      return doc.getSelection().isCollapsed ?
+      return that._sel.isCollapsed ?
         (that._menu.style.display = 'none') :
         (that._menu.getElementsByTagName('input')[0].style.display = 'none');
     });
@@ -119,10 +122,10 @@
       if(!action) return;
 
       var apply = function(value) {
-        doc.getSelection().removeAllRanges();
-        doc.getSelection().addRange(that._range);
+        that._sel.removeAllRanges();
+        that._sel.addRange(that._range);
         that._actions(action, value);
-        that._range = doc.getSelection().getRangeAt(0);
+        that._range = that._sel.getRangeAt(0);
         that.highlight();
       }
 
@@ -152,7 +155,7 @@
 
   // highlight menu
   Pen.prototype.highlight = function(target) {
-    var node = doc.getSelection().focusNode
+    var node = this._sel.focusNode
       , effects = this._nodeEffect(node)
       , menu = this._menu
       , highlight;
@@ -195,7 +198,7 @@
     };
 
     var block = function(name) {
-      if(that._nodeEffect(doc.getSelection().getRangeAt(0).startContainer).indexOf(name) !== -1) {
+      if(that._nodeEffect(that._sel.getRangeAt(0).startContainer).indexOf(name) !== -1) {
         if(name === 'blockquote') return document.execCommand('outdent', false, null);
         name = 'p';
       }
