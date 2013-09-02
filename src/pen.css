@@ -16,7 +16,7 @@
 .pen em, .pen b, .pen strong{font-weight:700;}
 
 /* block-level element margin */
-.pen p, .pen pre, .pen ul, .pen ol, .pen dl, .pen form, .pen hr, .pen table{margin-bottom:16px;}
+.pen p, .pen pre, .pen ul, .pen ol, .pen dl, .pen form, .pen hr, .pen table, .pen blockquote{margin-bottom:16px;}
 
 /* headers */
 .pen h1, .pen h2, .pen h3, .pen h4, .pen h5, .pen h6{margin-bottom:16px;font-weight:700;line-height:1.2;}
@@ -36,6 +36,7 @@
 .pen-menu{box-shadow:1px 0 2px #000;background:#333;opacity:0.9;position:fixed;height:36px;border-radius:3px;display:none;overflow:hidden;}
 .pen-icon{font:normal 900 16px Georgia serif;display:inline-block;padding:0 10px;line-height:40px;color:#fff;text-align:center;vertical-align:middle;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
 .pen-icon:hover{background:#000;}
+.pen-icon.active{color:#1abf89;background:#111;box-shadow:3px 2px 5px #000 inset;}
 .pen-input{position:absolute;width:100%;left:0;top:0;height:36px;line-height:20px;background:#333;color:#fff;border:none;text-align:center;display:none;}
 .pen-input:focus{outline:none;}
 

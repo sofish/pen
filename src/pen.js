@@ -24,7 +24,6 @@
     if(window._pen_debug_mode_on || force) console.log('Pen Debug Info: ' + message);
   };
 
-
   Pen = function(config) {
 
     if(!config) return utils.log('can\'t find config', true);
@@ -69,6 +68,16 @@
     this.toolbar();
   };
 
+  // node effects
+  Pen.prototype._nodeEffect = function(el) {
+    var nodes = [];
+    while(el !== this.config.editor) {
+      if(el.nodeName.match(/(?:[pubia]|h[1-6]|blockquote)/i)) nodes.push(el.nodeName.toLocaleLowerCase());
+      el = el.parentNode;
+    }
+    return nodes;
+  };
+
   Pen.prototype.toolbar = function() {
 
     var menu, that = this, icons = '';
@@ -91,7 +100,8 @@
         var range = doc.getSelection();
         if(!range.isCollapsed) {
           that._range = range.getRangeAt(0);
-          return that.menu();
+          that.menu();
+          that.highlight();
         }
     });
 
@@ -113,6 +123,7 @@
         doc.getSelection().addRange(that._range);
         that._actions(action, value);
         that._range = doc.getSelection().getRangeAt(0);
+        that.highlight();
       }
 
       // create link
@@ -139,6 +150,35 @@
     return this;
   }
 
+  // highlight menu
+  Pen.prototype.highlight = function(target) {
+    var node = doc.getSelection().focusNode
+      , effects = this._nodeEffect(node)
+      , menu = this._menu
+      , highlight;
+
+    // remove all highlights
+    [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
+      el.classList.remove('active');
+    });
+
+    highlight = function(str) {
+      var selector = '.icon-' + str
+        , el = menu.querySelector(selector);
+      return el && el.classList.add('active');
+    };
+
+    effects.forEach(function(item) {
+      if(item === 'a') return highlight('createlink');
+      if(item === 'i') return highlight('italic');
+      if(item === 'u') return highlight('underline');
+      if(item === 'b') return highlight('bold');
+      return highlight(item);
+    });
+
+    return this;
+  }
+
   Pen.prototype.actions = function() {
     var that = this;
 
@@ -149,32 +189,24 @@
       source: /^(?:insertimage|createlink)$/
     }
 
-    var currentEffectNode = function(el, tag) {
-      el = el.parentNode;
-      while(el.nodeName !== 'BODY') {
-        if(el.nodeName === tag.toUpperCase()) return el;
-        el = el.parentNode;
-      }
-    };
-
     var inline = function(name, value) {
       return doc.execCommand(name, false, value);
     };
 
     var block = function(name) {
-      var node = doc.getSelection().getRangeAt(0).startContainer;
-      if(currentEffectNode(node, name)) {
+      if(that._nodeEffect(doc.getSelection().getRangeAt(0).startContainer).indexOf(name) !== -1) {
         if(name === 'blockquote') return document.execCommand('outdent', false, null);
         name = 'p';
       }
+
       return document.execCommand('formatblock', false, name);
     };
 
     this._actions = function(name, value) {
       if(name.match(reg.block)) {
-        return block(name);
+        block(name);
       } else if(name.match(reg.inline) || name.match(reg.source)) {
-        return inline(name, value);
+        inline(name, value);
       } else {
         if(this.config.debug) log('can\' find command func');
       }
