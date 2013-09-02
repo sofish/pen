@@ -37,6 +37,7 @@
 .pen-icon{font:normal 900 16px Georgia serif;display:inline-block;padding:0 10px;line-height:40px;color:#fff;text-align:center;vertical-align:middle;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
 .pen-icon:hover{background:#000;}
 .pen-input{position:absolute;width:100%;left:0;top:0;height:36px;line-height:20px;background:#333;color:#fff;border:none;text-align:center;display:none;}
+.pen-input:focus{outline:none;}
 
 @font-face {
     font-family: 'fontello';
