@@ -112,7 +112,6 @@
         doc.getSelection().removeAllRanges();
         doc.getSelection().addRange(that._range);
         that._actions(action, value);
-        that.config.editor.focus();
         that._range = doc.getSelection().getRangeAt(0);
       }
 
