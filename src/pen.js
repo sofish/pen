@@ -113,7 +113,6 @@
         doc.getSelection().addRange(that._range);
         that._actions(action, value);
         that._range = doc.getSelection().getRangeAt(0);
-      }
 
       // create link
       if(action === 'createlink') {
