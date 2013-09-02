@@ -1,7 +1,12 @@
 # Pen Editor
-> what you see is what you get
+
+> **what you see is what you get**
+> a light weight editor
 
 **live demo:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
+
+![preview](https://f.cloud.github.com/assets/153183/1066367/53c4f9fc-13b2-11e3-885a-122b43da1e4e.png)
+
 
 ### 1. Config
 

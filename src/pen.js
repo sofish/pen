@@ -169,6 +169,7 @@
     };
 
     effects.forEach(function(item) {
+
       if(item === 'a') return highlight('createlink');
       if(item === 'i') return highlight('italic');
       if(item === 'u') return highlight('underline');
