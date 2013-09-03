@@ -6,7 +6,7 @@
 
 ## 1. INSTALL
 
-### 1.1 init with an id attribute
+### 1.1 init with id attribute
 
 ```js
 var editor = new Pen('#editor');
@@ -15,10 +15,10 @@ var editor = new Pen('#editor');
 ### 1.2 init with an element
 
 ```js
-var editor = new Pen(documenty.getElementById('#editor'));
+var editor = new Pen(document.getElementById('editor'));
 ```
 
-### 1.3 init with an options
+### 1.3 init with options
 
 ```js
 var options = {
@@ -33,7 +33,7 @@ var editor = new Pen(options);
 
 ## 2. CONFIG
 
-The following object makes the default setting of Pen:
+The following object sets up the default settings of Pen:
 
 ```js
 defaults = {
@@ -43,7 +43,7 @@ defaults = {
 }
 ```
 
-If you want to customize the toolbar to fit your own project, you can change pass an `options` obj to `Pen` constructor like [#1.3: init with an options](https://github.com/sofish/pen#13-init-with-an-options):
+If you want to customize the toolbar to fit your own project, you can instanciate `Pen` constructor with an `options` object like [#1.3: init with options](https://github.com/sofish/pen#13-init-with-options):
 
 ### 2.1 Change the editor class
 
@@ -51,18 +51,18 @@ Pen will add `.pen` to your editor by default, if you want to change the class, 
 
 ### 2.2 Enable debug mode
 
-If the `options.debug` set to `true`, Pen will output logs to the Console of your browser.
+If `options.debug` is set to `true`, Pen will output logs to the Console of your browser.
 
 ### 2.3 Customize the toolbar
 
 You can set `options.list` to an `Array`, add the following strings to make your own:
 
-- `blockquote`, `h2`, `h3`, `p`: create tag as it's literal meaning
+- `blockquote`, `h2`, `h3`, `p`: create a tag as its literal meaning
 - `insertorderedlist`: create an `ol>li` list
-- `insertunorderedlist`: create an `ul>li` list
+- `insertunorderedlist`: create a `ul>li` list
 - `indent`: indent list / blockquote block
 - `outdent`: outdent list / blockquote block
-- `bold`: wrap the text of the selection in a `b` tag
-- `italic`: wrap the text of the selection in a `i` tag
-- `underline`: wrap the text of the selection in a `u` tag
-- `createlink`: insert link the the text of the selection
+- `bold`: wrap the text selection in a `b` tag
+- `italic`: wrap the text selection in an `i` tag
+- `underline`: wrap the text selection in a `u` tag
+- `createlink`: insert link to the text selection
