@@ -75,7 +75,7 @@
   Pen.prototype._effectNode = function(el, returnAsNodeName) {
     var nodes = [], result;
     while(el !== this.config.editor) {
-      if(el.nodeName.match(/(?:[pubia]|h[1-6]|blockquote|[uo]l)/i)) {
+      if(el.nodeName.match(/(?:[pubia]|h[1-6]|blockquote|[uo]l|li)/i)) {
         nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
       }
       el = el.parentNode;
@@ -172,8 +172,6 @@
       , menu = this._menu
       , highlight;
 
-    console.log(effects);
-
     // remove all highlights
     [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
       el.classList.remove('active');
@@ -196,6 +194,8 @@
       if(tag === 'b') return highlight('bold');
       if(tag === 'ul') return highlight('insertunorderedlist');
       if(tag === 'ol') return highlight('insertorderedlist');
+      if(tag === 'ol') return highlight('insertorderedlist');
+      if(tag === 'li') return highlight('indent');
       return highlight(tag);
     });
 
