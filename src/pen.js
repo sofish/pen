@@ -120,9 +120,11 @@
 
     // when to hide
    this.config.editor.addEventListener('click', function() {
-      return that._sel.isCollapsed ?
-        (that._menu.style.display = 'none') :
-        (that._menu.getElementsByTagName('input')[0].style.display = 'none');
+      setTimeout(function() {
+          that._sel.isCollapsed ?
+          (that._menu.style.display = 'none') :
+          (that._menu.getElementsByTagName('input')[0].style.display = 'none');
+      }, 0);
     });
 
     // work like an editor
