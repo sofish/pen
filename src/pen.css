@@ -34,14 +34,14 @@
 .pen li ul, .pen-ul ul, .pen-ol ul{list-style: circle;}
 
 .pen-menu, .pen-input{font-size:14px;line-height:1;}
-.pen-menu{box-shadow:1px 0 2px #000;background:#333;opacity:0.9;position:fixed;height:36px;border-radius:3px;display:none;}
+.pen-menu{box-shadow:1px 2px 3px -2px #222;background:#333 linear-gradient(to bottom, #222, #333);opacity:0.9;position:fixed;height:36px;border:1px solid #333;border-radius:3px;display:none;}
 .pen-menu:after {top:100%;border:solid transparent;content:" ";height:0;width:0;position:absolute;pointer-events:none;}
-.pen-menu:after {border-color:rgba(51, 51, 51, 0);border-top-color:#333;border-width:5px;left:50%;margin-left:-5px;}
+.pen-menu:after {border-color:rgba(51, 51, 51, 0);border-top-color:#333;border-width:6px;left:50%;margin-left:-6px;}
 .pen-icon{font:normal 900 16px/40px Georgia serif;min-width:20px;display:inline-block;padding:0 10px;height:36px;overflow:hidden;color:#fff;text-align:center;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
 .pen-icon:first-of-type{border-top-left-radius:3px;border-bottom-left-radius:3px;}
 .pen-icon:last-of-type{border-top-right-radius:3px;border-bottom-right-radius:3px;}
 .pen-icon:hover{background:#000;}
-.pen-icon.active{color:#1abf89;background:#111;box-shadow:inset 2px 2px 4px #000;}
+.pen-icon.active{color:#1abf89;background:#000;box-shadow:inset 2px 2px 4px #000;}
 .pen-input{position:absolute;width:100%;left:0;top:0;height:36px;line-height:20px;background:#333;color:#fff;border:none;text-align:center;display:none;font-family:arial, sans-serif;}
 .pen-input:focus{outline:none;}
 
