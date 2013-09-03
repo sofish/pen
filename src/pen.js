@@ -1,6 +1,6 @@
 ~function(doc) {
 
-  var Pen, utils = {};
+  var Pen, FakePen, utils = {};
 
   // type detect
   utils.is = function(obj, type) {
@@ -24,16 +24,16 @@
     if(window._pen_debug_mode_on || force) console.log('Pen Debug Info: ' + message);
   };
 
-  Pen = function(config) {
-
-    if(!config) return utils.log('can\'t find config', true);
+  // merge: make it easy to have a fallback
+  utils.merge = function(config) {
 
     // default settings
     var defaults = {
-        class: 'pen',
-        debug: false,
-        list: ['blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink']
-      }
+      class: 'pen',
+      debug: false,
+      textarea: '<textarea name="content"></textarea>',
+      list: ['blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink']
+    };
 
     // user-friendly config
     if(config.nodeType === 1) {
@@ -43,6 +43,17 @@
     } else {
       defaults = utils.copy(defaults, config);
     }
+
+    return defaults;
+  }
+
+
+  Pen = function(config) {
+
+    if(!config) return utils.log('can\'t find config', true);
+
+    // merge user config
+    var defaults = utils.merge(config);
 
     if(defaults.editor.nodeType !== 1) return utils.log('can\'t find editor');
     if(defaults.debug) window._pen_debug_mode_on = true;
@@ -256,7 +267,20 @@
     return this;
   };
 
+  // a fallback for old browers
+  FakePen = function(config) {
+    if(!config) return utils.log('can\'t find config', true);
+
+    var defaults = utils.merge(config)
+      , klass = defaults.editor.getAttribute('class');
+
+    klass = klass ? klass.replace(/\bpen\b/g, '') + ' pen-textarea ' + defaults.class : 'pen pen-textarea';
+    defaults.editor.setAttribute('class', klass);
+    defaults.editor.innerHTML = defaults.textarea;
+    return defaults.editor;
+  }
+
   // make it accessible
-  this.Pen = Pen;
+  this.Pen = doc.getSelection ? Pen : FakePen;
 
 }(document);
