@@ -34,7 +34,22 @@
 .pen li ul, .pen-ul ul, .pen-ol ul{list-style: circle;}
 
 .pen-menu, .pen-input{font-size:14px;line-height:1;}
-.pen-menu{box-shadow:1px 2px 3px -2px #222;background:#333 linear-gradient(to bottom, #222, #333);opacity:0.9;position:fixed;height:36px;border:1px solid #333;border-radius:3px;display:none;}
+.pen-menu{
+    box-shadow:1px 2px 3px -2px #222;background:#333; opacity:0.9;position:fixed;height:36px;border:1px solid #333;border-radius:3px;display:none;
+    background-image: linear-gradient(top, rgb(34,34,34) 45%, rgb(51,51,51) 73%);
+    background-image: -o-linear-gradient(top, rgb(34,34,34) 45%, rgb(51,51,51) 73%);
+    background-image: -moz-linear-gradient(top, rgb(34,34,34) 45%, rgb(51,51,51) 73%);
+    background-image: -webkit-linear-gradient(top, rgb(34,34,34) 45%, rgb(51,51,51) 73%);
+    background-image: -ms-linear-gradient(top, rgb(34,34,34) 45%, rgb(51,51,51) 73%);
+
+    background-image: -webkit-gradient(
+	linear,
+	left top,
+	left bottom,
+	color-stop(0.45, rgb(34,34,34)),
+	color-stop(0.73, rgb(51,51,51))
+    );
+}
 .pen-menu:after {top:100%;border:solid transparent;content:" ";height:0;width:0;position:absolute;pointer-events:none;}
 .pen-menu:after {border-color:rgba(51, 51, 51, 0);border-top-color:#333;border-width:6px;left:50%;margin-left:-6px;}
 .pen-icon{font:normal 900 16px/40px Georgia serif;min-width:20px;display:inline-block;padding:0 10px;height:36px;overflow:hidden;color:#fff;text-align:center;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
