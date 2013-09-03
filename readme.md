@@ -1,9 +1,8 @@
-# # Pen Editor
-
-**live demo:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
+# Pen Editor
 
 ![pen - preview](https://f.cloud.github.com/assets/153183/1070081/7f7b588c-1440-11e3-9389-ce1104b442be.png)
 
+**LIVE DEMO:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
 
 ## 1. Config
 
@@ -22,10 +21,12 @@ var editor = new Pen(documenty.getElementById('#editor'));
 ### 1.3 init with an options
 
 ```js
-{
+var options = {
   editor: document.body, // {DOM Element} [required]
   class: 'pen', // {String} class of the editor,
   debug: 'false', // {Debug} false by default
   list: ['bold', 'italic', 'underline'] // editor menu list
 }
+
+var editor = new Pen(options);
 ```
