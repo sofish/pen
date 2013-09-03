@@ -24,7 +24,7 @@ var editor = new Pen(document.getElementById('editor'));
 var options = {
   editor: document.body, // {DOM Element} [required]
   class: 'pen', // {String} class of the editor,
-  debug: 'false', // {Debug} false by default
+  debug: false, // {Bool} Debug, false by default
   list: ['bold', 'italic', 'underline'] // editor menu list
 }
 
