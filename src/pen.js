@@ -100,6 +100,14 @@
 
     doc.body.appendChild((this._menu = menu));
 
+    // change menu offset when window resize
+    window.addEventListener('resize', function() {
+      if(menu.style.display === 'block') {
+        menu.style.display = 'none';
+        that.menu();
+      };
+    });
+
     // show toolbar on select
     this.config.editor.addEventListener('mouseup', function(){
         var range = that._sel;
@@ -129,6 +137,7 @@
         that._actions(action, value);
         that._range = that._sel.getRangeAt(0);
         that.highlight();
+        that.menu();
       }
 
       // create link
