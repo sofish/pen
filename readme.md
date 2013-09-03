@@ -1,4 +1,4 @@
-# Pen Editor - a light weight WYSIWYG editor
+# # Pen Editor
 
 **live demo:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
 
