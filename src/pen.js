@@ -32,7 +32,7 @@
     var defaults = {
         class: 'pen',
         debug: false,
-        list: ['blockquote', 'h2', 'h3', 'bold', 'italic', 'underline', 'createlink']
+        list: ['blockquote', 'h2', 'h3', 'p', 'bold', 'italic', 'underline', 'createlink']
       }
 
     // user-friendly config
@@ -89,7 +89,7 @@
 
     for(var i = 0, list = this.config.list; i < list.length; i++) {
       var name = list[i], klass = 'pen-icon icon-' + name;
-      icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]$/i) ? name.toUpperCase() : '') + '</i>';
+      icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]|p$/i) ? name.toUpperCase() : '') + '</i>';
       if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
     }
 
