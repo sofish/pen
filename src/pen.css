@@ -27,9 +27,10 @@
 .pen h5, .pen h6{font-size:1.2em;}
 
 /* list */
-.pen ul, .pen-ul{list-style:inside disc;}
-.pen ol, .pen-ol{list-style:inside decimal;}
-.pen li ul, .pen li ol, .pen-ul ul, .pen-ul ol, .pen-ol ul, .pen-ol ol{margin:0 2em 0 0;}
+.pen ul, .pen ol{margin-left:1.2em;}
+.pen ul, .pen-ul{list-style:disc;}
+.pen ol, .pen-ol{list-style:decimal;}
+.pen li ul, .pen li ol, .pen-ul ul, .pen-ul ol, .pen-ol ul, .pen-ol ol{margin:0 2em 0 1.2em;}
 .pen li ul, .pen-ul ul, .pen-ol ul{list-style: circle;}
 
 .pen-menu, .pen-input{font-size:14px;line-height:1;}

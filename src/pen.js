@@ -32,7 +32,7 @@
     var defaults = {
         class: 'pen',
         debug: false,
-        list: ['blockquote', 'h2', 'h3', 'p', 'bold', 'italic', 'underline', 'createlink']
+        list: ['blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'bold', 'italic', 'underline', 'createlink']
       }
 
     // user-friendly config
@@ -204,7 +204,7 @@
     // allow list
     var reg = {
       block: /^(?:p|h[1-6]|blockquote)$/,
-      inline: /^(?:bold|italic|underline)$/,
+      inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist)$/,
       source: /^(?:insertimage|createlink|unlink)$/
     }
 
