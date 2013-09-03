@@ -39,21 +39,26 @@ The following object sets up the default settings of Pen:
 defaults = {
   class: 'pen',
   debug: false,
+  textarea: '<textarea name="content"></textarea>',
   list: ['blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink']
 }
 ```
 
 If you want to customize the toolbar to fit your own project, you can instanciate `Pen` constructor with an `options` object like [#1.3: init with options](https://github.com/sofish/pen#13-init-with-options):
 
-### 2.1 Change the editor class
+### 2.1 Fallback for old browser
+
+You can set `defaults.textarea` to a piece of HTML string, by default, it's `<textarea name="content"></textarea>`。This will be set as `innerHTML` of your `#editor`.
+
+### 2.2 Change the editor class
 
 Pen will add `.pen` to your editor by default, if you want to change the class, make sure to replace the class name `pen` to your own in `src/pen.css`.
 
-### 2.2 Enable debug mode
+### 2.3 Enable debug mode
 
 If `options.debug` is set to `true`, Pen will output logs to the Console of your browser.
 
-### 2.3 Customize the toolbar
+### 2.4 Customize the toolbar
 
 You can set `options.list` to an `Array`, add the following strings to make your own:
 
