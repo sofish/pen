@@ -41,7 +41,7 @@
 .pen-icon:last-of-type{border-top-right-radius:3px;border-bottom-right-radius:3px;}
 .pen-icon:hover{background:#000;}
 .pen-icon.active{color:#1abf89;background:#111;box-shadow:inset 2px 2px 4px #000;}
-.pen-input{position:absolute;width:100%;left:0;top:0;height:36px;line-height:20px;background:#333;color:#fff;border:none;text-align:center;display:none;}
+.pen-input{position:absolute;width:100%;left:0;top:0;height:36px;line-height:20px;background:#333;color:#fff;border:none;text-align:center;display:none;font-family:arial, sans-serif;}
 .pen-input:focus{outline:none;}
 
 

@@ -1,27 +1,25 @@
-# Pen Editor
-
-a light weight WYSIWYG editor
+# Pen Editor - a light weight WYSIWYG editor
 
 **live demo:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
 
-![preview](https://f.cloud.github.com/assets/153183/1066367/53c4f9fc-13b2-11e3-885a-122b43da1e4e.png)
+![pen - preview](https://f.cloud.github.com/assets/153183/1070081/7f7b588c-1440-11e3-9389-ce1104b442be.png)
 
 
-### 1. Config
+## 1. Config
 
-#### 1. init with an id attribute
+### 1.1 init with an id attribute
 
 ```js
 var editor = new Pen('#editor');
 ```
 
-#### 2. init with an element
+### 1.2 init with an element
 
 ```js
 var editor = new Pen(documenty.getElementById('#editor'));
 ```
 
-#### 3. init with an options
+### 1.3 init with an options
 
 ```js
 {
