@@ -38,16 +38,15 @@
 
     // user-friendly config
     if(config.nodeType === 1) {
-      defaults.editor = options;
+      defaults.editor = config;
     } else if(config.match && config.match(/^#[\S]+$/)) {
-      defaults.editor = doc.getElementById(target);
+      defaults.editor = doc.getElementById(config);
     } else {
       defaults = utils.copy(defaults, config);
     }
 
     return defaults;
-  }
-
+  };
 
   Pen = function(config) {
 
@@ -152,7 +151,7 @@
         that._range = that._sel.getRangeAt(0);
         that.highlight();
         that.menu();
-      }
+      };
 
       // create link
       if(action === 'createlink') {
@@ -180,7 +179,7 @@
   }
 
   // highlight menu
-  Pen.prototype.highlight = function(target) {
+  Pen.prototype.highlight = function() {
     var node = this._sel.focusNode
       , effects = this._effectNode(node)
       , menu = this._menu
@@ -217,20 +216,20 @@
   }
 
   Pen.prototype.actions = function() {
-    var that = this;
+    var that = this, reg, inline, block;
 
     // allow list
-    var reg = {
+    reg = {
       block: /^(?:p|h[1-6]|blockquote)$/,
       inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
       source: /^(?:insertimage|createlink|unlink)$/
-    }
+    };
 
-    var inline = function(name, value) {
+    inline = function(name, value) {
       return doc.execCommand(name, false, value);
     };
 
-    var block = function(name) {
+    block = function(name) {
       if(that._effectNode(that._sel.getRangeAt(0).startContainer, true).indexOf(name) !== -1) {
         if(name === 'blockquote') return document.execCommand('outdent', false, null);
         name = 'p';
@@ -279,7 +278,7 @@
     defaults.editor.setAttribute('class', klass);
     defaults.editor.innerHTML = defaults.textarea;
     return defaults.editor;
-  }
+  };
 
   // make it accessible
   this.Pen = doc.getSelection ? Pen : FakePen;
