@@ -59,6 +59,8 @@ Pen will add `.pen` to your editor by default, if you want to change the class, 
 
 If `options.debug` is set to `true`, Pen will output logs to the Console of your browser.
 
+![debugger](https://f.cloud.github.com/assets/153183/1078426/e1d40758-1527-11e3-9a68-12c58225c93c.png)
+
 #### 2.4 Customize the toolbar
 
 You can set `options.list` to an `Array`, add the following strings to make your own:
