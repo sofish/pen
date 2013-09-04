@@ -5,13 +5,16 @@
 
   // type detect
   utils.is = function(obj, type) {
+    if ( obj.nodeType || obj.setInterval ) { // in IE dom.toString() = [object], cause out of memory 
+        return false;
+    }
     return Object.prototype.toString.call(obj).slice(8, -1) === type;
   };
 
   // copy props from a obj
   utils.copy = function(defaults, source) {
     for(var p in source) {
-      if(source.hasOwnProperty(p)) {
+      if(Object.prototype.hasOwnProperty.call(source,p)) { // IE
         var val = source[p];
         defaults[p] = this.is(val, 'Object') ? this.copy({}, val) :
           this.is(val, 'Array') ? this.copy([], val) : val;
@@ -24,13 +27,53 @@
   utils.log = function(message, force) {
     if(window._pen_debug_mode_on || force) console.log('Pen Debug Info: ' + message);
   };
+  //support ie event
+  utils.addEventListener = function(target,event,hander){  
+     target.addEventListener  ? target.addEventListener (event,hander): 
+        target.attachEvent ? target.attachEvent ("on"+event,hander): '';  
+  }
+  //support ie array
+  utils.forEach = function(arr,callback){
+    if(arr.forEach){
+      arr.forEach(callback);
+    }else{
+      var len = arr.length;
+      k = 0;  
+      while (k < len) {  
+          callback(arr[k]); 
+          k++;  
+      } 
+    }
+  }
+  //support ie selection
+  utils.getSelection = function(){
+    return doc.getSelection ? doc.getSelection : (function(){
+      var selection = document.selection;
+      var newRng = selection.createRange();  
+      return {
+        getRangeAt : function(){
+          return {
+            getBoundingClientRect : function(){
+              return {top:newRng.offsetTop,left:newRng.offsetLeft,width:newRng.boundingWidth  }
+            },
+            range : newRng
+          }
+        },
+        removeAllRanges:function(){},
+        addRange:function(range){range.range.select();}, 
+        focusNode: newRng.parentElement(),
+        isCollapsed: newRng.text ? false:true
+      };  
+    }); 
+  }
+ 
 
   // merge: make it easy to have a fallback
   utils.merge = function(config) {
 
     // default settings
     var defaults = {
-      class: 'pen',
+      className: 'pen',
       debug: false,
       textarea: '<textarea name="content"></textarea>',
       list: ['blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink']
@@ -62,7 +105,8 @@
 
     // set default class
     var klass = editor.getAttribute('class');
-    klass = /\bpen\b/.test(klass) ? klass : (klass ? (klass + ' ' + defaults.class) : defaults.class);
+    
+    klass = /\bpen\b/.test(klass) ? klass : (klass ? (klass + ' ' + defaults.className) : defaults.className);
     editor.setAttribute('class', klass);
 
     // set contenteditable
@@ -71,10 +115,9 @@
 
     // assign config
     this.config = defaults;
+    // save the selection obj 
 
-    // save the selection obj
-    this._sel = doc.getSelection();
-
+    this._sel = utils.getSelection();
     // map actions
     this.actions();
 
@@ -105,14 +148,13 @@
     }
 
     menu = doc.createElement('div');
-    menu.setAttribute('class', this.config.class + '-menu pen-menu');
+    menu.setAttribute('class', this.config.className + '-menu pen-menu');
     menu.innerHTML = icons;
     menu.style.display = 'none';
-
     doc.body.appendChild((this._menu = menu));
 
     // change menu offset when window resize
-    window.addEventListener('resize', function() {
+    utils.addEventListener(window,'resize', function() {
       if(menu.style.display === 'block') {
         menu.style.display = 'none';
         that.menu();
@@ -120,8 +162,8 @@
     });
 
     // show toolbar on select
-    this.config.editor.addEventListener('mouseup', function(){
-        var range = that._sel;
+    utils.addEventListener(this.config.editor,'mouseup', function(){
+        var range = that._sel.call(doc); //aaa = range;
         if(!range.isCollapsed) {
           that._range = range.getRangeAt(0);
           that.menu();
@@ -130,25 +172,26 @@
     });
 
     // when to hide
-   this.config.editor.addEventListener('click', function() {
+   utils.addEventListener(this.config.editor,'click', function() {
       setTimeout(function() {
-          that._sel.isCollapsed ?
+          that._sel.call(doc).isCollapsed ?
           (that._menu.style.display = 'none') :
           (that._menu.getElementsByTagName('input')[0].style.display = 'none');
       }, 0);
     });
 
     // work like an editor
-    menu.addEventListener('click', function(e) {
-      var action = e.target.getAttribute('data-action');
-
+    utils.addEventListener(menu,'click', function(e) {
+      target = e.target || window.event.srcElement;
+      var action = target.getAttribute('data-action');
+      
       if(!action) return;
 
       var apply = function(value) {
-        that._sel.removeAllRanges();
-        that._sel.addRange(that._range);
+        that._sel.call(doc).removeAllRanges();
+        that._sel.call(doc).addRange(that._range);
         that._actions(action, value);
-        that._range = that._sel.getRangeAt(0);
+        that._range = that._sel.call(doc).getRangeAt(0);
         that.highlight();
         that.menu();
       };
@@ -180,23 +223,23 @@
 
   // highlight menu
   Pen.prototype.highlight = function() {
-    var node = this._sel.focusNode
+    var node = this._sel.call(doc).focusNode
       , effects = this._effectNode(node)
       , menu = this._menu
       , highlight;
-
-    // remove all highlights
-    [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
-      el.classList.remove('active');
-    });
+     
+    utils.forEach(menu.querySelectorAll('.active'),function(item) {
+      item.className = item.className.replace(" active","");
+    });  
 
     highlight = function(str) {
       var selector = '.icon-' + str
-        , el = menu.querySelector(selector);
-      return el && el.classList.add('active');
+        , el = menu.querySelector(selector);  
+      el.className += " active";
+      return el ;//&& el.classList.add('active');
     };
 
-    effects.forEach(function(item) {
+    utils.forEach(effects,function(item) {
       var tag = item.nodeName.toLowerCase();
       if(tag === 'a') {
         menu.querySelector('input').value = item.href;
@@ -210,7 +253,7 @@
       if(tag === 'ol') return highlight('insertorderedlist');
       if(tag === 'li') return highlight('indent');
       return highlight(tag);
-    });
+    }); 
 
     return this;
   }
@@ -258,10 +301,10 @@
       , top = offset.top - 10
       , left = offset.left + (offset.width / 2)
       , menu = this._menu;
-
+      aaa = offset;
     // display block to caculate it's width & height
     menu.style.display = 'block';
-    menu.style.top = top - menu.clientHeight + 'px';
+    menu.style.top = top - menu.clientHeight + 'px';  
     menu.style.left = left - (menu.clientWidth/2) + 'px';
 
     return this;
@@ -274,13 +317,13 @@
     var defaults = utils.merge(config)
       , klass = defaults.editor.getAttribute('class');
 
-    klass = klass ? klass.replace(/\bpen\b/g, '') + ' pen-textarea ' + defaults.class : 'pen pen-textarea';
+    klass = klass ? klass.replace(/\bpen\b/g, '') + ' pen-textarea ' + defaults.className : 'pen pen-textarea';
     defaults.editor.setAttribute('class', klass);
-    defaults.editor.innerHTML = defaults.textarea;
+    //defaults.editor.innerHTML = defaults.textarea;
     return defaults.editor;
   };
 
   // make it accessible
-  this.Pen = doc.getSelection ? Pen : FakePen;
+  this.Pen = Pen;//doc.getSelection ? Pen : FakePen;
 
 }(document);
