@@ -225,9 +225,9 @@
   Pen.prototype.actions = function() {
     var that = this, reg, block, overall;
 
-    // allow list
+    // allow command list
     reg = {
-      block: /^(?:p|h[1-6]|blockquote)$/,
+      block: /^(?:p|h[1-6]|blockquote|pre)$/,
       inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
       source: /^(?:insertimage|createlink|unlink)$/
     };

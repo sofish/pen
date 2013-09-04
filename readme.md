@@ -65,7 +65,7 @@ If `options.debug` is set to `true`, Pen will output logs to the Console of your
 
 You can set `options.list` to an `Array`, add the following strings to make your own:
 
-- `blockquote`, `h2`, `h3`, `p`: create a tag as its literal meaning
+- `blockquote`, `h2`, `h3`, `p`, `pre`: create a tag as its literal meaning
 - `insertorderedlist`: create an `ol>li` list
 - `insertunorderedlist`: create a `ul>li` list
 - `indent`: indent list / blockquote block
