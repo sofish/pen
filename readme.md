@@ -1,8 +1,9 @@
 # Pen Editor
 
-![pen - preview](https://f.cloud.github.com/assets/153183/1070081/7f7b588c-1440-11e3-9389-ce1104b442be.png)
+- **LIVE DEMO:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
+- **Markdown is supported**
 
-**LIVE DEMO:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
+![pen - preview](https://f.cloud.github.com/assets/153183/1070081/7f7b588c-1440-11e3-9389-ce1104b442be.png)
 
 ## 1. installation
 
@@ -75,6 +76,17 @@ You can set `options.list` to an `Array`, add the following strings to make your
 - `underline`: wrap the text selection in a `u` tag
 - `createlink`: insert link to the text selection
 
-## 3. license
+## 3. markdown syntax support
+
+Install the `markdown.js` after `pen.js`, and it will be enabled automaticly.
+
+```html
+<script src="src/pen.js"></script>
+<script src="src/markdown.js"></script>
+```
+
+Heading / ol / ul / blockquote / pre is supported, the corresponding string is `#` (1 to 6), `1.`, `-` or `*`, `>` and `\`\`\``.
+
+## 4. license
 
 Licensed under MIT.
