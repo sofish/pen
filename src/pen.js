@@ -1,3 +1,4 @@
+/*! Licensed under MIT, https://github.com/sofish/pen */
 ~function(doc) {
 
   var Pen, FakePen, utils = {};

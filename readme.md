@@ -4,7 +4,7 @@
 
 **LIVE DEMO:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
 
-## 1. INSTALL
+## 1. installation
 
 ### 1.1 init with id attribute
 
@@ -32,7 +32,7 @@ var options = {
 var editor = new Pen(options);
 ```
 
-## 2. CONFIG
+## 2. configure
 
 The following object sets up the default settings of Pen:
 
@@ -72,3 +72,7 @@ You can set `options.list` to an `Array`, add the following strings to make your
 - `italic`: wrap the text selection in an `i` tag
 - `underline`: wrap the text selection in a `u` tag
 - `createlink`: insert link to the text selection
+
+## 3. license
+
+Licensed under MIT.
