@@ -94,6 +94,15 @@
     return nodes;
   };
 
+  // remove style attr
+  Pen.prototype.nostyle = function() {
+    var els = this.config.editor.querySelectorAll('[style]');
+    [].slice.call(els).forEach(function(item) {
+      item.removeAttribute('style');
+    });
+    return this;
+  };
+
   Pen.prototype.toolbar = function() {
 
     var menu, that = this, icons = '';
@@ -124,8 +133,7 @@
         var range = that._sel;
         if(!range.isCollapsed) {
           that._range = range.getRangeAt(0);
-          that.menu();
-          that.highlight();
+          that.menu().highlight();
         }
     });
 
@@ -149,8 +157,7 @@
         that._sel.addRange(that._range);
         that._actions(action, value);
         that._range = that._sel.getRangeAt(0);
-        that.highlight();
-        that.menu();
+        that.highlight().nostyle().menu();
       };
 
       // create link
