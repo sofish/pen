@@ -80,6 +80,9 @@
 
     // enable toolbar
     this.toolbar();
+
+    // enable markdown covert
+    this.markdown && this.markdown.init(this);
   };
 
   // node effects
