@@ -6,7 +6,7 @@
 
   // markdown covertor obj
   var covertor = {
-    keymap: { 96: '`', 62: '>', 49: '1', 46: '.', 45: '-', 35: '#'},
+    keymap: { '96': '`', 62: '>', 49: '1', 46: '.', 45: '-', '42': '*', '35': '#'},
     stack : []
   };
 
@@ -17,12 +17,12 @@
     if(str.match(/[#]{1,6}/)) {
       return ['h' + len, len];
     } else if(str === '```') {
-      return ['code', len];
+      return ['pre', len];
     } else if(str === '>') {
       return ['blockquote', len];
     } else if(str === '1.') {
       return ['insertorderedlist', len];
-    } else if(str === '-') {
+    } else if(str === '-' || str === '*') {
       return ['insertunorderedlist', len];
     }
   };

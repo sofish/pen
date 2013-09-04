@@ -258,7 +258,7 @@
       } else if(name.match(reg.inline) || name.match(reg.source)) {
         overall(name, value);
       } else {
-        if(this.config.debug) utils.log('can\' find command func');
+        if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
       }
     }
 
