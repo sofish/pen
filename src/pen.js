@@ -22,7 +22,7 @@
 
   // log
   utils.log = function(message, force) {
-    if(window._pen_debug_mode_on || force) console.log('Pen Debug Info: ' + message);
+    if(window._pen_debug_mode_on || force) console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
   };
 
   // merge: make it easy to have a fallback
@@ -84,7 +84,7 @@
 
   // node effects
   Pen.prototype._effectNode = function(el, returnAsNodeName) {
-    var nodes = [], result;
+    var nodes = [];
     while(el !== this.config.editor) {
       if(el.nodeName.match(/(?:[pubia]|h[1-6]|blockquote|[uo]l|li)/i)) {
         nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
@@ -125,7 +125,7 @@
       if(menu.style.display === 'block') {
         menu.style.display = 'none';
         that.menu();
-      };
+      }
     });
 
     // show toolbar on select
@@ -164,7 +164,7 @@
       if(action === 'createlink') {
         var input = menu.getElementsByTagName('input')[0], createlink;
 
-        input.style.display = 'block'
+        input.style.display = 'block';
         input.focus();
 
         createlink = function(input) {
@@ -176,14 +176,14 @@
 
         return input.onkeypress = function(e) {
           if(e.which === 13) return createlink(e.target);
-        }
+        };
       }
 
       apply();
     });
 
     return this;
-  }
+  };
 
   // highlight menu
   Pen.prototype.highlight = function() {
@@ -220,10 +220,10 @@
     });
 
     return this;
-  }
+  };
 
   Pen.prototype.actions = function() {
-    var that = this, reg, inline, block;
+    var that = this, reg, block, overall;
 
     // allow list
     reg = {
@@ -232,8 +232,13 @@
       source: /^(?:insertimage|createlink|unlink)$/
     };
 
-    inline = function(name, value) {
-      return doc.execCommand(name, false, value);
+    overall = function(cmd, val) {
+      var message = ' to exec 「' + cmd + '」 command' + (val ? (' with value: ' + val) : '');
+      if(document.execCommand(cmd, false, val) && that.config.debug) {
+        utils.log('success' + message);
+      } else {
+        utils.log('fail' + message);
+      }
     };
 
     block = function(name) {
@@ -241,17 +246,16 @@
         if(name === 'blockquote') return document.execCommand('outdent', false, null);
         name = 'p';
       }
-
-      return document.execCommand('formatblock', false, name);
+      return overall('formatblock', name);
     };
 
     this._actions = function(name, value) {
       if(name.match(reg.block)) {
         block(name);
       } else if(name.match(reg.inline) || name.match(reg.source)) {
-        inline(name, value);
+        overall(name, value);
       } else {
-        if(this.config.debug) log('can\' find command func');
+        if(this.config.debug) utils.log('can\' find command func');
       }
     }
 
