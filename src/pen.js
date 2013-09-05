@@ -33,7 +33,10 @@
       class: 'pen',
       debug: false,
       textarea: '<textarea name="content"></textarea>',
-      list: ['blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink']
+      list: [
+        'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule', 
+        'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
+      ]
     };
 
     // user-friendly config
@@ -231,7 +234,7 @@
     // allow command list
     reg = {
       block: /^(?:p|h[1-6]|blockquote|pre)$/,
-      inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
+      inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent|inserthorizontalrule)$/,
       source: /^(?:insertimage|createlink|unlink)$/
     };
 
