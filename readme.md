@@ -78,14 +78,28 @@ You can set `options.list` to an `Array`, add the following strings to make your
 
 ## 3. markdown syntax support
 
-Install the `markdown.js` after `pen.js`, and it will be enabled automaticly.
+#### 3.1 install
+The syntax covertor will   be enabled automaticly by link `markdown.js` after `pen.js: 
 
 ```html
 <script src="src/pen.js"></script>
 <script src="src/markdown.js"></script>
 ```
 
-Heading / ol / ul / blockquote / pre is supported, the corresponding string is `#` (1 to 6), `1.`, `-` or `*`, `>` and `\`\`\``.
+#### 3.2 usage
+To use it, you can type `action cmd` + `space key` at a line start. like: 
+
+```
+### This will create a h3 tag
+```
+
+The following cmds are allowed: 
+
+- Headings: type 1~6 `#` at the line start
+- Unordered List: type `- ` or `* `
+- Ordered List: type `1. `
+- Code block: type **\`\`\`**
+- Block Quote: type `> `
 
 ## 4. license
 
