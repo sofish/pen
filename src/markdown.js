@@ -62,6 +62,7 @@
   covertor.init = function(pen) {
     pen.config.editor.addEventListener('keypress', function(e) {
       var cmd = covertor.parse(e);
+      console.log(cmd);
       if(cmd) return covertor.action(pen, cmd);
     });
   };

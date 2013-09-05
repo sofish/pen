@@ -11,7 +11,7 @@
 :root .pen sub, :root .pen sup{vertical-align:baseline; /* for ie9 and other mordern browsers */}
 .pen sup {top:-0.5em;}
 .pen sub {bottom:-0.25em;}
-.pen hr{border:none;border-bottom:1px solid #cfcfcf;margin-bottom:10px;*color:pink;*filter:chroma(color=pink);height:10px;*margin:-7px 0 2px;}
+.pen hr{border:none;border-bottom:1px solid #cfcfcf;margin-bottom:18px;*color:pink;*filter:chroma(color=pink);height:10px;*margin:-7px 0 8px;}
 .pen small{font-size:0.8em;color:#888;}
 .pen em, .pen b, .pen strong{font-weight:700;}
 .pen pre{white-space:pre-wrap;padding:0.85em;background:#f8f8f8;}

@@ -34,7 +34,7 @@
       debug: false,
       textarea: '<textarea name="content"></textarea>',
       list: [
-        'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule', 
+        'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
         'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
       ]
     };
