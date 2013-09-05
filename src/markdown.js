@@ -24,7 +24,7 @@
       return ['insertorderedlist', len];
     } else if(str === '-' || str === '*') {
       return ['insertunorderedlist', len];
-    } else if(str.match(/(?:\.|\*){3,}/)) {
+    } else if(str.match(/(?:\.|\*|\-){3,}/)) {
       return ['inserthorizontalrule', len];
     }
   };

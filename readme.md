@@ -100,6 +100,7 @@ The following cmds are allowed:
 - Ordered List: type `1. `
 - Code block: type **\`\`\`**
 - Block Quote: type `> `
+- Horizontal Rule: more than 3 `-`, `*`, `.` will create a `<hr />`, like `......`
 
 ## 4. license
 
