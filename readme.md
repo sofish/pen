@@ -26,7 +26,7 @@ var options = {
   editor: document.body, // {DOM Element} [required]
   class: 'pen', // {String} class of the editor,
   debug: false, // {Boolean} false by default
-  textarea: '<textarea name="content"></textarea>',
+  textarea: '<textarea name="content"></textarea>', // fallback for old browsers
   list: ['bold', 'italic', 'underline'] // editor menu list
 }
 
@@ -42,7 +42,11 @@ defaults = {
   class: 'pen',
   debug: false,
   textarea: '<textarea name="content"></textarea>',
-  list: ['blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink']
+  list: [
+    'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist',
+    'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
+  ],
+  stay: true
 }
 ```
 
@@ -76,6 +80,10 @@ You can set `options.list` to an `Array`, add the following strings to make your
 - `underline`: wrap the text selection in a `u` tag
 - `createlink`: insert link to the text selection
 - `inserthorizontalrule`: insert a `hr` tag
+
+#### 2.5 Prevent unsafe page redirect
+
+By default, Pen will prevent unsafe page redirect when editing, to shut down it, specific `options.stay` to `false`.
 
 ## 3. markdown syntax support
 
