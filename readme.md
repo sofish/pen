@@ -3,7 +3,11 @@
 - **LIVE DEMO:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
 - **Markdown is supported**
 
-![pen - preview](https://f.cloud.github.com/assets/153183/1070081/7f7b588c-1440-11e3-9389-ce1104b442be.png)
+******************
+
+![pen editor - screenshot ](https://f.cloud.github.com/assets/153183/1093671/61d4c0d2-16a9-11e3-88ed-01b1758a9a42.png)
+
+******************
 
 ## 1. installation
 
