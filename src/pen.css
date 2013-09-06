@@ -1,7 +1,7 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
 
 /* basic reset */
-.pen, .pen-menu, .pen-input, .pen textarea{font:400 1.36em/1.45 Palatino, Optima, Georgia, serif;color:#331;}
+.pen, .pen-menu, .pen-input, .pen textarea{font:400 1.16em/1.45 Palatino, Optima, Georgia, serif;color:#331;}
 .pen:focus{outline:none;}
 .pen fieldset, img {border: 0;}
 .pen blockquote{padding-left:10px;margin-left:-14px;border-left:4px solid #1abf89;}
@@ -11,13 +11,13 @@
 :root .pen sub, :root .pen sup{vertical-align:baseline; /* for ie9 and other mordern browsers */}
 .pen sup {top:-0.5em;}
 .pen sub {bottom:-0.25em;}
-.pen hr{border:none;border-bottom:1px solid #cfcfcf;margin-bottom:18px;*color:pink;*filter:chroma(color=pink);height:10px;*margin:-7px 0 8px;}
+.pen hr{border:none;border-bottom:1px solid #cfcfcf;margin-bottom:25px;*color:pink;*filter:chroma(color=pink);height:10px;*margin:-7px 0 15px;}
 .pen small{font-size:0.8em;color:#888;}
 .pen em, .pen b, .pen strong{font-weight:700;}
 .pen pre{white-space:pre-wrap;padding:0.85em;background:#f8f8f8;}
 
 /* block-level element margin */
-.pen p, .pen pre, .pen ul, .pen ol, .pen dl, .pen form, .pen hr, .pen table, .pen blockquote{margin-bottom:16px;}
+.pen p, .pen pre, .pen ul, .pen ol, .pen dl, .pen form, .pen table, .pen blockquote{margin-bottom:16px;}
 
 /* headers */
 .pen h1, .pen h2, .pen h3, .pen h4, .pen h5, .pen h6{margin-bottom:16px;font-weight:700;line-height:1.2;}

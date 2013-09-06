@@ -75,6 +75,7 @@ You can set `options.list` to an `Array`, add the following strings to make your
 - `italic`: wrap the text selection in an `i` tag
 - `underline`: wrap the text selection in a `u` tag
 - `createlink`: insert link to the text selection
+- `inserthorizontalrule`: insert a `hr` tag
 
 ## 3. markdown syntax support
 

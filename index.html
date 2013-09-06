@@ -5,8 +5,8 @@
     <title>Pen - What You See Is What You Get (WYSIWYG)</title>
     <style type="text/css">
     *{padding:0;margin:0;}
-    html{border-top:10px #1abf89 solid;}
-    body{width:800px;margin:0 auto;padding:6% 20px 20px;font-family:Palatino, Optima, Georgia, serif;}
+    html{border-top:10px #1abf89 solid;background:#f8f8f8;}
+    body{width:800px;margin:0 auto;padding:5% 20px 20px;font-family:Palatino, Optima, Georgia, serif;}
     @media all and (max-width:780px){ body, pre a{width:80%;} }
     #fork{position:fixed;right:0;top:0;}
     </style>
@@ -15,21 +15,20 @@
 <body>
 
 <div data-toggle="pen" placeholder="im a placeholder">
-    <h2>You've got to find what you love</h2>
-    <p><b><i>Click to edit, Select to apply effect.</i></b></p>
-    <p>Stewart and his team put out several issues of <a href="The Whole Earth Catalog">The Whole Earth Catalog</a> , and then when it had run its course, they put out a final issue. <p>
+    <h2>Enjoy live editing (+markdown)</h2>
+    <p><b><i>Click to edit, Select to apply effect, click items of toolbar to toggle effects.</i></b></p>
+    <hr>
+    <p>Horizontal-Rule can be insert by click「...」on the toolbar or just type「... 」/「--- 」/「*** 」at line start. Note that there's a SPACE at the end of a command.</p>
+    <hr>
+    <p>To link or unlink, please press the <i>ENTER</i> key after you filled the input field with your a link. A <a href="/sofish">link</a> can be unlink by apply an empty value to the input field. <p>
     <ul>
-      <li>It was the mid-1970s, and I was your age.</li>
-      <li>On the back cover of their final issue was a photograph of an early morning country road:
+      <li>Ordered list and unordered list is supported.</li>
+      <li>Use the toolbar or use markdown syntax like「<b>1. </b>」,「<b>- </b>」or「<b>* </b>」</li>
     </ul>
-    <ol>
-      <li>the kind you might find yourself hitchhiking on </li>
-      <li>if you were so adventurous. </li>
-    </ol>
-    <blockquote>Beneath it were the words: "Stay Hungry. Stay Foolish." It was their farewell message as they signed off. <b><i>Stay Hungry. Stay Foolish.</i></b> </blockquote>
-    <p>And I have always wished that for myself. And now, as you graduate to begin anew, I wish that for you.</p>
-    <p><u>Steve Jobs</u></p>
-
+    <blockquote>You can quote text by type「<b>&gt;</b>」at line start.</blockquote>
+    <p>What about add underline to text? "<u>Stay Hungry, Stay Foolish - <i>Steve Jobs</i></u>".</p>
+    <pre>A code block is also support by type 「```」 at line start and press SPACE.</pre>
+    <p>For more, please checkout: <a href="https://github.com/sofish/pen#readme" target="_blank">https://github.com/sofish/pen#readme</a></p>
 </div>
 
 <a id="fork" href="https://github.com/sofish/pen" target="_blank"><img src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
