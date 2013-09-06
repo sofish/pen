@@ -32,6 +32,7 @@
     var defaults = {
       class: 'pen',
       debug: false,
+      stay: true,
       textarea: '<textarea name="content"></textarea>',
       list: [
         'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
@@ -86,6 +87,9 @@
 
     // enable markdown covert
     this.markdown && this.markdown.init(this);
+
+    // stay on the page
+    this.config.stay && this.stay();
   };
 
   // node effects
@@ -282,6 +286,12 @@
     menu.style.left = left - (menu.clientWidth/2) + 'px';
 
     return this;
+  };
+
+  Pen.prototype.stay = function() {
+    !window.onbeforeunload && (window.onbeforeunload = function() {
+      return 'Are you going to leave here?';
+    })
   };
 
   // a fallback for old browers
