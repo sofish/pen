@@ -115,7 +115,7 @@
 
   Pen.prototype.toolbar = function() {
 
-    var menu, that = this, icons = '';
+    var menu, that = this, icons = '', setpos;
 
     for(var i = 0, list = this.config.list; i < list.length; i++) {
       var name = list[i], klass = 'pen-icon icon-' + name;
@@ -130,13 +130,13 @@
 
     doc.body.appendChild((this._menu = menu));
 
-    // change menu offset when window resize
-    window.addEventListener('resize', function() {
-      if(menu.style.display === 'block') {
-        menu.style.display = 'none';
-        that.menu();
-      }
-    });
+    setpos = function() {
+      if(menu.style.display === 'block') that.menu();
+    }
+
+    // change menu offset when window resize / scroll
+    window.addEventListener('resize', setpos);
+    window.addEventListener('scroll', setpos);
 
     // show toolbar on select
     this.config.editor.addEventListener('mouseup', function(){
