@@ -44,7 +44,7 @@
     if(config.nodeType === 1) {
       defaults.editor = config;
     } else if(config.match && config.match(/^#[\S]+$/)) {
-      defaults.editor = doc.getElementById(config);
+      defaults.editor = document.getElementById(config.slice(1));
     } else {
       defaults = utils.copy(defaults, config);
     }
