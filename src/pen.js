@@ -132,7 +132,7 @@
 
     setpos = function() {
       if(menu.style.display === 'block') that.menu();
-    }
+    };
 
     // change menu offset when window resize / scroll
     window.addEventListener('resize', setpos);
@@ -150,9 +150,7 @@
     // when to hide
    this.config.editor.addEventListener('click', function() {
       setTimeout(function() {
-          that._sel.isCollapsed ?
-          (that._menu.style.display = 'none') :
-          (that._menu.getElementsByTagName('input')[0].style.display = 'none');
+          that._sel.isCollapsed && (that._menu.style.display = 'none');
       }, 0);
     });
 
@@ -206,6 +204,9 @@
     [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
       el.classList.remove('active');
     });
+
+    // display link input
+    menu.querySelector('input').style.display = 'none';
 
     highlight = function(str) {
       var selector = '.icon-' + str
@@ -267,10 +268,10 @@
       } else {
         if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
       }
-    }
+    };
 
     return this;
-  }
+  };
 
   // show menu
   Pen.prototype.menu = function() {
@@ -291,7 +292,7 @@
   Pen.prototype.stay = function() {
     !window.onbeforeunload && (window.onbeforeunload = function() {
       return 'Are you going to leave here?';
-    })
+    });
   };
 
   // a fallback for old browers
