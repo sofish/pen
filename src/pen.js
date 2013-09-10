@@ -25,6 +25,18 @@
     if(window._pen_debug_mode_on || force) console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
   };
 
+  // shift a function
+  utils.shift = function(key, fn, time) {
+      time = time || 50;
+      var queue = this['_shift_fn' + key], timeout = 'shift_timeout' + key, current;
+      queue ? queue.concat([fn, time]) : (queue = [[fn, time]]);
+      current = queue.pop();
+      clearTimeout(this[timeout]);
+      this[timeout] = setTimeout(function() {
+        current[0]();
+      }, time);
+  };
+
   // merge: make it easy to have a fallback
   utils.merge = function(config) {
 
@@ -113,7 +125,7 @@
 
   Pen.prototype.toolbar = function() {
 
-    var menu, that = this, icons = '', setpos;
+    var that = this, icons = '';
 
     for(var i = 0, list = this.config.list; i < list.length; i++) {
       var name = list[i], klass = 'pen-icon icon-' + name;
@@ -121,14 +133,14 @@
       if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
     }
 
-    menu = doc.createElement('div');
+    var menu = doc.createElement('div');
     menu.setAttribute('class', this.config.class + '-menu pen-menu');
     menu.innerHTML = icons;
     menu.style.display = 'none';
 
     doc.body.appendChild((this._menu = menu));
 
-    setpos = function() {
+    var setpos = function() {
       if(menu.style.display === 'block') that.menu();
     };
 
@@ -136,17 +148,26 @@
     window.addEventListener('resize', setpos);
     window.addEventListener('scroll', setpos);
 
-    // show toolbar on select
-    this.config.editor.addEventListener('mouseup', function(){
-        var range = that._sel;
-        if(!range.isCollapsed) {
-          that._range = range.getRangeAt(0);
-          that.menu().highlight();
-        }
+    var editor = this.config.editor;
+    var show = function() {
+      var range = that._sel;
+      if(!range.isCollapsed) {
+        that._range = range.getRangeAt(0);
+        that.menu().highlight();
+      }
+    };
+
+    // show toolbar on mouse select
+    editor.addEventListener('mouseup', show);
+
+    // show toolbar on arrow key select
+    editor.addEventListener('keyup', function(e) {
+      var code = e.keyCode || e.which;
+      if(code > 36 && code < 41) utils.shift('select_text', show, 200);
     });
 
     // when to hide
-   this.config.editor.addEventListener('click', function() {
+    editor.addEventListener('click', function() {
       setTimeout(function() {
           that._sel.isCollapsed && (that._menu.style.display = 'none');
       }, 0);
