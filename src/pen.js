@@ -32,7 +32,7 @@
     var defaults = {
       class: 'pen',
       debug: false,
-      stay: true,
+      stay: config.stay || !config.debug,
       textarea: '<textarea name="content"></textarea>',
       list: [
         'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
@@ -65,9 +65,7 @@
     var editor = defaults.editor;
 
     // set default class
-    var klass = editor.getAttribute('class');
-    klass = /\bpen\b/.test(klass) ? klass : (klass ? (klass + ' ' + defaults.class) : defaults.class);
-    editor.setAttribute('class', klass);
+    editor.classList.add(defaults.class);
 
     // set contenteditable
     var editable = editor.getAttribute('contenteditable');
