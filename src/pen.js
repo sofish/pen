@@ -214,18 +214,17 @@
 
     effects.forEach(function(item) {
       var tag = item.nodeName.toLowerCase();
-      if(tag === 'a') {
-        menu.querySelector('input').value = item.href;
-        return highlight('createlink');
+      switch(tag) {
+        case 'a': return (menu.querySelector('input').value = item.href), highlight('createlink');
+        case 'i': return highlight('italic');
+        case 'u': return highlight('underline');
+        case 'b': return highlight('bold');
+        case 'ul': return highlight('insertunorderedlist');
+        case 'ol': return highlight('insertorderedlist');
+        case 'ol': return highlight('insertorderedlist');
+        case 'li': return highlight('indent');
+        default : highlight(tag);
       }
-      if(tag === 'i') return highlight('italic');
-      if(tag === 'u') return highlight('underline');
-      if(tag === 'b') return highlight('bold');
-      if(tag === 'ul') return highlight('insertunorderedlist');
-      if(tag === 'ol') return highlight('insertorderedlist');
-      if(tag === 'ol') return highlight('insertorderedlist');
-      if(tag === 'li') return highlight('indent');
-      return highlight(tag);
     });
 
     return this;
