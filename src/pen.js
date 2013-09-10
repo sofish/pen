@@ -113,6 +113,55 @@
     return this;
   };
 
+  /**
+   * Adds an arrow key highlight listener.
+   */
+  Pen.prototype.addArrowKeyHighlightListener_ = function(){
+    var arrowTimeoutMs = 200;
+
+    var arrowTimer = null;
+
+    this.config.editor.addEventListener('keyup', function(ev){
+        var code = ev.keyCode || ev.charCode;
+        if (code >= 37 || code <= 40){
+            if (arrowTimer){
+                clearTimeout(arrowTimer);
+            }
+
+            var range = this._sel;
+            if (!range || !range.isCollapsed){
+                arrowTimer = setTimeout(function(){
+                    this.showHighlightMenu()
+                }.bind(this), arrowTimeoutMs);
+            } else {
+                this.hideHighlightMenu();
+            }
+        }
+    }.bind(this));
+  };
+
+  /**
+   * Shows the highlight menu over the selected range.
+   */
+  Pen.prototype.showHighlightMenu = function(){
+    var range = this._sel;
+    if(!range || !range.isCollapsed) {
+      this._range = range.getRangeAt(0);
+      this.menu().highlight();
+    }
+  }
+
+  /**
+   * Hides the highlight menu.
+   */
+  Pen.prototype.hideHighlightMenu = function(){
+    setTimeout(function() {
+        this._sel.isCollapsed ?
+            (this._menu.style.display = 'none') :
+            (this._menu.getElementsByTagName('input')[0].style.display = 'none');
+    }.bind(this), 0);
+  }
+
   Pen.prototype.toolbar = function() {
 
     var menu, that = this, icons = '', setpos;
@@ -138,22 +187,16 @@
     window.addEventListener('resize', setpos);
     window.addEventListener('scroll', setpos);
 
+    that.addArrowKeyHighlightListener_();
+
     // show toolbar on select
     this.config.editor.addEventListener('mouseup', function(){
-        var range = that._sel;
-        if(!range.isCollapsed) {
-          that._range = range.getRangeAt(0);
-          that.menu().highlight();
-        }
+        that.showHighlightMenu();
     });
 
     // when to hide
    this.config.editor.addEventListener('click', function() {
-      setTimeout(function() {
-          that._sel.isCollapsed ?
-          (that._menu.style.display = 'none') :
-          (that._menu.getElementsByTagName('input')[0].style.display = 'none');
-      }, 0);
+        that.hideHighlightMenu();
     });
 
     // work like an editor
