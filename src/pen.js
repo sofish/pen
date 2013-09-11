@@ -149,29 +149,25 @@
     window.addEventListener('scroll', setpos);
 
     var editor = this.config.editor;
-    var show = function() {
+    var toggle = function() {
       var range = that._sel;
       if(!range.isCollapsed) {
-        that._range = range.getRangeAt(0);
-        that.menu().highlight();
+        //show menu
+        utils.shift('toggle_menu', function(){
+          that._range = range.getRangeAt(0);
+          that.menu().highlight();
+        }, 200);
+      }else{
+        //hide menu
+        setTimeout(function(){that._menu.style.display = 'none';}, 0);
       }
     };
 
-    // show toolbar on mouse select
-    editor.addEventListener('mouseup', show);
+    // toggle toolbar on mouse select
+    editor.addEventListener('mouseup', toggle);
 
-    // show toolbar on arrow key select
-    editor.addEventListener('keyup', function(e) {
-      var code = e.keyCode || e.which;
-      if(code > 36 && code < 41) utils.shift('select_text', show, 200);
-    });
-
-    // when to hide
-    editor.addEventListener('click', function() {
-      setTimeout(function() {
-          that._sel.isCollapsed && (that._menu.style.display = 'none');
-      }, 0);
-    });
+    // toggle toolbar on key select
+    editor.addEventListener('keyup', toggle);
 
     // work like an editor
     menu.addEventListener('click', function(e) {
