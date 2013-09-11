@@ -98,6 +98,8 @@ You can set `options.list` to an `Array`, add the following strings to make your
 
 By default, Pen will prevent unsafe page redirect when editing, to shut down it, specific `options.stay` to `false`.
 
+__NOTE:__ if `defautls.debug` is set to `true` and `default.stay` is not set: `defaults.stay == !defaults.debug`.
+
 ## 3. markdown syntax support
 
 #### 3.1 install

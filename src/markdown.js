@@ -31,7 +31,7 @@
 
   // parse command
   covertor.parse = function(e) {
-    var code = e.which;
+    var code = e.keyCode || e.which;
 
     // when `space` is pressed
     if(code === 32) {

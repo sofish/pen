@@ -25,6 +25,18 @@
     if(window._pen_debug_mode_on || force) console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
   };
 
+  // shift a function
+  utils.shift = function(key, fn, time) {
+      time = time || 50;
+      var queue = this['_shift_fn' + key], timeout = 'shift_timeout' + key, current;
+      queue ? queue.concat([fn, time]) : (queue = [[fn, time]]);
+      current = queue.pop();
+      clearTimeout(this[timeout]);
+      this[timeout] = setTimeout(function() {
+        current[0]();
+      }, time);
+  };
+
   // merge: make it easy to have a fallback
   utils.merge = function(config) {
 
@@ -32,7 +44,7 @@
     var defaults = {
       class: 'pen',
       debug: false,
-      stay: true,
+      stay: config.stay || !config.debug,
       textarea: '<textarea name="content"></textarea>',
       list: [
         'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
@@ -65,9 +77,7 @@
     var editor = defaults.editor;
 
     // set default class
-    var klass = editor.getAttribute('class');
-    klass = /\bpen\b/.test(klass) ? klass : (klass ? (klass + ' ' + defaults.class) : defaults.class);
-    editor.setAttribute('class', klass);
+    editor.classList.add(defaults.class);
 
     // set contenteditable
     var editable = editor.getAttribute('contenteditable');
@@ -115,7 +125,7 @@
 
   Pen.prototype.toolbar = function() {
 
-    var menu, that = this, icons = '', setpos;
+    var that = this, icons = '';
 
     for(var i = 0, list = this.config.list; i < list.length; i++) {
       var name = list[i], klass = 'pen-icon icon-' + name;
@@ -123,36 +133,43 @@
       if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
     }
 
-    menu = doc.createElement('div');
+    var menu = doc.createElement('div');
     menu.setAttribute('class', this.config.class + '-menu pen-menu');
     menu.innerHTML = icons;
     menu.style.display = 'none';
 
     doc.body.appendChild((this._menu = menu));
 
-    setpos = function() {
+    var setpos = function() {
       if(menu.style.display === 'block') that.menu();
-    }
+    };
 
     // change menu offset when window resize / scroll
     window.addEventListener('resize', setpos);
     window.addEventListener('scroll', setpos);
 
-    // show toolbar on select
-    this.config.editor.addEventListener('mouseup', function(){
-        var range = that._sel;
-        if(!range.isCollapsed) {
-          that._range = range.getRangeAt(0);
-          that.menu().highlight();
-        }
+    var editor = this.config.editor;
+    var show = function() {
+      var range = that._sel;
+      if(!range.isCollapsed) {
+        that._range = range.getRangeAt(0);
+        that.menu().highlight();
+      }
+    };
+
+    // show toolbar on mouse select
+    editor.addEventListener('mouseup', show);
+
+    // show toolbar on arrow key select
+    editor.addEventListener('keyup', function(e) {
+      var code = e.keyCode || e.which;
+      if(code > 36 && code < 41) utils.shift('select_text', show, 200);
     });
 
     // when to hide
-   this.config.editor.addEventListener('click', function() {
+    editor.addEventListener('click', function() {
       setTimeout(function() {
-          that._sel.isCollapsed ?
-          (that._menu.style.display = 'none') :
-          (that._menu.getElementsByTagName('input')[0].style.display = 'none');
+          that._sel.isCollapsed && (that._menu.style.display = 'none');
       }, 0);
     });
 
@@ -207,6 +224,9 @@
       el.classList.remove('active');
     });
 
+    // display link input
+    menu.querySelector('input').style.display = 'none';
+
     highlight = function(str) {
       var selector = '.icon-' + str
         , el = menu.querySelector(selector);
@@ -215,18 +235,17 @@
 
     effects.forEach(function(item) {
       var tag = item.nodeName.toLowerCase();
-      if(tag === 'a') {
-        menu.querySelector('input').value = item.href;
-        return highlight('createlink');
+      switch(tag) {
+        case 'a': return (menu.querySelector('input').value = item.href), highlight('createlink');
+        case 'i': return highlight('italic');
+        case 'u': return highlight('underline');
+        case 'b': return highlight('bold');
+        case 'ul': return highlight('insertunorderedlist');
+        case 'ol': return highlight('insertorderedlist');
+        case 'ol': return highlight('insertorderedlist');
+        case 'li': return highlight('indent');
+        default : highlight(tag);
       }
-      if(tag === 'i') return highlight('italic');
-      if(tag === 'u') return highlight('underline');
-      if(tag === 'b') return highlight('bold');
-      if(tag === 'ul') return highlight('insertunorderedlist');
-      if(tag === 'ol') return highlight('insertorderedlist');
-      if(tag === 'ol') return highlight('insertorderedlist');
-      if(tag === 'li') return highlight('indent');
-      return highlight(tag);
     });
 
     return this;
@@ -267,10 +286,10 @@
       } else {
         if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
       }
-    }
+    };
 
     return this;
-  }
+  };
 
   // show menu
   Pen.prototype.menu = function() {
@@ -291,7 +310,7 @@
   Pen.prototype.stay = function() {
     !window.onbeforeunload && (window.onbeforeunload = function() {
       return 'Are you going to leave here?';
-    })
+    });
   };
 
   // a fallback for old browers
