@@ -1,0 +1,20 @@
+{
+  "name": "pen",
+  "version": "0.0.1",
+  "main": "src/pen.js",
+  "author": "sofish <sofish@icloud.com>",
+  "description": "enjoy live editing (+markdown) http://sofish.github.io/pen",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sofish/pen"
+  },
+  "keywords": [
+    "editor",
+    "markdown",
+    "medium"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "https://github.com/sofish/pen/blob/master/license.txt"
+  }
+}

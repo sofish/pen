@@ -9,6 +9,15 @@
 
 ******************
 
+## 0. source code
+
+You can clone the source code from github, or using bower.
+
+```
+bower install pen
+```
+
+
 ## 1. installation
 
 #### 1.1 init with id attribute
