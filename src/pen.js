@@ -153,21 +153,23 @@
       var range = that._sel;
       if(!range.isCollapsed) {
         //show menu
-        utils.shift('toggle_menu', function(){
-          that._range = range.getRangeAt(0);
-          that.menu().highlight();
-        }, 200);
-      }else{
+        that._range = range.getRangeAt(0);
+        that.menu().highlight();
+      } else {
         //hide menu
-        setTimeout(function(){that._menu.style.display = 'none';}, 0);
+        that._menu.style.display = 'none';
       }
     };
 
     // toggle toolbar on mouse select
-    editor.addEventListener('mouseup', toggle);
+    editor.addEventListener('mouseup', function() {
+      utils.shift('toggle_menu', toggle, 200);
+    });
 
     // toggle toolbar on key select
-    editor.addEventListener('keyup', toggle);
+    editor.addEventListener('keyup', function() {
+      utils.shift('toggle_menu', toggle, 200);
+    });
 
     // work like an editor
     menu.addEventListener('click', function(e) {
