@@ -150,26 +150,24 @@
 
     var editor = this.config.editor;
     var toggle = function() {
-      var range = that._sel;
-      if(!range.isCollapsed) {
-        //show menu
-        that._range = range.getRangeAt(0);
-        that.menu().highlight();
-      } else {
-        //hide menu
-        that._menu.style.display = 'none';
-      }
+      utils.shift('toggle_menu', function() {
+        var range = that._sel;
+        if(!range.isCollapsed) {
+          //show menu
+          that._range = range.getRangeAt(0);
+          that.menu().highlight();
+        } else {
+          //hide menu
+          that._menu.style.display = 'none';
+        }
+      }, 200);
     };
 
     // toggle toolbar on mouse select
-    editor.addEventListener('mouseup', function() {
-      utils.shift('toggle_menu', toggle, 200);
-    });
+    editor.addEventListener('mouseup', toggle);
 
     // toggle toolbar on key select
-    editor.addEventListener('keyup', function() {
-      utils.shift('toggle_menu', toggle, 200);
-    });
+    editor.addEventListener('keyup', toggle);
 
     // work like an editor
     menu.addEventListener('click', function(e) {
