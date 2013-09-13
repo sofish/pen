@@ -48,7 +48,7 @@
       textarea: '<textarea name="content"></textarea>',
       list: [
         'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
-        'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
+        'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink','superscript','subscript'
       ]
     };
 
@@ -238,7 +238,8 @@
         case 'b': return highlight('bold');
         case 'ul': return highlight('insertunorderedlist');
         case 'ol': return highlight('insertorderedlist');
-        case 'ol': return highlight('insertorderedlist');
+        case 'sup': return highlight('superscript');
+		case 'sub': return highlight('subscript');
         case 'li': return highlight('indent');
         default : highlight(tag);
       }
@@ -253,7 +254,7 @@
     // allow command list
     reg = {
       block: /^(?:p|h[1-6]|blockquote|pre)$/,
-      inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent|inserthorizontalrule)$/,
+      inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent|inserthorizontalrule|superscript|subscript)$/,
       source: /^(?:insertimage|createlink|unlink)$/
     };
 
