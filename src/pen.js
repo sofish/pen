@@ -48,7 +48,7 @@
       textarea: '<textarea name="content"></textarea>',
       list: [
         'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
-        'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink','superscript','subscript'
+        'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
       ]
     };
 
@@ -239,7 +239,7 @@
         case 'ul': return highlight('insertunorderedlist');
         case 'ol': return highlight('insertorderedlist');
         case 'sup': return highlight('superscript');
-		case 'sub': return highlight('subscript');
+		    case 'sub': return highlight('subscript');
         case 'li': return highlight('indent');
         default : highlight(tag);
       }
