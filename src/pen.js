@@ -150,6 +150,9 @@
 
     var editor = this.config.editor;
     var toggle = function() {
+
+      if(that._isDestoryed) return;
+
       utils.shift('toggle_menu', function() {
         var range = that._sel;
         if(!range.isCollapsed) {
@@ -307,6 +310,24 @@
     !window.onbeforeunload && (window.onbeforeunload = function() {
       return 'Are you going to leave here?';
     });
+  };
+
+  Pen.prototype.destory = function(isAJoke) {
+    var destory = isAJoke ? false : true
+      , attr = isAJoke ? 'setAttribute' : 'removeAttribute'
+
+    if(!isAJoke) {
+      this._sel.removeAllRanges();
+      this._menu.style.display = 'none';
+    }
+    this._isDestoryed = destory;
+    this.config.editor[attr]('contenteditable', '');
+
+    return this;
+  };
+
+  Pen.prototype.rebuild = function() {
+    return this.destory('it\'s a joke');
   };
 
   // a fallback for old browers
