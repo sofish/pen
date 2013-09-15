@@ -172,7 +172,7 @@
     // toggle toolbar on key select
     editor.addEventListener('keyup', toggle);
 
-    // work like an editor
+    // toggle toolbar on key select
     menu.addEventListener('click', function(e) {
       var action = e.target.getAttribute('data-action');
 
@@ -251,13 +251,14 @@
   };
 
   Pen.prototype.actions = function() {
-    var that = this, reg, block, overall;
+    var that = this, reg, block, overall, insert;
 
     // allow command list
     reg = {
       block: /^(?:p|h[1-6]|blockquote|pre)$/,
-      inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent|inserthorizontalrule)$/,
-      source: /^(?:insertimage|createlink|unlink)$/
+      inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
+      source: /^(?:insertimage|createlink|unlink)$/,
+      insert: /^(?:inserthorizontalrule)$/
     };
 
     overall = function(cmd, val) {
@@ -267,6 +268,19 @@
       } else {
         utils.log('fail' + message);
       }
+    };
+
+    insert = function(name) {
+      var range = that._sel.getRangeAt(0)
+        , node = range.startContainer;
+
+      while(node.nodeType !== 1) {
+        node = node.parentNode;
+      }
+
+      range.selectNode(node);
+      range.collapse(false);
+      return overall(name);
     };
 
     block = function(name) {
@@ -282,6 +296,8 @@
         block(name);
       } else if(name.match(reg.inline) || name.match(reg.source)) {
         overall(name, value);
+      } else if(name.match(reg.insert)) {
+        insert(name);
       } else {
         if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
       }
