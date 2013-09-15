@@ -307,8 +307,9 @@
   };
 
   Pen.prototype.stay = function() {
+    var that = this;
     !window.onbeforeunload && (window.onbeforeunload = function() {
-      return 'Are you going to leave here?';
+      if(!that._isDestoryed) return 'Are you going to leave here?';
     });
   };
 
