@@ -151,7 +151,7 @@
     var editor = this.config.editor;
     var toggle = function() {
 
-      if(that._isDestoryed) return;
+      if(that._isDestroyed) return;
 
       utils.shift('toggle_menu', function() {
         var range = that._sel;
@@ -171,6 +171,23 @@
 
     // toggle toolbar on key select
     editor.addEventListener('keyup', toggle);
+
+    // press ENTER key twice, end a block
+    editor.addEventListener('keypress', function(e) {
+      var code = e.keyCode || e.which;
+      if(!that._enter) that._enter = [];
+
+      if(code === 13) {
+        if(that._enter.length === 1){
+          that._enter.length = 0;
+          that._actions('p');
+          return;
+        }
+        return that._enter.length = 1;
+      }
+
+      that._enter.length = 0;
+    })
 
     // toggle toolbar on key select
     menu.addEventListener('click', function(e) {
@@ -258,7 +275,7 @@
       block: /^(?:p|h[1-6]|blockquote|pre)$/,
       inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
       source: /^(?:insertimage|createlink|unlink)$/,
-      insert: /^(?:inserthorizontalrule)$/
+      insert: /^(?:inserthorizontalrule|insert)$/
     };
 
     overall = function(cmd, val) {
@@ -325,26 +342,26 @@
   Pen.prototype.stay = function() {
     var that = this;
     !window.onbeforeunload && (window.onbeforeunload = function() {
-      if(!that._isDestoryed) return 'Are you going to leave here?';
+      if(!that._isDestroyed) return 'Are you going to leave here?';
     });
   };
 
-  Pen.prototype.destory = function(isAJoke) {
-    var destory = isAJoke ? false : true
+  Pen.prototype.destroy = function(isAJoke) {
+    var destroy = isAJoke ? false : true
       , attr = isAJoke ? 'setAttribute' : 'removeAttribute'
 
     if(!isAJoke) {
       this._sel.removeAllRanges();
       this._menu.style.display = 'none';
     }
-    this._isDestoryed = destory;
+    this._isDestroyed = destroy;
     this.config.editor[attr]('contenteditable', '');
 
     return this;
   };
 
   Pen.prototype.rebuild = function() {
-    return this.destory('it\'s a joke');
+    return this.destroy('it\'s a joke');
   };
 
   // a fallback for old browers

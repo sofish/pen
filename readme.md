@@ -102,12 +102,12 @@ __NOTE:__ if `defautls.debug` is set to `true` and `default.stay` is not set: `d
 
 #### 2.6 Disable and Re-enable editor
 
-You can disable the pen editor by call `destory()` method of the `var pen = new Pen(options)` object. like:
+You can disable the pen editor by call `destroy()` method of the `var pen = new Pen(options)` object. like:
 
 ```js
 var pen = new Pen('#editor');
 
-pen.destory(); // return itself
+pen.destroy(); // return itself
 ```
 
 And, there's a corresponding method called `rebuild()` to re-enable the editor:
