@@ -172,23 +172,6 @@
     // toggle toolbar on key select
     editor.addEventListener('keyup', toggle);
 
-    // press ENTER key twice, end a block
-    editor.addEventListener('keypress', function(e) {
-      var code = e.keyCode || e.which;
-      if(!that._enter) that._enter = [];
-
-      if(code === 13) {
-        if(that._enter.length === 1){
-          that._enter.length = 0;
-          that._actions('p');
-          return;
-        }
-        return that._enter.length = 1;
-      }
-
-      that._enter.length = 0;
-    })
-
     // toggle toolbar on key select
     menu.addEventListener('click', function(e) {
       var action = e.target.getAttribute('data-action');
