@@ -216,7 +216,7 @@
     var node = this._sel.focusNode
       , effects = this._effectNode(node)
       , menu = this._menu
-      , highlight;
+      , highlight, linkinput;
 
     // remove all highlights
     [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
@@ -224,7 +224,9 @@
     });
 
     // display link input
-    menu.querySelector('input').style.display = 'none';
+    linkinput = menu.querySelector('input');
+    if (linkinput) linkinput.style.display = 'none';
+
 
     highlight = function(str) {
       var selector = '.icon-' + str
