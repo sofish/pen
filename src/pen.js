@@ -224,7 +224,8 @@
     });
 
     // display link input
-    menu.querySelector('input').style.display = 'none';
+    var input = menu.querySelector('input')
+    if (input) input.style.display = 'none';
 
     highlight = function(str) {
       var selector = '.icon-' + str
