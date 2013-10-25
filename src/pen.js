@@ -195,7 +195,7 @@
 
         createlink = function(input) {
           input.style.display = 'none';
-          if(input.value) return apply(input.value.replace(/(^\s+)|(\s+$)/g, ''));
+          if(input.value) return apply(input.value.replace(/(^\s+)|(\s+$)/g, '').replace(/^(?!http:\/\/|https:\/\/)(.*)$/, 'http://$1'));
           action = 'unlink';
           apply();
         };
