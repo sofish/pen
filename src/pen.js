@@ -216,8 +216,8 @@
     var node = this._sel.focusNode
       , effects = this._effectNode(node)
       , menu = this._menu
+      , linkInput = menu.querySelector('input')
       , highlight
-      , linkInput = menu.querySelector('input');
 
     // remove all highlights
     [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
@@ -225,9 +225,7 @@
     });
 
     // display link input if createlink enabled
-    if (linkInput) {
-      linkInput.style.display = 'none';
-    }
+    if (linkInput) linkInput.style.display = 'none';
 
     highlight = function(str) {
       var selector = '.icon-' + str
