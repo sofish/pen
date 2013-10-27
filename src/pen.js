@@ -216,15 +216,18 @@
     var node = this._sel.focusNode
       , effects = this._effectNode(node)
       , menu = this._menu
-      , highlight;
+      , highlight
+      , linkInput = menu.querySelector('input');
 
     // remove all highlights
     [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
       el.classList.remove('active');
     });
 
-    // display link input
-    menu.querySelector('input').style.display = 'none';
+    // display link input if createlink enabled
+    if (linkInput) {
+      linkInput.style.display = 'none';
+    }
 
     highlight = function(str) {
       var selector = '.icon-' + str
