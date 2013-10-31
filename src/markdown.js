@@ -48,12 +48,24 @@
 
   // exec command
   covertor.action = function(pen, cmd) {
+    var trimContent = function (length) {
+      var node = pen._sel.focusNode; 
+      node.textContent = node.textContent.slice(length); 
+    };
+    var defer = function(func){
+      var argv = Array.prototype.slice.call(arguments, 1);
+      return setTimeout(function(){ return func.apply(null, argv); }, 1);
+    };
 
     // only apply effect at line start
     if(pen._sel.focusOffset > cmd[1]) return;
 
-    var node = pen._sel.focusNode;
-    node.textContent = node.textContent.slice(cmd[1]);
+    if (cmd[0] === 'inserthorizontalrule') {
+      trimContent(cmd[1]);
+    } else {
+      defer(trimContent, cmd[1]); 
+    }
+    
     pen._actions(cmd[0]);
     pen.nostyle();
   };
