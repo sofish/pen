@@ -1,5 +1,6 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-~function(doc) {
+/* jshint -W030, -W093, -W015 */
+(function(doc) {
 
   var Pen, FakePen, utils = {};
 
@@ -27,14 +28,14 @@
 
   // shift a function
   utils.shift = function(key, fn, time) {
-      time = time || 50;
-      var queue = this['_shift_fn' + key], timeout = 'shift_timeout' + key, current;
-      queue ? queue.concat([fn, time]) : (queue = [[fn, time]]);
-      current = queue.pop();
-      clearTimeout(this[timeout]);
-      this[timeout] = setTimeout(function() {
-        current[0]();
-      }, time);
+    time = time || 50;
+    var queue = this['_shift_fn' + key], timeout = 'shift_timeout' + key, current;
+    queue ? queue.concat([fn, time]) : (queue = [[fn, time]]);
+    current = queue.pop();
+    clearTimeout(this[timeout]);
+    this[timeout] = setTimeout(function() {
+      current[0]();
+    }, time);
   };
 
   // merge: make it easy to have a fallback
@@ -217,7 +218,7 @@
       , effects = this._effectNode(node)
       , menu = this._menu
       , linkInput = menu.querySelector('input')
-      , highlight
+      , highlight;
 
     // remove all highlights
     [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
@@ -332,7 +333,7 @@
 
   Pen.prototype.destroy = function(isAJoke) {
     var destroy = isAJoke ? false : true
-      , attr = isAJoke ? 'setAttribute' : 'removeAttribute'
+      , attr = isAJoke ? 'setAttribute' : 'removeAttribute';
 
     if(!isAJoke) {
       this._sel.removeAllRanges();
@@ -364,4 +365,4 @@
   // make it accessible
   this.Pen = doc.getSelection ? Pen : FakePen;
 
-}(document);
+}(document));
