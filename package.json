@@ -16,5 +16,15 @@
   "license": {
     "type": "MIT",
     "url": "https://github.com/sofish/pen/blob/master/license.txt"
-  }
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.7.2",
+    "grunt-contrib-uglify": "~0.2.7",
+    "grunt-contrib-watch": "~0.5.3"
+  },
+  "scripts": {
+    "test": "grunt --verbose"
+  },
+  "readmeFilename": "README.md"
 }

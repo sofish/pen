@@ -1,5 +1,5 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-~function() {
+(function() {
 
   // only works with Pen
   if(!this.Pen) return;
@@ -67,6 +67,6 @@
   };
 
   // append to Pen
-  Pen.prototype.markdown = covertor;
+  window.Pen.prototype.markdown = covertor;
 
-}();
+}());
