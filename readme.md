@@ -1,9 +1,8 @@
-[![Build Status](https://travis-ci.org/sofish/pen.png?branch=master)](https://travis-ci.org/sofish/pen)
-
 # Pen Editor
 
 - **LIVE DEMO:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
 - **Markdown is supported**
+- Build status: [![Build Status](https://travis-ci.org/sofish/pen.png?branch=master)](https://travis-ci.org/sofish/pen)
 
 ******************
 
