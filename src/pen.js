@@ -1,5 +1,5 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-/* jshint -W030, -W093, -W015 */
+/* jshint -W030, -W093 */
 (function(doc) {
 
   var Pen, FakePen, utils = {};
@@ -237,15 +237,24 @@
     effects.forEach(function(item) {
       var tag = item.nodeName.toLowerCase();
       switch(tag) {
-        case 'a': return (menu.querySelector('input').value = item.href), highlight('createlink');
-        case 'i': return highlight('italic');
-        case 'u': return highlight('underline');
-        case 'b': return highlight('bold');
-        case 'ul': return highlight('insertunorderedlist');
-        case 'ol': return highlight('insertorderedlist');
-        case 'ol': return highlight('insertorderedlist');
-        case 'li': return highlight('indent');
-        default : highlight(tag);
+        case 'a':
+          return (menu.querySelector('input').value = item.href), highlight('createlink');
+        case 'i':
+          return highlight('italic');
+        case 'u':
+          return highlight('underline');
+        case 'b':
+          return highlight('bold');
+        case 'ul':
+          return highlight('insertunorderedlist');
+        case 'ol':
+          return highlight('insertorderedlist');
+        case 'ol':
+          return highlight('insertorderedlist');
+        case 'li':
+          return highlight('indent');
+        default :
+          highlight(tag);
       }
     });
 
