@@ -1,5 +1,4 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-/* jshint -W030 */
 (function(doc) {
 
   var Pen, FakePen, utils = {};
@@ -30,7 +29,12 @@
   utils.shift = function(key, fn, time) {
     time = time || 50;
     var queue = this['_shift_fn' + key], timeout = 'shift_timeout' + key, current;
-    queue ? queue.concat([fn, time]) : (queue = [[fn, time]]);
+    if ( queue ) {
+      queue.concat([fn, time]);
+    }
+    else {
+      queue = [[fn, time]];
+    }
     current = queue.pop();
     clearTimeout(this[timeout]);
     this[timeout] = setTimeout(function() {
@@ -97,10 +101,14 @@
     this.toolbar();
 
     // enable markdown covert
-    this.markdown && this.markdown.init(this);
+    if (this.markdown) {
+      this.markdown.init(this);
+    }
 
     // stay on the page
-    this.config.stay && this.stay();
+    if (this.config.stay) {
+      this.stay();
+    }
   };
 
   // node effects
@@ -337,9 +345,11 @@
 
   Pen.prototype.stay = function() {
     var that = this;
-    !window.onbeforeunload && (window.onbeforeunload = function() {
-      if(!that._isDestroyed) return 'Are you going to leave here?';
-    });
+    if (!window.onbeforeunload) {
+      window.onbeforeunload = function() {
+        if(!that._isDestroyed) return 'Are you going to leave here?';
+      };
+    }
   };
 
   Pen.prototype.destroy = function(isAJoke) {
