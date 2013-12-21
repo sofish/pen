@@ -1,5 +1,5 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-/* jshint -W030, -W093 */
+/* jshint -W030 */
 (function(doc) {
 
   var Pen, FakePen, utils = {};
@@ -201,9 +201,11 @@
           apply();
         };
 
-        return input.onkeypress = function(e) {
+        input.onkeypress = function(e) {
           if(e.which === 13) return createlink(e.target);
         };
+
+        return input.onkeypress;
       }
 
       apply();
