@@ -46,7 +46,7 @@ module.exports = function(grunt) {
         files: [{
           expand: true,
           cwd: 'src/',
-          src: [ '**/*.css', 'font/*' ],
+          src: [ 'font/*' ],
           dest: 'build/'
         }]
       },
@@ -54,9 +54,30 @@ module.exports = function(grunt) {
         files: [{
           expand: true,
           cwd: 'src/',
-          src: [ '**/*.js', '**/*.css', 'font/*' ],
+          src: [ '**/*.js', 'font/*' ],
           dest: 'build/'
         }]
+      }
+    },
+
+    sass: {
+      build: {
+        options: {
+          outputStyle: 'compressed'
+        },
+        files: [{
+          expand: true,
+          cwd: 'src/',
+          src: [ '**/*.scss', '!_*' ],
+          dest: 'build/',
+          ext: '.css'
+        }]
+      },
+      debug: {
+        options: {
+          outputStyle: 'nested'
+        },
+        files: '<%= sass.build.files %>'
       }
     },
 
@@ -65,8 +86,12 @@ module.exports = function(grunt) {
         files: [ '<%= jshint.files %>' ],
         tasks: [ 'jshint', 'copy:debug' ]
       },
-      assets: {
-        files: [ 'src/**/*.css', 'src/font/**' ],
+      sass: {
+        files: [ 'src/**/*.scss' ],
+        tasks: [ 'sass:debug' ]
+      },
+      font: {
+        files: [ 'src/font/**' ],
         tasks: [ 'copy:debug' ]
       }
     },
@@ -90,12 +115,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks("grunt-contrib-connect");
+  grunt.loadNpmTasks('grunt-sass');
 
   // Default tasks.
-  grunt.registerTask('default', ['jshint', 'uglify', 'copy:build']);
+  grunt.registerTask('default',
+    ['jshint', 'uglify', 'sass:build', 'copy:build']);
 
   // Debug build
-  grunt.registerTask('debug', ['jshint', 'copy:debug']);
+  grunt.registerTask('debug', ['jshint', 'sass:debug', 'copy:debug']);
 
   // Dev build
   grunt.registerTask('dev', ['debug', 'connect', 'watch']);
