@@ -34,8 +34,21 @@ module.exports = function(grunt) {
 
     uglify: {
       build: {
-        src: 'src/**/*.js',
-        dest: 'build/pen-<%= pkg.version %>.min.js'
+        expand: true,
+        cwd: 'src/',
+        src: [ '**/*.js' ],
+        dest: 'build/'
+      }
+    },
+
+    copy: {
+      build: {
+        files: [{
+          expand: true,
+          cwd: 'src/',
+          src: [ '**/*.css', 'font/*' ],
+          dest: 'build/'
+        }]
       }
     },
 
@@ -52,8 +65,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
   // Default task(s).
-  grunt.registerTask('default', ['jshint', 'uglify']);
+  grunt.registerTask('default', ['jshint', 'uglify', 'copy']);
 
 };
