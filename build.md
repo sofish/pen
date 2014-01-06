@@ -28,10 +28,13 @@ The following steps should allow you to build this project:
    grunt;
    ```
 
-   While editing a file, you can use `watch` to automatically rebuild every
-   time a file is saved:
+   During development, you can use the `dev` target to automatically rebuild
+   every time a file is saved:
 
    ```
-   grunt watch;
+   grunt dev;
    ```
+
+   This will also spin up a local server on port 8080 so that you can load
+   your changes in a browser: [http://127.0.0.1:8080]
 

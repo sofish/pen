@@ -49,12 +49,26 @@ module.exports = function(grunt) {
           src: [ '**/*.css', 'font/*' ],
           dest: 'build/'
         }]
+      },
+      debug: {
+        files: [{
+          expand: true,
+          cwd: 'src/',
+          src: [ '**/*.js', '**/*.css', 'font/*' ],
+          dest: 'build/'
+        }]
       }
     },
 
     watch: {
-      files: ['<%= jshint.files %>'],
-      tasks: ['jshint']
+      js: {
+        files: [ '<%= jshint.files %>' ],
+        tasks: [ 'jshint', 'copy:debug' ]
+      },
+      assets: {
+        files: [ 'src/**/*.css', 'src/font/**' ],
+        tasks: [ 'copy:debug' ]
+      }
     },
 
     clean: [ 'build' ]
@@ -66,8 +80,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks("grunt-contrib-connect");
 
-  // Default task(s).
-  grunt.registerTask('default', ['jshint', 'uglify', 'copy']);
+  // Default tasks.
+  grunt.registerTask('default', ['jshint', 'uglify', 'copy:build']);
+
+  // Debug build
+  grunt.registerTask('debug', ['jshint', 'copy:debug']);
 
 };
