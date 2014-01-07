@@ -71,6 +71,15 @@ module.exports = function(grunt) {
       }
     },
 
+    connect: {
+      server: {
+        options: {
+          port: 8080,
+          base: '.'
+        }
+      }
+    },
+
     clean: [ 'build' ]
   });
 
@@ -87,5 +96,8 @@ module.exports = function(grunt) {
 
   // Debug build
   grunt.registerTask('debug', ['jshint', 'copy:debug']);
+
+  // Dev build
+  grunt.registerTask('dev', ['debug', 'connect', 'watch']);
 
 };
