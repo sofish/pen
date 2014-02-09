@@ -102,3 +102,59 @@
 .pen-menu .icon-inserthorizontalrule:before { content: '\e818'; } /* '' */
 .pen-menu .icon-pin:before { content: '\e812'; } /* '' */
 .pen-menu .icon-createlink:before { content: '\e810'; } /* '' */
+
+.pen {
+  position: relative;
+}
+.pen.hinted h1:before,
+.pen.hinted h2:before,
+.pen.hinted h3:before,
+.pen.hinted h4:before,
+.pen.hinted h5:before,
+.pen.hinted h6:before,
+.pen.hinted blockquote:before,
+.pen.hinted hr:before {
+  color: #eee;
+  position: absolute;
+  right: 100%;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+.pen.hinted blockquote {  border-left: 0; margin-left: 0; padding-left: 0; }
+.pen.hinted blockquote:before {
+  color: #1abf89;
+  content: ">";
+  font-weight: bold;
+  vertical-align: center;
+}
+.pen.hinted h1:before { content: "#";}
+.pen.hinted h2:before { content: "##";}
+.pen.hinted h3:before { content: "###";}
+.pen.hinted h4:before { content: "####";}
+.pen.hinted h5:before { content: "#####";}
+.pen.hinted h6:before { content: "######";}
+.pen.hinted hr:before { content: "﹘﹘﹘"; line-height: 1.2; vertical-align: bottom; }
+
+.pen.hinted pre:before, .pen.hinted pre:after {
+  content: "```";
+  display: block;
+  color: #ccc;
+}
+
+.pen.hinted ul { list-style: none; }
+.pen.hinted ul li:before {
+  content: "*";
+  color: #999;
+  line-height: 1;
+  vertical-align: bottom;
+  margin-left: -1.2em;
+  display: inline-block;
+  width: 1.2em;
+}
+
+.pen.hinted b:before, .pen.hinted b:after { content: "**"; color: #eee; font-weight: normal; }
+.pen.hinted i:before, .pen.hinted i:after { content: "*"; color: #eee; }
+
+.pen.hinted a { text-decoration: none; }
+.pen.hinted a:before {content: "["; color: #ddd; }
+.pen.hinted a:after { content: "](" attr(href) ")"; color: #ddd; }
