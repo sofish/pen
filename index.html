@@ -14,6 +14,10 @@
   #mode{color:#1abf89;;cursor:pointer;}
   #mode.disabled{color:#666;}
   #mode:before{content: '\e813';}
+  #hinted{color:#1abf89;cursor:pointer;}
+  #hinted.disabled{color:#666;}
+  #hinted:before{content: '\e816';}
+
   #fork{position:fixed;right:0;top:0;}
   </style>
   <link rel="stylesheet" href="src/pen.css" />
@@ -22,6 +26,7 @@
 
 <div id="toolbar">
   <span id="mode" class="icon-mode"></span>
+  <span id="hinted" class="icon-pre disabled" title="Toggle Markdown Hints"></span>
 </div>
 
 <div data-toggle="pen" placeholder="im a placeholder">
@@ -77,6 +82,18 @@
     }
   });
 
+  // toggle editor mode
+  document.querySelector('#hinted').addEventListener('click', function() {
+    var pen = document.querySelector('.pen')
+
+    if(pen.classList.contains('hinted')) {
+      pen.classList.remove('hinted');
+      this.classList.add('disabled');
+    } else {
+      pen.classList.add('hinted');
+      this.classList.remove('disabled');
+    }
+  });
 </script>
 </body>
 </html>
