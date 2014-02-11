@@ -1,5 +1,4 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-/* jshint -W030, -W093, -W015 */
 (function(doc) {
 
   var Pen, FakePen, utils = {};
@@ -30,7 +29,12 @@
   utils.shift = function(key, fn, time) {
     time = time || 50;
     var queue = this['_shift_fn' + key], timeout = 'shift_timeout' + key, current;
-    queue ? queue.concat([fn, time]) : (queue = [[fn, time]]);
+    if ( queue ) {
+      queue.concat([fn, time]);
+    }
+    else {
+      queue = [[fn, time]];
+    }
     current = queue.pop();
     clearTimeout(this[timeout]);
     this[timeout] = setTimeout(function() {
@@ -97,10 +101,14 @@
     this.toolbar();
 
     // enable markdown covert
-    this.markdown && this.markdown.init(this);
+    if (this.markdown) {
+      this.markdown.init(this);
+    }
 
     // stay on the page
-    this.config.stay && this.stay();
+    if (this.config.stay) {
+      this.stay();
+    }
   };
 
   // node effects
@@ -201,9 +209,11 @@
           apply();
         };
 
-        return input.onkeypress = function(e) {
+        input.onkeypress = function(e) {
           if(e.which === 13) return createlink(e.target);
         };
+
+        return input.onkeypress;
       }
 
       apply();
@@ -237,15 +247,24 @@
     effects.forEach(function(item) {
       var tag = item.nodeName.toLowerCase();
       switch(tag) {
-        case 'a': return (menu.querySelector('input').value = item.href), highlight('createlink');
-        case 'i': return highlight('italic');
-        case 'u': return highlight('underline');
-        case 'b': return highlight('bold');
-        case 'ul': return highlight('insertunorderedlist');
-        case 'ol': return highlight('insertorderedlist');
-        case 'ol': return highlight('insertorderedlist');
-        case 'li': return highlight('indent');
-        default : highlight(tag);
+        case 'a':
+          return (menu.querySelector('input').value = item.href), highlight('createlink');
+        case 'i':
+          return highlight('italic');
+        case 'u':
+          return highlight('underline');
+        case 'b':
+          return highlight('bold');
+        case 'ul':
+          return highlight('insertunorderedlist');
+        case 'ol':
+          return highlight('insertorderedlist');
+        case 'ol':
+          return highlight('insertorderedlist');
+        case 'li':
+          return highlight('indent');
+        default :
+          highlight(tag);
       }
     });
 
@@ -326,9 +345,11 @@
 
   Pen.prototype.stay = function() {
     var that = this;
-    !window.onbeforeunload && (window.onbeforeunload = function() {
-      if(!that._isDestroyed) return 'Are you going to leave here?';
-    });
+    if (!window.onbeforeunload) {
+      window.onbeforeunload = function() {
+        if(!that._isDestroyed) return 'Are you going to leave here?';
+      };
+    }
   };
 
   Pen.prototype.destroy = function(isAJoke) {
