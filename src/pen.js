@@ -139,7 +139,7 @@
     for(var i = 0, list = this.config.list; i < list.length; i++) {
       var name = list[i], klass = 'pen-icon icon-' + name;
       icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]|p$/i) ? name.toUpperCase() : '') + '</i>';
-      if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
+      if((name === 'createlink') ||  (name === 'insertimage'))  icons += '<input class="pen-input" placeholder="http://" />';
     }
 
     var menu = doc.createElement('div');
@@ -196,7 +196,7 @@
       };
 
       // create link
-      if(action === 'createlink') {
+      if((action === 'createlink') ||  (action === 'insertimage'))  {
         var input = menu.getElementsByTagName('input')[0], createlink;
 
         input.style.display = 'block';
