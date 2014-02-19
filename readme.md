@@ -120,7 +120,7 @@ pen.rebuild(); // return itself
 ## 3. markdown syntax support
 
 #### 3.1 install
-The syntax covertor will   be enabled automaticly by link `markdown.js` after `pen.js: 
+The syntax convertor will be enabled automaticly by linking `markdown.js` after `pen.js: 
 
 ```html
 <script src="src/pen.js"></script>
