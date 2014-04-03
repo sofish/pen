@@ -19,6 +19,25 @@
   #hinted:before{content: '\e816';}
 
   #fork{position:fixed;right:0;top:0;}
+  
+  /*
+  When the webpage is printed
+  this media query hides extra elements,
+  and makes the text content fit the page.
+  */
+  @media print {
+    #fork, #toolbar {
+        display: none;
+    }
+    body {
+        width: 94%;
+        padding-top: 1em;
+        font-size: 12px;
+    }
+    html {
+        border-top: 0;
+    }
+  }
   </style>
   <link rel="stylesheet" href="src/pen.css" />
 </head>
