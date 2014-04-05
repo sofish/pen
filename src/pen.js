@@ -335,7 +335,7 @@
     menu.style.display = 'block';
     var newLeft = (offset.left/2);
     menu.style.top = top - menu.clientHeight + 'px';
-    menu.style.left = newLeft   + 'px';   
+    menu.style.left = newLeft + 'px';   
 
     return this;
   };
