@@ -4,7 +4,11 @@
 .pen, .pen-menu, .pen-input, .pen textarea{font:400 1.16em/1.45 Palatino, Optima, Georgia, serif;color:#331;}
 .pen:focus{outline:none;}
 .pen fieldset, img {border: 0;}
-.pen blockquote{padding-left:10px;margin-left:-14px;border-left:4px solid #1abf89;}
+.pen blockquote{
+  padding-left:10px;
+  margin-left:-14px;
+  border-left:4px solid #1abf89;
+}
 .pen a{color:#1abf89;}
 .pen del{text-decoration:line-through;}
 .pen sub, .pen sup {font-size:75%;position:relative;vertical-align:text-top\9;}
@@ -36,8 +40,28 @@
 
 /* pen menu */
 .pen-menu, .pen-input{font-size:14px;line-height:1;}
-.pen-menu{white-space:nowrap;box-shadow:1px 2px 3px -2px #222;background:#333;background-image:linear-gradient(to bottom, #222, #333);opacity:0.9;position:fixed;height:36px;border:1px solid #333;border-radius:3px;display:none;z-index:1000;}
-.pen-menu:after {top:100%;border:solid transparent;content:" ";height:0;width:0;position:absolute;pointer-events:none;}
+.pen-menu{
+    white-space:nowrap;
+    box-shadow:1px 2px 3px -2px #222;
+    background:#333;
+    background-image:linear-gradient(to bottom, #222, #333);
+    opacity:0.9;
+    position:fixed;
+    height:36px;
+    border:1px solid #333;
+    border-radius:3px;
+    display:none;
+  }
+
+.pen-menu:after {
+  top:100%;
+  border:solid transparent;
+  content:" ";
+  height:0;
+  width:0;
+  position:fixed;
+  pointer-events:none;
+}
 .pen-menu:after {border-color:rgba(51, 51, 51, 0);border-top-color:#333;border-width:6px;left:50%;margin-left:-6px;}
 .pen-icon{font:normal 900 16px/40px Georgia serif;min-width:20px;display:inline-block;padding:0 10px;height:36px;overflow:hidden;color:#fff;text-align:center;cursor:pointer;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;user-select:none;}
 .pen-icon:first-of-type{border-top-left-radius:3px;border-bottom-left-radius:3px;}
@@ -102,10 +126,12 @@
 .pen-menu .icon-inserthorizontalrule:before { content: '\e818'; } /* '' */
 .pen-menu .icon-pin:before { content: '\e812'; } /* '' */
 .pen-menu .icon-createlink:before { content: '\e810'; } /* '' */
+.pen-menu .icon-insertimage:before { content: '\e819'; } /* '' */
 
 .pen {
   position: relative;
 }
+
 .pen.hinted h1:before,
 .pen.hinted h2:before,
 .pen.hinted h3:before,

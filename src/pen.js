@@ -141,12 +141,11 @@
       icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]|p$/i) ? name.toUpperCase() : '') + '</i>';
       if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
     }
-
+    
     var menu = doc.createElement('div');
     menu.setAttribute('class', this.config.class + '-menu pen-menu');
     menu.innerHTML = icons;
     menu.style.display = 'none';
-
     doc.body.appendChild((this._menu = menu));
 
     var setpos = function() {
@@ -198,7 +197,6 @@
       // create link
       if(action === 'createlink') {
         var input = menu.getElementsByTagName('input')[0], createlink;
-
         input.style.display = 'block';
         input.focus();
 
@@ -237,13 +235,11 @@
 
     // display link input if createlink enabled
     if (linkInput) linkInput.style.display = 'none';
-
     highlight = function(str) {
       var selector = '.icon-' + str
         , el = menu.querySelector(selector);
       return el && el.classList.add('active');
     };
-
     effects.forEach(function(item) {
       var tag = item.nodeName.toLowerCase();
       switch(tag) {
@@ -337,8 +333,9 @@
 
     // display block to caculate it's width & height
     menu.style.display = 'block';
+    var newLeft = (offset.left/2);
     menu.style.top = top - menu.clientHeight + 'px';
-    menu.style.left = left - (menu.clientWidth/2) + 'px';
+    menu.style.left = newLeft   + 'px';   
 
     return this;
   };
