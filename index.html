@@ -17,7 +17,6 @@
   #hinted{color:#1abf89;cursor:pointer;}
   #hinted.disabled{color:#666;}
   #hinted:before{content: '\e816';}
-
   #fork{position:fixed;right:0;top:0;}
   </style>
   <link rel="stylesheet" href="src/pen.css" />
@@ -29,27 +28,29 @@
   <span id="hinted" class="icon-pre disabled" title="Toggle Markdown Hints"></span>
 </div>
 
-<div data-toggle="pen" placeholder="im a placeholder">
-  <h2>Enjoy live editing (+markdown)</h2>
+<div id="container">
+  <div data-toggle="pen" placeholder="im a placeholder">
+    <h2>Enjoy live editing (+markdown)</h2>
 
-  <p><b><i>Click to edit, Select to apply effect, click items of toolbar to toggle effects.</i></b></p>
-  <hr>
-  <p>Horizontal-Rule can be inserted by click「...」on the toolbar or just type「... 」/「--- 」/「*** 」at line start. Note that
-    there's a SPACE at the end of a command.</p>
-  <hr>
-  <p>To link or unlink, please press the <i>ENTER</i> key after you filled the input field with your a link. A <a
-    href="/sofish">link</a> can be unlink by applying an empty value to the input field.
+    <p><b><i>Click to edit, Select to apply effect, click items of toolbar to toggle effects.</i></b></p>
+    <hr>
+    <p>Horizontal-Rule can be inserted by a click「...」on the toolbar or by typing「... 」/「--- 」/「*** 」at line start. Note that
+      there's a SPACE at the end of a command. Horizontal-Rule can be inserted by a click「...」on the toolbar or by simply typing「... 」/「--- 」/「*** 」at line start. Note that there's a SPACE at the end of a command</p>
+    <hr>
+    <p>To link or un-link, please press the <i>ENTER</i> key after you filled the input field with your a link. A <a
+      href="/sofish">link</a> can be undone by applying an empty value to the input field.
 
-  <p>
-  <ul>
-    <li>Ordered list and unordered list are supported.</li>
-    <li>Use the toolbar or use markdown syntax like「<b>1. </b>」,「<b>- </b>」or「<b>* </b>」</li>
-  </ul>
-  <blockquote>You can quote text by type「<b>&gt;</b>」at line start.</blockquote>
-  <p>What about add underline to text? "<u>Stay Hungry, Stay Foolish - <i>Steve Jobs</i></u>".</p>
-  <pre>A code block is also supported by type 「```」 at line start and press SPACE.</pre>
-  <p>For more, please checkout: <a href="https://github.com/sofish/pen#readme" target="_blank">https://github.com/sofish/pen#readme</a>
-  </p>
+    <p>
+    <ul>
+      <li>Ordered list and unordered list are supported.</li>
+      <li>Use the toolbar or use markdown syntax like「<b>1. </b>」,「<b>- </b>」or「<b>* </b>」</li>
+    </ul>
+    <blockquote>You can quote text by typing「<b>&gt;</b>」at line start.</blockquote>
+    <p>What about adding underline to text? "<u>Stay Hungry, Stay Foolish - <i>Steve Jobs</i></u>".</p>
+    <pre>A code block is also supported by typing 「```」 at line start and press SPACE.</pre>
+    <p>For more, please checkout: <a href="https://github.com/sofish/pen#readme" target="_blank">https://github.com/sofish/pen#readme</a>
+    </p>
+  </div>
 </div>
 
 <a id="fork" href="https://github.com/sofish/pen" target="_blank"><img
