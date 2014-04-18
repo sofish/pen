@@ -335,12 +335,12 @@
       //, left = offset.left + (offset.width / 2)
       , menu = this._menu;
 
-      // display block to caculate it's width & height
-      menu.style.display = 'block';
-      var newLeft = (offset.left / 2);
-      menu.style.top = top - menu.clientHeight + 'px';
-      menu.style.left = newLeft + 'px';
-      return this;
+    // display block to caculate it's width & height
+    menu.style.display = 'block';
+    var newLeft = (offset.left / 2);
+    menu.style.top = top - menu.clientHeight + 'px';
+    menu.style.left = newLeft + 'px';
+    return this;
   };
 
   Pen.prototype.stay = function() {
