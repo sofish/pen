@@ -332,14 +332,14 @@
 
     var offset = this._range.getBoundingClientRect()
       , top = offset.top - 10
-      , left = offset.left + (offset.width / 2)
+      //, left = offset.left + (offset.width / 2)
       , menu = this._menu;
 
     // display block to caculate it's width & height
     menu.style.display = 'block';
+    var newLeft = (offset.left / 2);
     menu.style.top = top - menu.clientHeight + 'px';
-    menu.style.left = left - (menu.clientWidth/2) + 'px';
-
+    menu.style.left = newLeft + 'px';
     return this;
   };
 
