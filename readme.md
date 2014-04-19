@@ -2,7 +2,7 @@
 
 - **LIVE DEMO:** [http://sofish.github.io/pen](http://sofish.github.io/pen)
 - **Markdown is supported**
-- **Build status:** [![Build Status](https://travis-ci.org/sofish/pen.png?branch=master)](https://travis-ci.org/sofish/pen)
+- **Build status:** [![Build Status](https://travis-ci.org/vikramjb/pen.png?branch=master)](https://travis-ci.org/vikramjb/pen)
 
 ******************
 
