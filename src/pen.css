@@ -35,6 +35,11 @@
 .pen li ul, .pen-ul ul, .pen-ol ul{list-style: circle;}
 
 /* pen menu */
+.pen-menu [class^="icon-"], .pen-menu [class*=" icon-"] {   /* reset to avoid conflicts with Bootstrap */
+  background: transparent;
+  background-image: none;
+}
+
 .pen-menu, .pen-input{font-size:14px;line-height:1;}
 .pen-menu{white-space:nowrap;box-shadow:1px 2px 3px -2px #222;background:#333;background-image:linear-gradient(to bottom, #222, #333);opacity:0.9;position:fixed;height:36px;border:1px solid #333;border-radius:3px;display:none;z-index:1000;}
 .pen-menu:after {top:100%;border:solid transparent;content:" ";height:0;width:0;position:absolute;pointer-events:none;}
