@@ -95,6 +95,7 @@
 .pen-menu .icon-underline:before { content: '\e804'; } /* '' */
 .pen-menu .icon-blockquote:before { content: '\e814'; } /* '' */
 .pen-menu .icon-undo:before { content: '\e817'; } /* '' */
+.pen-menu .icon-code:before { content: '\e816'; } /* '' */
 .pen-menu .icon-pre:before { content: '\e816'; } /* '' */
 .pen-menu .icon-unlink:before { content: '\e811'; } /* '' */
 .pen-menu .icon-superscript:before { content: '\e808'; } /* '' */
