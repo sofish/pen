@@ -105,7 +105,7 @@
     line-height:0;
 }
 .pen-menu {
-    
+    text-align:center;
     box-shadow:1px 2px 3px -2px #222;
     background:#333;
     background-image:linear-gradient(to bottom, #222, #333);
