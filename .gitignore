@@ -3,3 +3,5 @@
 *.log
 node_modules
 build
+
+*.sublime-workspace

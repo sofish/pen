@@ -4,14 +4,14 @@
   // only works with Pen
   if(!this.Pen) return;
 
-  // markdown covertor obj
-  var covertor = {
+  // markdown converter obj
+  var converter = {
     keymap: { '96': '`', '62': '>', '49': '1', '46': '.', '45': '-', '42': '*', '35': '#'},
     stack : []
   };
 
   // return valid markdown syntax
-  covertor.valid = function(str) {
+  converter.valid = function(str) {
     var len = str.length;
 
     if(str.match(/[#]{1,6}/)) {
@@ -30,7 +30,7 @@
   };
 
   // parse command
-  covertor.parse = function(e) {
+  converter.parse = function(e) {
     var code = e.keyCode || e.which;
 
     // when `space` is pressed
@@ -47,7 +47,7 @@
   };
 
   // exec command
-  covertor.action = function(pen, cmd) {
+  converter.action = function(pen, cmd) {
 
     // only apply effect at line start
     if(pen._sel.focusOffset > cmd[1]) return;
@@ -58,15 +58,15 @@
     pen.nostyle();
   };
 
-  // init covertor
-  covertor.init = function(pen) {
+  // init converter
+  converter.init = function(pen) {
     pen.config.editor.addEventListener('keypress', function(e) {
-      var cmd = covertor.parse(e);
-      if(cmd) return covertor.action(pen, cmd);
+      var cmd = converter.parse(e);
+      if(cmd) return converter.action(pen, cmd);
     });
   };
 
   // append to Pen
-  window.Pen.prototype.markdown = covertor;
+  window.Pen.prototype.markdown = converter;
 
 }());

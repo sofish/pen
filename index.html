@@ -1,118 +1,144 @@
 <!doctype html>
 <html lang="en-US">
-<head>
-  <meta charset="UTF-8">
-  <title>Pen - What You See Is What You Get (WYSIWYG)</title>
-  <style type="text/css">
-  *{padding:0;margin:0;}
-  html{border-top:10px #1abf89 solid;}
-  body{width:800px;margin:0 auto;padding:5% 20px 20px;font-family:Palatino, Optima, Georgia, serif;}
-  @media all and (max-width:1024px){ body, pre a{width:60%;} }
-  small{color:#999;}
-  #toolbar{margin-bottom:1em;position:fixed;left:20px;margin-top:5px;}
-  #toolbar [class^="icon-"]:before, #toolbar [class*=" icon-"]:before{font-family:'pen'}
-  #mode{color:#1abf89;;cursor:pointer;}
-  #mode.disabled{color:#666;}
-  #mode:before{content: '\e813';}
-  #hinted{color:#1abf89;cursor:pointer;}
-  #hinted.disabled{color:#666;}
-  #hinted:before{content: '\e816';}
 
-  #fork{position:fixed;right:0;top:0;}
-  
-  /*
-  When the webpage is printed
-  this media query hides extra elements,
-  and makes the text content fit the page.
-  */
-  @media print {
-    #fork, #toolbar {
-        display: none;
-    }
-    body {
-        width: 94%;
-        padding-top: 1em;
-        font-size: 12px;
+<head>
+    <meta charset="UTF-8">
+    <title>Pen - What You See Is What You Get (WYSIWYG)</title>
+    <style type="text/css">
+    * {
+        padding:0;
+        margin:0;
     }
     html {
-        border-top: 0;
+        border-top:10px #1abf89 solid;
     }
-  }
-  </style>
-  <link rel="stylesheet" href="src/pen.css" />
+    body {
+        width:800px;
+        margin:0 auto;
+        padding:5% 20px 20px;
+        font-family:Palatino, Optima, Georgia, serif;
+    }
+    @media all and (max-width:1024px) {
+        body, pre a {
+            width:60%;
+        }
+    }
+    small {
+        color:#999;
+    }
+    #toolbar {
+        margin-bottom:1em;
+        position:fixed;
+        left:20px;
+        margin-top:5px;
+    }
+    
+    #toolbar [class^="icon-"]:before, #toolbar [class*=" icon-"]:before{font-family:'pen'}
+
+    #mode {
+        color:#1abf89;
+        cursor:pointer;
+    }
+    #mode.disabled {
+        color:#666;
+    }
+    #mode:before {
+        content:'\e813';
+    }
+    #hinted {
+        color:#1abf89;
+        cursor:pointer;
+    }
+    #hinted.disabled {
+        color:#666;
+    }
+    #hinted:before {
+        content:'\e816';
+    }
+    #fork {
+        position:fixed;
+        right:0;
+        top:0;
+    }
+    </style>
+    <link rel="stylesheet" href="src/pen.css" />
 </head>
+
 <body>
 
-<div id="toolbar">
-  <span id="mode" class="icon-mode"></span>
-  <span id="hinted" class="icon-pre disabled" title="Toggle Markdown Hints"></span>
-</div>
-
-<div data-toggle="pen" placeholder="im a placeholder">
-  <h2>Enjoy live editing (+markdown)</h2>
-
-  <p><b><i>Click to edit, Select to apply effect, click items of toolbar to toggle effects.</i></b></p>
-  <hr>
-  <p>Horizontal-Rule can be inserted by click「...」on the toolbar or just type「... 」/「--- 」/「*** 」at line start. Note that
-    there's a SPACE at the end of a command.</p>
-  <hr>
-  <p>To link or unlink, please press the <i>ENTER</i> key after you filled the input field with your a link. A <a
-    href="/sofish">link</a> can be unlink by applying an empty value to the input field.
-
-  <p>
-  <ul>
-    <li>Ordered list and unordered list are supported.</li>
-    <li>Use the toolbar or use markdown syntax like「<b>1. </b>」,「<b>- </b>」or「<b>* </b>」</li>
-  </ul>
-  <blockquote>You can quote text by type「<b>&gt;</b>」at line start.</blockquote>
-  <p>What about add underline to text? "<u>Stay Hungry, Stay Foolish - <i>Steve Jobs</i></u>".</p>
-  <pre>A code block is also supported by type 「```」 at line start and press SPACE.</pre>
-  <p>For more, please checkout: <a href="https://github.com/sofish/pen#readme" target="_blank">https://github.com/sofish/pen#readme</a>
-  </p>
-</div>
-
-<a id="fork" href="https://github.com/sofish/pen" target="_blank"><img
-  src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
-
-<script src="src/pen.js"></script>
-<script src="src/markdown.js"></script>
-<script type="text/javascript">
-
-  // config
-  var options = {
-    editor: document.querySelector('[data-toggle="pen"]'),
-    debug: true
-  };
-
-  // create editor
-  var pen = new Pen(options);
 
 
-  // toggle editor mode
-  document.querySelector('#mode').addEventListener('click', function() {
-    var text = this.textContent;
+    <div id="toolbar">
+        <span id="mode" class="icon-mode"></span>
+        <span id="hinted" class="icon-pre disabled" title="Toggle Markdown Hints"></span>
+    </div>
+    <div id="container">
+        <div data-toggle="pen" placeholder="im a placeholder">
+            <h2>Enjoy live editing (+markdown)</h2>
 
-    if(this.classList.contains('disabled')) {
-      this.classList.remove('disabled');
-      pen.rebuild();
-    } else {
-      this.classList.add('disabled');
-      pen.destroy();
-    }
-  });
+            <p><b><i>Click to edit, Select to apply effect, click items of toolbar to toggle effects.</i></b>
+            </p>
+            <hr>
+            <p>Horizontal-Rule can be inserted by a click「...」on the toolbar or by typing「... 」/「--- 」/「*** 」at line start. Note that there's a SPACE at the end of a command. Horizontal-Rule can be inserted by a click「...」on the toolbar or by simply typing「... 」/「--- 」/「*** 」at line start. Note that there's a SPACE at the end of a command</p>
+            <hr>
+            <p>To link or un-link, please press the <i>ENTER</i> key after you filled the input field with your a link. A <a href="/sofish">link</a> can be undone by applying an empty value to the input field.
 
-  // toggle editor mode
-  document.querySelector('#hinted').addEventListener('click', function() {
-    var pen = document.querySelector('.pen')
+                <p>
+                    <ul>
+                        <li>Ordered list and unordered list are supported.</li>
+                        <li>Use the toolbar or use markdown syntax like「<b>1. </b>」,「<b>- </b>」or「<b>* </b>」</li>
+                    </ul>
+                    <blockquote>You can quote text by typing「<b>&gt;</b>」at line start.</blockquote>
+                    <p>What about adding underline to text? "<u>Stay Hungry, Stay Foolish - <i>Steve Jobs</i></u>".</p>
+                    <pre>A code block is also supported by typing 「```」 at line start and press SPACE.</pre>
+                    <p>For more, please checkout: <a href="https://github.com/sofish/pen#readme" target="_blank">https://github.com/sofish/pen#readme</a>
+                    </p>
+        </div>
+    </div>
 
-    if(pen.classList.contains('hinted')) {
-      pen.classList.remove('hinted');
-      this.classList.add('disabled');
-    } else {
-      pen.classList.add('hinted');
-      this.classList.remove('disabled');
-    }
-  });
-</script>
+    <a id="fork" href="https://github.com/sofish/pen" target="_blank">
+        <img src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub">
+    </a>
+
+    <script src="src/pen.js"></script>
+    <script src="src/markdown.js"></script>
+    <script type="text/javascript">
+    // config
+    var options = {
+        editor: document.querySelector('[data-toggle="pen"]'),
+        debug: true
+    };
+
+    // create editor
+    var pen = new Pen(options);
+
+
+    // toggle editor mode
+    document.querySelector('#mode').addEventListener('click', function() {
+        var text = this.textContent;
+
+        if (this.classList.contains('disabled')) {
+            this.classList.remove('disabled');
+            pen.rebuild();
+        } else {
+            this.classList.add('disabled');
+            pen.destroy();
+        }
+    });
+
+    // toggle editor mode
+    document.querySelector('#hinted').addEventListener('click', function() {
+        var pen = document.querySelector('.pen')
+
+        if (pen.classList.contains('hinted')) {
+            pen.classList.remove('hinted');
+            this.classList.add('disabled');
+        } else {
+            pen.classList.add('hinted');
+            this.classList.remove('disabled');
+        }
+    });
+    </script>
 </body>
+
 </html>
