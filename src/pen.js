@@ -205,12 +205,13 @@
 
         createlink = function(input) {
           input.style.display = 'none';
-          if(input.value)
-              return apply(
-                  input.value.replace(/(^\s+)|(\s+$)/g, '')
-                      .replace(/^(?!mailto:|.+\/|.+#|.+\?)(.*@.*\..+)$/, 'mailto:$1')
-                      .replace(/^(?!\w+?:\/\/|mailto:|\/|\.\/|\?|#)(.*)$/, 'http://$1')
-                  );
+          if(input.value) {
+            var inputValue = input.value;
+            inputValue.replace(/(^\s+)|(\s+$)/g, '');
+            inputValue.replace(/^(?!mailto:|.+\/|.+#|.+\?)(.*@.*\..+)$/, 'mailto:$1');
+            inputValue.replace(/^(?!\w+?:\/\/|mailto:|\/|\.\/|\?|#)(.*)$/, 'http://$1');
+            return apply(inputValue);
+          }
           action = 'unlink';
           apply();
         };
