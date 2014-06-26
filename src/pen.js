@@ -205,7 +205,7 @@
 
         createlink = function(input) {
           input.style.display = 'none';
-          if(input.value) return apply(input.value.replace(/(^\s+)|(\s+$)/g, '').replace(/^(?!http:\/\/|https:\/\/)(.*)$/, 'http://$1'));
+          if(input.value) return apply(input.value.replace(/(^\s+)|(\s+$)/g, '').replace(/^(?!\w+?:\/\/|\/|\.\/|\?|#)(.*)$/, 'http://$1'));
           action = 'unlink';
           apply();
         };
@@ -249,7 +249,7 @@
       var tag = item.nodeName.toLowerCase();
       switch(tag) {
         case 'a':
-          return (menu.querySelector('input').value = item.href), highlight('createlink');
+          return (menu.querySelector('input').value = item.getAttribute('href')), highlight('createlink');
         case 'i':
           return highlight('italic');
         case 'u':
