@@ -207,10 +207,10 @@
           input.style.display = 'none';
           if(input.value)
           	return apply(
-	          	input.value.replace(/(^\s+)|(\s+$)/g, '')
-	          		.replace(/^(?!mailto:|.+\/|.+#|.+\?)(.*@.*\..+)$/, 'mailto:$1')
-	          		.replace(/^(?!\w+?:\/\/|mailto:|\/|\.\/|\?|#)(.*)$/, 'http://$1')
-	          	);
+	          input.value.replace(/(^\s+)|(\s+$)/g, '')
+		          .replace(/^(?!mailto:|.+\/|.+#|.+\?)(.*@.*\..+)$/, 'mailto:$1')
+		          .replace(/^(?!\w+?:\/\/|mailto:|\/|\.\/|\?|#)(.*)$/, 'http://$1')
+	          );
           action = 'unlink';
           apply();
         };
