@@ -275,7 +275,7 @@
   };
 
   Pen.prototype.actions = function() {
-    var that = this, reg, block, overall, insert;
+    var that = this, reg, block, overall, insert, wrap;
 
     // allow command list
     reg = {
