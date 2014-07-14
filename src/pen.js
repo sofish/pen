@@ -235,8 +235,12 @@
       el.classList.remove('active');
     });
 
-    // display link input if createlink enabled
-    if (linkInput) linkInput.style.display = 'none';
+    if (linkInput) {
+      // display link input if createlink enabled
+      linkInput.style.display = 'none';
+      // reset link input value
+      linkInput.value = '';
+    }
 
     highlight = function(str) {
       var selector = '.icon-' + str
