@@ -344,9 +344,9 @@
 
     // store the stylesheet used for positioning the menu horizontally
     if(this._stylesheet === undefined) {
-        var style = document.createElement("style");
-        document.head.appendChild(style);
-        this._stylesheet = stylesheet = style.sheet;
+      var style = document.createElement("style");
+      document.head.appendChild(style);
+      this._stylesheet = stylesheet = style.sheet;
     }
     // display block to caculate its width & height
     menu.style.display = 'block';
