@@ -357,11 +357,14 @@
     // check to see if menu has over-extended its bounding box. if it has,
     // 1) apply a new class if overflowed on top;
     // 2) apply a new rule if overflowed on the left
+    if(stylesheet.cssRules.length > 0) {
+      stylesheet.deleteRule(0);
+    }
     if(menuOffset.x < 0) {
       menuOffset.x = 0;
-      stylesheet.addRule('.pen-menu:after', 'left: ' + left + 'px');
+      stylesheet.insertRule('.pen-menu:after { left: ' + left + 'px; }',0);
     } else {
-      stylesheet.addRule('.pen-menu:after', 'left: 50%');
+      stylesheet.insertRule('.pen-menu:after { left: 50%; }',0);
     }
     if(menuOffset.y < 0) {
       menu.classList.toggle('pen-menu-below', true);
