@@ -342,6 +342,7 @@
       , menuOffset = { x: 0, y: 0 }
       , stylesheet = this._stylesheet;
 
+    // store the stylesheet used for positioning the menu horizontally
     if(this._stylesheet === undefined) {
         var style = document.createElement("style");
         document.head.appendChild(style);
