@@ -335,15 +335,46 @@
   Pen.prototype.menu = function() {
 
     var offset = this._range.getBoundingClientRect()
-      , top = offset.top - 10
+      , menuPadding = 10
+      , top = offset.top - menuPadding
       , left = offset.left + (offset.width / 2)
-      , menu = this._menu;
+      , menu = this._menu
+      , menuOffset = { x: 0, y: 0 }
+      , stylesheet = this._stylesheet;
 
-    // display block to caculate it's width & height
+    // store the stylesheet used for positioning the menu horizontally
+    if(this._stylesheet === undefined) {
+      var style = document.createElement("style");
+      document.head.appendChild(style);
+      this._stylesheet = stylesheet = style.sheet;
+    }
+    // display block to caculate its width & height
     menu.style.display = 'block';
-    menu.style.top = top - menu.clientHeight + 'px';
-    menu.style.left = left - (menu.clientWidth/2) + 'px';
 
+    menuOffset.x = left - (menu.clientWidth/2);
+    menuOffset.y = top - menu.clientHeight;
+
+    // check to see if menu has over-extended its bounding box. if it has,
+    // 1) apply a new class if overflowed on top;
+    // 2) apply a new rule if overflowed on the left
+    if(stylesheet.cssRules.length > 0) {
+      stylesheet.deleteRule(0);
+    }
+    if(menuOffset.x < 0) {
+      menuOffset.x = 0;
+      stylesheet.insertRule('.pen-menu:after { left: ' + left + 'px; }',0);
+    } else {
+      stylesheet.insertRule('.pen-menu:after { left: 50%; }',0);
+    }
+    if(menuOffset.y < 0) {
+      menu.classList.toggle('pen-menu-below', true);
+      menuOffset.y = offset.top + offset.height + menuPadding;
+    } else {
+      menu.classList.toggle('pen-menu-below', false);
+    }
+
+    menu.style.top = menuOffset.y + 'px';
+    menu.style.left = menuOffset.x + 'px';
     return this;
   };
 
