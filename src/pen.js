@@ -108,6 +108,9 @@
     // enable toolbar
     this.toolbar();
 
+    // init placeholder
+    this._initPlaceholder();
+
     // enable markdown covert
     if (this.markdown) {
       this.markdown.init(this);
@@ -160,6 +163,57 @@
       el = el.parentNode;
     }
     return nodes;
+  };
+
+  // placeholder
+  Pen.prototype._initPlaceholder = function() {
+    var that = this, editor = that.config.editor;
+
+    that._placeholder = editor.getAttribute('data-placeholder');
+
+    that._addListener(editor, 'focus', function() {
+      if(!that._placeholder) return;
+      editor.classList.remove('pen-placeholder');
+      if(that._placeholder === editor.innerHTML) editor.innerHTML = '';
+    });
+    that._addListener(editor, 'blur', function() {
+      that.placeholder();
+    });
+
+    that.placeholder();
+  };
+
+  Pen.prototype.placeholder = function(placeholder) {
+    var editor = this.config.editor;
+    if(placeholder) this._placeholder = placeholder + '';
+
+    if(this._placeholder && (!editor.innerHTML.trim() || editor.classList.contains('pen-placeholder'))) {
+      editor.innerHTML = this._placeholder;
+      editor.classList.add('pen-placeholder');
+      return true;
+    }
+    editor.classList.remove('pen-placeholder');
+    return false;
+  };
+
+  Pen.prototype.getContent = function() {
+    var editor = this.config.editor;
+    if(editor.classList.contains('pen-placeholder')) return '';
+    return editor.innerHTML;
+  };
+
+  Pen.prototype.setContent = function(html) {
+    this.config.editor.innerHTML = html;
+    this.placeholder();
+    return this;
+  };
+
+  Pen.prototype.focus = function() {
+    var editor = this.config.editor;
+    setTimeout(function() {
+      editor.focus();
+    });
+    return this;
   };
 
   // remove style attr

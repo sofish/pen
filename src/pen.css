@@ -165,3 +165,5 @@
 .pen.hinted a { text-decoration: none; }
 .pen.hinted a:before {content: "["; color: #ddd; }
 .pen.hinted a:after { content: "](" attr(href) ")"; color: #ddd; }
+
+.pen-placeholder { color: #999; }
