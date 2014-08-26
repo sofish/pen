@@ -1,22 +1,29 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
 (function(doc) {
 
-  var Pen, FakePen, utils = {};
+  var Pen, FakePen, utils = {}, hasOwnProperty = Object.prototype.hasOwnProperty;
 
   // type detect
   utils.is = function(obj, type) {
     return Object.prototype.toString.call(obj).slice(8, -1) === type;
   };
 
-  // copy props from a obj
-  utils.copy = function(defaults, source) {
-    for(var p in source) {
-      if(source.hasOwnProperty(p)) {
-        var val = source[p];
-        defaults[p] = this.is(val, 'Object') ? this.copy({}, val) :
-          this.is(val, 'Array') ? this.copy([], val) : val;
+  utils.forEach = function(obj, iterator, context) {
+    if(utils.is(obj, 'Array')) {
+      for (var i = 0, l = obj.length; i < l; i++) iterator.call(context, obj[i], i, obj);
+    } else {
+      for (var key in obj) {
+        if (hasOwnProperty.call(obj, key)) iterator.call(context, obj[key], key, obj);
       }
     }
+  };
+
+  // copy props from a obj
+  utils.copy = function(defaults, source) {
+    utils.forEach(source, function (value, key) {
+      defaults[key] = utils.is(value, 'Object') ? utils.copy({}, value) :
+          utils.is(value, 'Array') ? utils.copy([], value) : value;
+    });
     return defaults;
   };
 
@@ -112,6 +119,37 @@
     }
   };
 
+  Pen.prototype._addListener = function(target, type, listener) {
+    this._eventTargets = this._eventTargets || [];
+    this._eventsCache = this._eventsCache || [];
+    var index = this._eventTargets.indexOf(target);
+    if(index < 0) {
+      this._eventTargets.push(target);
+      index = this._eventTargets.length - 1;
+    }
+    this._eventsCache[index] = this._eventsCache[index] || {};
+    this._eventsCache[index][type] = this._eventsCache[index][type] || [];
+    this._eventsCache[index][type].push(listener);
+
+    target.addEventListener(type, listener, false);
+    return this;
+  };
+
+  Pen.prototype._removeAllListeners = function() {
+    var that = this;
+    if (!that._eventsCache) return that;
+    utils.forEach(that._eventsCache, function (events, index) {
+      var target = that._eventTargets[index];
+      utils.forEach(events, function (listeners, type) {
+        utils.forEach(listeners, function (listener) {
+          target.removeEventListener(type, listener, false);
+        });
+      });
+    });
+    that._eventTargets = [];
+    that._eventsCache = [];
+  };
+
   // node effects
   Pen.prototype._effectNode = function(el, returnAsNodeName) {
     var nodes = [];
@@ -155,8 +193,8 @@
     };
 
     // change menu offset when window resize / scroll
-    window.addEventListener('resize', setpos);
-    window.addEventListener('scroll', setpos);
+    this._addListener(window, 'resize', setpos);
+    this._addListener(window, 'scroll', setpos);
 
     var editor = this.config.editor;
     var toggle = function() {
@@ -177,13 +215,13 @@
     };
 
     // toggle toolbar on mouse select
-    editor.addEventListener('mouseup', toggle);
+    this._addListener(editor, 'mouseup', toggle);
 
     // toggle toolbar on key select
-    editor.addEventListener('keyup', toggle);
+    this._addListener(editor, 'keyup', toggle);
 
     // toggle toolbar on key select
-    menu.addEventListener('click', function(e) {
+    this._addListener(menu, 'click', function(e) {
       var action = e.target.getAttribute('data-action');
 
       if(!action) return;
@@ -409,6 +447,7 @@
       , attr = isAJoke ? 'setAttribute' : 'removeAttribute';
 
     if(!isAJoke) {
+      this._removeAllListeners();
       this._sel.removeAllRanges();
       this._menu.style.display = 'none';
     }
