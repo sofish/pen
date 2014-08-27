@@ -50,9 +50,10 @@
       class: 'pen',
       debug: false,
       stay: config.stay || !config.debug,
+      stayMsg: 'Are you going to leave here?',
       textarea: '<textarea name="content"></textarea>',
       list: [
-        'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
+        'blockquote', 'h2', 'h3', 'p', 'code', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
         'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
       ]
     };
@@ -107,7 +108,7 @@
 
     // stay on the page
     if (this.config.stay) {
-      this.stay();
+      this.stay(this.config);
     }
   };
 
@@ -204,7 +205,13 @@
 
         createlink = function(input) {
           input.style.display = 'none';
-          if(input.value) return apply(input.value.replace(/(^\s+)|(\s+$)/g, '').replace(/^(?!http:\/\/|https:\/\/)(.*)$/, 'http://$1'));
+          if(input.value) {
+            var inputValue = input.value;
+            inputValue.replace(/(^\s+)|(\s+$)/g, '');
+            inputValue.replace(/^(?!mailto:|.+\/|.+#|.+\?)(.*@.*\..+)$/, 'mailto:$1');
+            inputValue.replace(/^(?!\w+?:\/\/|mailto:|\/|\.\/|\?|#)(.*)$/, 'http://$1');
+            return apply(inputValue);
+          }
           action = 'unlink';
           apply();
         };
@@ -252,13 +259,15 @@
       var tag = item.nodeName.toLowerCase();
       switch(tag) {
         case 'a':
-          return (menu.querySelector('input').value = item.href), highlight('createlink');
+          return (menu.querySelector('input').value = item.getAttribute('href')), highlight('createlink');
         case 'i':
           return highlight('italic');
         case 'u':
           return highlight('underline');
         case 'b':
           return highlight('bold');
+        case 'code':
+          return highlight('code');
         case 'ul':
           return highlight('insertunorderedlist');
         case 'ol':
@@ -276,14 +285,15 @@
   };
 
   Pen.prototype.actions = function() {
-    var that = this, reg, block, overall, insert;
+    var that = this, reg, block, overall, insert, wrap;
 
     // allow command list
     reg = {
       block: /^(?:p|h[1-6]|blockquote|pre)$/,
       inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
       source: /^(?:insertimage|createlink|unlink)$/,
-      insert: /^(?:inserthorizontalrule|insert)$/
+      insert: /^(?:inserthorizontalrule|insert)$/,
+      wrap: /^(?:code)$/
     };
 
     overall = function(cmd, val) {
@@ -316,6 +326,11 @@
       return overall('formatblock', name);
     };
 
+    wrap = function(tag) {
+      var val = '<'+tag+'>'+ document.getSelection() +'</'+tag+'>';
+      return overall('insertHTML', val);
+    };
+
     this._actions = function(name, value) {
       if(name.match(reg.block)) {
         block(name);
@@ -323,6 +338,8 @@
         overall(name, value);
       } else if(name.match(reg.insert)) {
         insert(name);
+      } else if(name.match(reg.wrap)) {
+        wrap(name);
       } else {
         if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
       }
@@ -378,11 +395,11 @@
     return this;
   };
 
-  Pen.prototype.stay = function() {
+  Pen.prototype.stay = function(config) {
     var that = this;
     if (!window.onbeforeunload) {
       window.onbeforeunload = function() {
-        if(!that._isDestroyed) return 'Are you going to leave here?';
+        if(!that._isDestroyed) return config.stayMsg;
       };
     }
   };
