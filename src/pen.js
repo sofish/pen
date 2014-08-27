@@ -503,7 +503,7 @@
     if(!isAJoke) {
       this._removeAllListeners();
       this._sel.removeAllRanges();
-      this._menu.style.display = 'none';
+      this._menu.parentNode.removeChild(this._menu);
     }
     this._isDestroyed = destroy;
     this.config.editor[attr]('contenteditable', '');
