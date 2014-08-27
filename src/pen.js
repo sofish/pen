@@ -208,11 +208,18 @@
     return this;
   };
 
-  Pen.prototype.focus = function() {
-    var editor = this.config.editor;
+  Pen.prototype.focus = function(focusEnd) {
+    var editor = this.config.editor, sel = this._sel;
     setTimeout(function() {
       editor.focus();
-    });
+      if(!focusEnd) return;
+
+      var range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }, 100);
     return this;
   };
 
