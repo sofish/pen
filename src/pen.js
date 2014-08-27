@@ -3,13 +3,31 @@
 
   var Pen, FakePen, utils = {}, hasOwnProperty = Object.prototype.hasOwnProperty;
 
+  // allow command list
+  var commandsReg = {
+    block: /^(?:p|h[1-6]|blockquote|pre)$/,
+    inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
+    source: /^(?:insertimage|createlink|unlink)$/,
+    insert: /^(?:inserthorizontalrule|insert)$/,
+    wrap: /^(?:code)$/
+  };
+
+  var effectNodeReg = /(?:[pubia]|h[1-6]|blockquote|[uo]l|li)/i;
+
+  var strReg = {
+    whiteSpace: /(^\s+)|(\s+$)/g,
+    mailTo: /^(?!mailto:|.+\/|.+#|.+\?)(.*@.*\..+)$/,
+    http: /^(?!\w+?:\/\/|mailto:|\/|\.\/|\?|#)(.*)$/
+  };
+
   // type detect
   utils.is = function(obj, type) {
     return Object.prototype.toString.call(obj).slice(8, -1) === type;
   };
 
-  utils.forEach = function(obj, iterator, context) {
-    if(utils.is(obj, 'Array')) {
+  utils.forEach = function(obj, iterator, context, arrayLike) {
+    if (arrayLike == null) arrayLike = utils.is(obj, 'Array');
+    if(arrayLike) {
       for (var i = 0, l = obj.length; i < l; i++) iterator.call(context, obj[i], i, obj);
     } else {
       for (var key in obj) {
@@ -30,23 +48,6 @@
   // log
   utils.log = function(message, force) {
     if(window._pen_debug_mode_on || force) console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
-  };
-
-  // shift a function
-  utils.shift = function(key, fn, time) {
-    time = time || 50;
-    var queue = this['_shift_fn' + key], timeout = 'shift_timeout' + key, current;
-    if ( queue ) {
-      queue.concat([fn, time]);
-    }
-    else {
-      queue = [[fn, time]];
-    }
-    current = queue.pop();
-    clearTimeout(this[timeout]);
-    this[timeout] = setTimeout(function() {
-      current[0]();
-    }, time);
   };
 
   // merge: make it easy to have a fallback
@@ -77,6 +78,198 @@
     return defaults;
   };
 
+  function commandOverall(cmd, val) {
+    var message = ' to exec 「' + cmd + '」 command' + (val ? (' with value: ' + val) : '');
+    if(document.execCommand(cmd, false, val) && this.config.debug) {
+      utils.log('success' + message);
+    } else {
+      utils.log('fail' + message);
+    }
+  }
+
+  function commandInsert(name) {
+    var range = this._sel.getRangeAt(0)
+      , node = range.startContainer;
+
+    while(node.nodeType !== 1) {
+      node = node.parentNode;
+    }
+
+    range.selectNode(node);
+    range.collapse(false);
+    return commandOverall.call(this, name);
+  }
+
+  function commandBlock(name) {
+    if(effectNode.call(this, this._sel.getRangeAt(0).startContainer, true).indexOf(name) !== -1) {
+      if(name === 'blockquote') return document.execCommand('outdent', false, null);
+      name = 'p';
+    }
+    return commandOverall.call(this, 'formatblock', name);
+  }
+
+  function commandWrap(tag) {
+    var val = '<' + tag + '>' + this._sel + '</' + tag + '>';
+    return commandOverall.call(this, 'insertHTML', val);
+  }
+
+  // placeholder
+  function initPlaceholder() {
+    var that = this, editor = that.config.editor;
+
+    that._placeholder = editor.getAttribute('data-placeholder');
+    that.placeholder();
+  }
+
+  function initToolbar() {
+    var icons = '';
+
+    utils.forEach(this.config.list, function (name, i) {
+      var klass = 'pen-icon icon-' + name;
+      icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]|p$/i) ? name.toUpperCase() : '') + '</i>';
+      if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
+    }, null, true);
+
+    this._menu = doc.createElement('div');
+    this._menu.setAttribute('class', this.config.class + '-menu pen-menu');
+    this._menu.innerHTML = icons;
+    this._menu.style.display = 'none';
+
+    doc.body.appendChild(this._menu);
+  }
+
+  function initEvents() {
+    var timer, that = this, menu = that._menu, editor = that.config.editor, sel = that._sel;
+
+    var setpos = function() {
+      if(menu.style.display === 'block') that.menu();
+    };
+
+    // change menu offset when window resize / scroll
+    addListener.call(this, window, 'resize', setpos);
+    addListener.call(this, window, 'scroll', setpos);
+
+    var toggle = function() {
+      that._range = sel.getRangeAt(0);
+
+      clearTimeout(timer);
+      timer = setTimeout(function() {
+        if(!sel.isCollapsed) {
+          //show menu
+          that.menu().highlight();
+        } else {
+          //hide menu
+          that._menu.style.display = 'none';
+        }
+      }, 200);
+    };
+
+    // toggle toolbar on mouse select
+    addListener.call(this, editor, 'mouseup', toggle);
+
+    // toggle toolbar on key select
+    addListener.call(this, editor, 'keyup', toggle);
+
+    var menuApply = function(action, value) {
+      that.setRange();
+      that.execCommand(action, value);
+      that._range = that.getRange();
+      that.highlight().menu();
+    };
+
+    // toggle toolbar on key select
+    addListener.call(this, menu, 'click', function(e) {
+      var action = e.target.getAttribute('data-action');
+
+      if(!action) return;
+      if(action !== 'createlink') return menuApply(action);
+      // create link
+      var input = menu.getElementsByTagName('input')[0];
+
+      input.style.display = 'block';
+      input.focus();
+
+      var createlink = function(input) {
+        input.style.display = 'none';
+        if(input.value) {
+          var inputValue = input.value
+            .replace(strReg.whiteSpace, '')
+            .replace(strReg.mailTo, 'mailto:$1')
+            .replace(strReg.http, 'http://$1');
+          return menuApply(action, inputValue);
+        }
+        action = 'unlink';
+        menuApply(action);
+      };
+
+      input.onkeypress = function(e) {
+        if(e.which === 13) return createlink(e.target);
+      };
+
+    });
+
+    // listen for placeholder
+    addListener.call(this, editor, 'focus', function() {
+      if(!that._placeholder) return;
+      editor.classList.remove('pen-placeholder');
+      if(that._placeholder === editor.innerHTML) editor.innerHTML = '';
+    });
+
+    addListener.call(this, editor, 'blur', function() {
+      that.placeholder();
+    });
+
+    // listen for paste and clear style
+    addListener.call(this, editor, 'paste', function() {
+      setTimeout(function() {
+        that.clearStyle();
+      });
+    });
+  }
+
+  function addListener(target, type, listener) {
+    this._eventTargets = this._eventTargets || [];
+    this._eventsCache = this._eventsCache || [];
+    var index = this._eventTargets.indexOf(target);
+    if(index < 0) {
+      this._eventTargets.push(target);
+      index = this._eventTargets.length - 1;
+    }
+    this._eventsCache[index] = this._eventsCache[index] || {};
+    this._eventsCache[index][type] = this._eventsCache[index][type] || [];
+    this._eventsCache[index][type].push(listener);
+
+    target.addEventListener(type, listener, false);
+    return this;
+  }
+
+  function removeAllListeners() {
+    var that = this;
+    if (!that._eventsCache) return that;
+    utils.forEach(that._eventsCache, function (events, index) {
+      var target = that._eventTargets[index];
+      utils.forEach(events, function (listeners, type) {
+        utils.forEach(listeners, function (listener) {
+          target.removeEventListener(type, listener, false);
+        }, null, true);
+      }, null, false);
+    }, null, true);
+    that._eventTargets = [];
+    that._eventsCache = [];
+  }
+
+  // node effects
+  function effectNode(el, returnAsNodeName) {
+    var nodes = [];
+    while(el !== this.config.editor) {
+      if(el.nodeName.match(effectNodeReg)) {
+        nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
+      }
+      el = el.parentNode;
+    }
+    return nodes;
+  }
+
   Pen = function(config) {
 
     if(!config) return utils.log('can\'t find config', true);
@@ -102,14 +295,14 @@
     // save the selection obj
     this._sel = doc.getSelection();
 
-    // map actions
-    this.actions();
-
     // enable toolbar
-    this.toolbar();
+    initToolbar.call(this);
 
     // init placeholder
-    this._initPlaceholder();
+    initPlaceholder.call(this);
+
+    // init events
+    initEvents.call(this);
 
     // enable markdown covert
     if (this.markdown) {
@@ -120,67 +313,12 @@
     if (this.config.stay) {
       this.stay(this.config);
     }
+
   };
 
-  Pen.prototype._addListener = function(target, type, listener) {
-    this._eventTargets = this._eventTargets || [];
-    this._eventsCache = this._eventsCache || [];
-    var index = this._eventTargets.indexOf(target);
-    if(index < 0) {
-      this._eventTargets.push(target);
-      index = this._eventTargets.length - 1;
-    }
-    this._eventsCache[index] = this._eventsCache[index] || {};
-    this._eventsCache[index][type] = this._eventsCache[index][type] || [];
-    this._eventsCache[index][type].push(listener);
-
-    target.addEventListener(type, listener, false);
+  Pen.prototype.on = function(type, listener) {
+    addListener.call(this, this.config.editor, type, listener);
     return this;
-  };
-
-  Pen.prototype._removeAllListeners = function() {
-    var that = this;
-    if (!that._eventsCache) return that;
-    utils.forEach(that._eventsCache, function (events, index) {
-      var target = that._eventTargets[index];
-      utils.forEach(events, function (listeners, type) {
-        utils.forEach(listeners, function (listener) {
-          target.removeEventListener(type, listener, false);
-        });
-      });
-    });
-    that._eventTargets = [];
-    that._eventsCache = [];
-  };
-
-  // node effects
-  Pen.prototype._effectNode = function(el, returnAsNodeName) {
-    var nodes = [];
-    while(el !== this.config.editor) {
-      if(el.nodeName.match(/(?:[pubia]|h[1-6]|blockquote|[uo]l|li)/i)) {
-        nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
-      }
-      el = el.parentNode;
-    }
-    return nodes;
-  };
-
-  // placeholder
-  Pen.prototype._initPlaceholder = function() {
-    var that = this, editor = that.config.editor;
-
-    that._placeholder = editor.getAttribute('data-placeholder');
-
-    that._addListener(editor, 'focus', function() {
-      if(!that._placeholder) return;
-      editor.classList.remove('pen-placeholder');
-      if(that._placeholder === editor.innerHTML) editor.innerHTML = '';
-    });
-    that._addListener(editor, 'blur', function() {
-      that.placeholder();
-    });
-
-    that.placeholder();
   };
 
   Pen.prototype.placeholder = function(placeholder) {
@@ -208,136 +346,66 @@
     return this;
   };
 
-  Pen.prototype.focus = function(focusEnd) {
-    var editor = this.config.editor, sel = this._sel;
-    editor.focus();
-    if(!focusEnd) return;
+  Pen.prototype.getRange = function() {
+    var sel = this._sel;
+    return (sel.rangeCount && sel.getRangeAt(0)) || null;
+  };
 
-    var range = document.createRange();
-    range.selectNodeContents(editor);
-    range.collapse(false);
-    sel.removeAllRanges();
-    sel.addRange(range);
+  Pen.prototype.setRange = function(range) {
+    var sel = this._sel;
+    range = range || this._range;
+    if (!range) {
+      range = this.getRange();
+      if (range) range.collapse(false); // set to end
+    }
+    if (range) {
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
     return this;
+  };
+
+  Pen.prototype.focus = function(focusStart) {
+    this.config.editor.focus();
+    if(!focusStart) this.setRange();
+    return this;
+  };
+
+  Pen.prototype.execCommand = function(name, value) {
+    if(name.match(commandsReg.block)) {
+      commandBlock.call(this, name);
+    } else if(name.match(commandsReg.inline) || name.match(commandsReg.source)) {
+      commandOverall.call(this, name, value);
+    } else if(name.match(commandsReg.insert)) {
+      commandInsert.call(this, name);
+    } else if(name.match(reg.wrap)) {
+      commandWrap.call(this, name);
+    } else {
+      if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
+    }
   };
 
   // remove style attr
-  Pen.prototype.nostyle = function() {
+  Pen.prototype.clearStyle = function() {
     var els = this.config.editor.querySelectorAll('[style]');
-    [].slice.call(els).forEach(function(item) {
+    utils.forEach(els, function(item) {
       item.removeAttribute('style');
-    });
-    return this;
-  };
-
-  Pen.prototype.toolbar = function() {
-
-    var that = this, icons = '';
-
-    for(var i = 0, list = this.config.list; i < list.length; i++) {
-      var name = list[i], klass = 'pen-icon icon-' + name;
-      icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]|p$/i) ? name.toUpperCase() : '') + '</i>';
-      if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
-    }
-
-    var menu = doc.createElement('div');
-    menu.setAttribute('class', this.config.class + '-menu pen-menu');
-    menu.innerHTML = icons;
-    menu.style.display = 'none';
-
-    doc.body.appendChild((this._menu = menu));
-
-    var setpos = function() {
-      if(menu.style.display === 'block') that.menu();
-    };
-
-    // change menu offset when window resize / scroll
-    this._addListener(window, 'resize', setpos);
-    this._addListener(window, 'scroll', setpos);
-
-    var editor = this.config.editor;
-    var toggle = function() {
-
-      if(that._isDestroyed) return;
-
-      utils.shift('toggle_menu', function() {
-        var range = that._sel;
-        if(!range.isCollapsed) {
-          //show menu
-          that._range = range.getRangeAt(0);
-          that.menu().highlight();
-        } else {
-          //hide menu
-          that._menu.style.display = 'none';
-        }
-      }, 200);
-    };
-
-    // toggle toolbar on mouse select
-    this._addListener(editor, 'mouseup', toggle);
-
-    // toggle toolbar on key select
-    this._addListener(editor, 'keyup', toggle);
-
-    // toggle toolbar on key select
-    this._addListener(menu, 'click', function(e) {
-      var action = e.target.getAttribute('data-action');
-
-      if(!action) return;
-
-      var apply = function(value) {
-        that._sel.removeAllRanges();
-        that._sel.addRange(that._range);
-        that._actions(action, value);
-        that._range = that._sel.getRangeAt(0);
-        that.highlight().nostyle().menu();
-      };
-
-      // create link
-      if(action === 'createlink') {
-        var input = menu.getElementsByTagName('input')[0], createlink;
-
-        input.style.display = 'block';
-        input.focus();
-
-        createlink = function(input) {
-          input.style.display = 'none';
-          if(input.value) {
-            var inputValue = input.value;
-            inputValue.replace(/(^\s+)|(\s+$)/g, '');
-            inputValue.replace(/^(?!mailto:|.+\/|.+#|.+\?)(.*@.*\..+)$/, 'mailto:$1');
-            inputValue.replace(/^(?!\w+?:\/\/|mailto:|\/|\.\/|\?|#)(.*)$/, 'http://$1');
-            return apply(inputValue);
-          }
-          action = 'unlink';
-          apply();
-        };
-
-        input.onkeypress = function(e) {
-          if(e.which === 13) return createlink(e.target);
-        };
-
-        return input.onkeypress;
-      }
-
-      apply();
-    });
-
+    }, null, true);
     return this;
   };
 
   // highlight menu
   Pen.prototype.highlight = function() {
     var node = this._sel.focusNode
-      , effects = this._effectNode(node)
+      , effects = effectNode.call(this, node)
       , menu = this._menu
       , linkInput = menu.querySelector('input')
       , highlight;
 
     // remove all highlights
-    [].slice.call(menu.querySelectorAll('.active')).forEach(function(el) {
+    utils.forEach(menu.querySelectorAll('.active'), function(el) {
       el.classList.remove('active');
-    });
+    }, null, true);
 
     if (linkInput) {
       // display link input if createlink enabled
@@ -352,95 +420,31 @@
       return el && el.classList.add('active');
     };
 
-    effects.forEach(function(item) {
+    utils.forEach(effects, function(item) {
       var tag = item.nodeName.toLowerCase();
       switch(tag) {
         case 'a':
-          return (menu.querySelector('input').value = item.getAttribute('href')), highlight('createlink');
+          menu.querySelector('input').value = item.getAttribute('href');
+          tag = 'createlink'; break;
         case 'i':
-          return highlight('italic');
+          tag = 'italic'; break;
         case 'u':
-          return highlight('underline');
+          tag = 'underline'; break;
         case 'b':
-          return highlight('bold');
+          tag = 'bold'; break;
         case 'code':
-          return highlight('code');
+          tag = 'code'; break;
         case 'ul':
-          return highlight('insertunorderedlist');
+          tag = 'insertunorderedlist'; break;
         case 'ol':
-          return highlight('insertorderedlist');
+          tag = 'insertorderedlist'; break;
         case 'ol':
-          return highlight('insertorderedlist');
+          tag = 'insertorderedlist'; break;
         case 'li':
-          return highlight('indent');
-        default :
-          highlight(tag);
+          tag = 'indent'; break;
       }
-    });
-
-    return this;
-  };
-
-  Pen.prototype.actions = function() {
-    var that = this, reg, block, overall, insert, wrap;
-
-    // allow command list
-    reg = {
-      block: /^(?:p|h[1-6]|blockquote|pre)$/,
-      inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
-      source: /^(?:insertimage|createlink|unlink)$/,
-      insert: /^(?:inserthorizontalrule|insert)$/,
-      wrap: /^(?:code)$/
-    };
-
-    overall = function(cmd, val) {
-      var message = ' to exec 「' + cmd + '」 command' + (val ? (' with value: ' + val) : '');
-      if(document.execCommand(cmd, false, val) && that.config.debug) {
-        utils.log('success' + message);
-      } else {
-        utils.log('fail' + message);
-      }
-    };
-
-    insert = function(name) {
-      var range = that._sel.getRangeAt(0)
-        , node = range.startContainer;
-
-      while(node.nodeType !== 1) {
-        node = node.parentNode;
-      }
-
-      range.selectNode(node);
-      range.collapse(false);
-      return overall(name);
-    };
-
-    block = function(name) {
-      if(that._effectNode(that._sel.getRangeAt(0).startContainer, true).indexOf(name) !== -1) {
-        if(name === 'blockquote') return document.execCommand('outdent', false, null);
-        name = 'p';
-      }
-      return overall('formatblock', name);
-    };
-
-    wrap = function(tag) {
-      var val = '<'+tag+'>'+ document.getSelection() +'</'+tag+'>';
-      return overall('insertHTML', val);
-    };
-
-    this._actions = function(name, value) {
-      if(name.match(reg.block)) {
-        block(name);
-      } else if(name.match(reg.inline) || name.match(reg.source)) {
-        overall(name, value);
-      } else if(name.match(reg.insert)) {
-        insert(name);
-      } else if(name.match(reg.wrap)) {
-        wrap(name);
-      } else {
-        if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
-      }
-    };
+      highlight(tag);
+    }, null, true);
 
     return this;
   };
@@ -506,11 +510,13 @@
       , attr = isAJoke ? 'setAttribute' : 'removeAttribute';
 
     if(!isAJoke) {
-      this._removeAllListeners();
+      removeAllListeners.call(this);
       this._sel.removeAllRanges();
       this._menu.parentNode.removeChild(this._menu);
     } else {
-      this.toolbar();
+      initToolbar.call(this);
+      initPlaceholder.call(this);
+      initEvents.call(this);
     }
     this._isDestroyed = destroy;
     this.config.editor[attr]('contenteditable', '');
