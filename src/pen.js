@@ -210,16 +210,14 @@
 
   Pen.prototype.focus = function(focusEnd) {
     var editor = this.config.editor, sel = this._sel;
-    setTimeout(function() {
-      editor.focus();
-      if(!focusEnd) return;
+    editor.focus();
+    if(!focusEnd) return;
 
-      var range = document.createRange();
-      range.selectNodeContents(editor);
-      range.collapse(false);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }, 100);
+    var range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
     return this;
   };
 
@@ -511,6 +509,8 @@
       this._removeAllListeners();
       this._sel.removeAllRanges();
       this._menu.parentNode.removeChild(this._menu);
+    } else {
+      this.toolbar();
     }
     this._isDestroyed = destroy;
     this.config.editor[attr]('contenteditable', '');
