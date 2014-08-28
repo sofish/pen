@@ -1,7 +1,9 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-(function(doc) {
+(function(root, doc) {
 
-  var Pen, FakePen, utils = {}, hasOwnProperty = Object.prototype.hasOwnProperty;
+  var Pen, FakePen, debugMode, utils = {};
+  var hasOwnProperty = Object.prototype.hasOwnProperty;
+  var toString = Object.prototype.toString;
 
   // allow command list
   var commandsReg = {
@@ -22,7 +24,7 @@
 
   // type detect
   utils.is = function(obj, type) {
-    return Object.prototype.toString.call(obj).slice(8, -1) === type;
+    return toString.call(obj).slice(8, -1) === type;
   };
 
   utils.forEach = function(obj, iterator, context, arrayLike) {
@@ -47,7 +49,7 @@
 
   // log
   utils.log = function(message, force) {
-    if(window._pen_debug_mode_on || force) console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
+    if(debugMode || force) console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
   };
 
   // merge: make it easy to have a fallback
@@ -124,7 +126,7 @@
   function initToolbar() {
     var icons = '';
 
-    utils.forEach(this.config.list, function (name, i) {
+    utils.forEach(this.config.list, function (name) {
       var klass = 'pen-icon icon-' + name;
       icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]|p$/i) ? name.toUpperCase() : '') + '</i>';
       if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
@@ -232,8 +234,7 @@
     this._eventsCache = this._eventsCache || [];
     var index = this._eventTargets.indexOf(target);
     if(index < 0) {
-      this._eventTargets.push(target);
-      index = this._eventTargets.length - 1;
+      index = this._eventTargets.push(target) - 1;
     }
     this._eventsCache[index] = this._eventsCache[index] || {};
     this._eventsCache[index][type] = this._eventsCache[index][type] || [];
@@ -256,6 +257,7 @@
     }, null, true);
     that._eventTargets = [];
     that._eventsCache = [];
+    return that;
   }
 
   // node effects
@@ -272,22 +274,22 @@
 
   Pen = function(config) {
 
-    if(!config) return utils.log('can\'t find config', true);
+    if(!config) throw new Error('Can\'t find config');
+
+    debugMode = config.debug;
 
     // merge user config
     var defaults = utils.merge(config);
 
-    if(defaults.editor.nodeType !== 1) return utils.log('can\'t find editor');
-    if(defaults.debug) window._pen_debug_mode_on = true;
-
     var editor = defaults.editor;
+
+    if(!editor || editor.nodeType !== 1) throw new Error('Can\'t find editor');
 
     // set default class
     editor.classList.add(defaults.class);
 
     // set contenteditable
-    var editable = editor.getAttribute('contenteditable');
-    if(!editable) editor.setAttribute('contenteditable', 'true');
+    editor.setAttribute('contenteditable', 'true');
 
     // assign config
     this.config = defaults;
@@ -305,14 +307,10 @@
     initEvents.call(this);
 
     // enable markdown covert
-    if (this.markdown) {
-      this.markdown.init(this);
-    }
+    if (this.markdown) this.markdown.init(this);
 
     // stay on the page
-    if (this.config.stay) {
-      this.stay(this.config);
-    }
+    if (this.config.stay) this.stay(this.config);
 
   };
 
@@ -378,7 +376,7 @@
       commandOverall.call(this, name, value);
     } else if(name.match(commandsReg.insert)) {
       commandInsert.call(this, name);
-    } else if(name.match(reg.wrap)) {
+    } else if(name.match(commandsReg.wrap)) {
       commandWrap.call(this, name);
     } else {
       if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
@@ -425,23 +423,32 @@
       switch(tag) {
         case 'a':
           menu.querySelector('input').value = item.getAttribute('href');
-          tag = 'createlink'; break;
+          tag = 'createlink';
+          break;
         case 'i':
-          tag = 'italic'; break;
+          tag = 'italic';
+          break;
         case 'u':
-          tag = 'underline'; break;
+          tag = 'underline';
+          break;
         case 'b':
-          tag = 'bold'; break;
+          tag = 'bold';
+          break;
         case 'code':
-          tag = 'code'; break;
+          tag = 'code';
+          break;
         case 'ul':
-          tag = 'insertunorderedlist'; break;
+          tag = 'insertunorderedlist';
+          break;
         case 'ol':
-          tag = 'insertorderedlist'; break;
+          tag = 'insertorderedlist';
+          break;
         case 'ol':
-          tag = 'insertorderedlist'; break;
+          tag = 'insertorderedlist';
+          break;
         case 'li':
-          tag = 'indent'; break;
+          tag = 'indent';
+          break;
       }
       highlight(tag);
     }, null, true);
@@ -542,6 +549,6 @@
   };
 
   // make it accessible
-  this.Pen = doc.getSelection ? Pen : FakePen;
+  root.Pen = doc.getSelection ? Pen : FakePen;
 
-}(document));
+}(window, document));
