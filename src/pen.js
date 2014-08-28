@@ -42,7 +42,7 @@
   utils.copy = function(defaults, source) {
     utils.forEach(source, function (value, key) {
       defaults[key] = utils.is(value, 'Object') ? utils.copy({}, value) :
-          utils.is(value, 'Array') ? utils.copy([], value) : value;
+        utils.is(value, 'Array') ? utils.copy([], value) : value;
     });
     return defaults;
   };
@@ -82,10 +82,10 @@
 
   function commandOverall(cmd, val) {
     var message = ' to exec 「' + cmd + '」 command' + (val ? (' with value: ' + val) : '');
-    if(document.execCommand(cmd, false, val) && this.config.debug) {
+    if(document.execCommand(cmd, false, val)) {
       utils.log('success' + message);
     } else {
-      utils.log('fail' + message);
+      utils.log('fail' + message, true);
     }
   }
 
@@ -212,9 +212,8 @@
 
     // listen for placeholder
     addListener.call(this, editor, 'focus', function() {
-      if(!that._placeholder) return;
+      if(editor.classList.contains('pen-placeholder') || that.isEmpty()) editor.innerHTML = '<div><br></div>';
       editor.classList.remove('pen-placeholder');
-      if(that._placeholder === editor.innerHTML) editor.innerHTML = '';
     });
 
     addListener.call(this, editor, 'blur', function() {
@@ -224,9 +223,19 @@
     // listen for paste and clear style
     addListener.call(this, editor, 'paste', function() {
       setTimeout(function() {
-        that.clearStyle();
+        that.clearAttr('id');
+        that.clearAttr('name');
+        that.clearAttr('class');
+        that.clearAttr('style');
       });
     });
+
+    // addListener.call(this, editor, 'keydown', function(e) {
+    //   if (e.keyCode === 13) {
+    //     document.execCommand('insertHTML', false, '<p><br></p>');
+    //     return false;
+    //   }
+    // });
   }
 
   function addListener(target, type, listener) {
@@ -323,13 +332,18 @@
     var editor = this.config.editor;
     if(placeholder) this._placeholder = placeholder + '';
 
-    if(this._placeholder && (!editor.innerHTML.trim() || editor.classList.contains('pen-placeholder'))) {
+    if(this._placeholder && (editor.classList.contains('pen-placeholder') || this.isEmpty())) {
       editor.innerHTML = this._placeholder;
       editor.classList.add('pen-placeholder');
       return true;
     }
     editor.classList.remove('pen-placeholder');
     return false;
+  };
+
+  Pen.prototype.isEmpty = function() {
+    var editor = this.config.editor;
+    return !(editor.innerText.trim() || editor.querySelectorAll('img').length);
   };
 
   Pen.prototype.getContent = function() {
@@ -379,15 +393,15 @@
     } else if(name.match(commandsReg.wrap)) {
       commandWrap.call(this, name);
     } else {
-      if(this.config.debug) utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''));
+      utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''), true);
     }
   };
 
   // remove style attr
-  Pen.prototype.clearStyle = function() {
-    var els = this.config.editor.querySelectorAll('[style]');
+  Pen.prototype.clearAttr = function(attr) {
+    var els = this.config.editor.querySelectorAll('[' + attr + ']');
     utils.forEach(els, function(item) {
-      item.removeAttribute('style');
+      item.removeAttribute(attr);
     }, null, true);
     return this;
   };
