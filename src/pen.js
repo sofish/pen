@@ -2,7 +2,6 @@
 (function(root, doc) {
 
   var Pen, FakePen, debugMode, utils = {};
-  var hasOwnProperty = Object.prototype.hasOwnProperty;
   var toString = Object.prototype.toString;
 
   // allow command list
@@ -27,13 +26,13 @@
     return toString.call(obj).slice(8, -1) === type;
   };
 
-  utils.forEach = function(obj, iterator, context, arrayLike) {
+  utils.forEach = function(obj, iterator, arrayLike) {
     if (arrayLike == null) arrayLike = utils.is(obj, 'Array');
     if(arrayLike) {
-      for (var i = 0, l = obj.length; i < l; i++) iterator.call(context, obj[i], i, obj);
+      for (var i = 0, l = obj.length; i < l; i++) iterator(obj[i], i, obj);
     } else {
       for (var key in obj) {
-        if (hasOwnProperty.call(obj, key)) iterator.call(context, obj[key], key, obj);
+        if (obj.hasOwnProperty(key)) iterator(obj[key], key, obj);
       }
     }
   };
@@ -65,7 +64,9 @@
       list: [
         'blockquote', 'h2', 'h3', 'p', 'code', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
         'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
-      ]
+      ],
+      cleanAttrs: ['id', 'class', 'style', 'name'],
+      cleanTags: ['script']
     };
 
     // user-friendly config
@@ -80,7 +81,7 @@
     return defaults;
   };
 
-  function commandOverall(cmd, val) {
+  function commandOverall(ctx, cmd, val) {
     var message = ' to exec 「' + cmd + '」 command' + (val ? (' with value: ' + val) : '');
     if(document.execCommand(cmd, false, val)) {
       utils.log('success' + message);
@@ -89,8 +90,8 @@
     }
   }
 
-  function commandInsert(name) {
-    var range = this._sel.getRangeAt(0)
+  function commandInsert(ctx, name) {
+    var range = ctx._sel.getRangeAt(0)
       , node = range.startContainer;
 
     while(node.nodeType !== 1) {
@@ -99,88 +100,88 @@
 
     range.selectNode(node);
     range.collapse(false);
-    return commandOverall.call(this, name);
+    return commandOverall(ctx, name);
   }
 
-  function commandBlock(name) {
-    if(effectNode.call(this, this._sel.getRangeAt(0).startContainer, true).indexOf(name) !== -1) {
+  function commandBlock(ctx, name) {
+    if(effectNode(ctx, ctx._sel.getRangeAt(0).startContainer, true).indexOf(name) !== -1) {
       if(name === 'blockquote') return document.execCommand('outdent', false, null);
       name = 'p';
     }
-    return commandOverall.call(this, 'formatblock', name);
+    return commandOverall(ctx, 'formatblock', name);
   }
 
-  function commandWrap(tag) {
-    var val = '<' + tag + '>' + this._sel + '</' + tag + '>';
-    return commandOverall.call(this, 'insertHTML', val);
+  function commandWrap(ctx, tag) {
+    var val = '<' + tag + '>' + ctx._sel + '</' + tag + '>';
+    return commandOverall(ctx, 'insertHTML', val);
   }
 
   // placeholder
-  function initPlaceholder() {
-    var that = this, editor = that.config.editor;
+  function initPlaceholder(ctx) {
+    var editor = ctx.config.editor;
 
-    that._placeholder = editor.getAttribute('data-placeholder');
-    that.placeholder();
+    ctx._placeholder = editor.getAttribute('data-placeholder');
+    ctx.placeholder();
   }
 
-  function initToolbar() {
+  function initToolbar(ctx) {
     var icons = '';
 
-    utils.forEach(this.config.list, function (name) {
+    utils.forEach(ctx.config.list, function (name) {
       var klass = 'pen-icon icon-' + name;
       icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]|p$/i) ? name.toUpperCase() : '') + '</i>';
       if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
-    }, null, true);
+    }, true);
 
-    this._menu = doc.createElement('div');
-    this._menu.setAttribute('class', this.config.class + '-menu pen-menu');
-    this._menu.innerHTML = icons;
-    this._menu.style.display = 'none';
+    ctx._menu = doc.createElement('div');
+    ctx._menu.setAttribute('class', ctx.config.class + '-menu pen-menu');
+    ctx._menu.innerHTML = icons;
+    ctx._menu.style.display = 'none';
 
-    doc.body.appendChild(this._menu);
+    doc.body.appendChild(ctx._menu);
   }
 
-  function initEvents() {
-    var timer, that = this, menu = that._menu, editor = that.config.editor, sel = that._sel;
+  function initEvents(ctx) {
+    var timer, menu = ctx._menu, editor = ctx.config.editor, sel = ctx._sel;
 
     var setpos = function() {
-      if(menu.style.display === 'block') that.menu();
+      if(menu.style.display === 'block') ctx.menu();
     };
 
     // change menu offset when window resize / scroll
-    addListener.call(this, window, 'resize', setpos);
-    addListener.call(this, window, 'scroll', setpos);
+    addListener(ctx, window, 'resize', setpos);
+    addListener(ctx, window, 'scroll', setpos);
 
     var toggle = function() {
-      that._range = sel.getRangeAt(0);
+      ctx._range = sel.getRangeAt(0);
 
       clearTimeout(timer);
       timer = setTimeout(function() {
         if(!sel.isCollapsed) {
           //show menu
-          that.menu().highlight();
+          ctx.menu().highlight();
         } else {
           //hide menu
-          that._menu.style.display = 'none';
+          ctx._menu.style.display = 'none';
         }
-      }, 200);
+      }, 100);
     };
 
     // toggle toolbar on mouse select
-    addListener.call(this, editor, 'mouseup', toggle);
+    addListener(ctx, editor, 'mouseup', toggle);
 
     // toggle toolbar on key select
-    addListener.call(this, editor, 'keyup', toggle);
+    addListener(ctx, editor, 'keyup', toggle);
 
     var menuApply = function(action, value) {
-      that.setRange();
-      that.execCommand(action, value);
-      that._range = that.getRange();
-      that.highlight().menu();
+      ctx.setRange();
+      ctx.execCommand(action, value);
+      ctx._range = ctx.getRange();
+      if(!sel.isCollapsed) ctx.highlight().menu();
     };
 
     // toggle toolbar on key select
-    addListener.call(this, menu, 'click', function(e) {
+    addListener(ctx, menu, 'click', function(e) {
       var action = e.target.getAttribute('data-action');
 
       if(!action) return;
@@ -211,68 +212,55 @@
     });
 
     // listen for placeholder
-    addListener.call(this, editor, 'focus', function() {
-      if(editor.classList.contains('pen-placeholder') || that.isEmpty()) editor.innerHTML = '<div><br></div>';
+    addListener(ctx, editor, 'focus', function() {
+      if(editor.classList.contains('pen-placeholder') || ctx.isEmpty()) editor.innerHTML = '<div><br></div>';
       editor.classList.remove('pen-placeholder');
     });
 
-    addListener.call(this, editor, 'blur', function() {
-      that.placeholder();
+    addListener(ctx, editor, 'blur', function() {
+      ctx.placeholder();
     });
 
     // listen for paste and clear style
-    addListener.call(this, editor, 'paste', function() {
+    addListener(ctx, editor, 'paste', function() {
       setTimeout(function() {
-        that.clearAttr('id');
-        that.clearAttr('name');
-        that.clearAttr('class');
-        that.clearAttr('style');
+        ctx.cleanContent();
       });
     });
-
-    // addListener.call(this, editor, 'keydown', function(e) {
-    //   if (e.keyCode === 13) {
-    //     document.execCommand('insertHTML', false, '<p><br></p>');
-    //     return false;
-    //   }
-    // });
   }
 
-  function addListener(target, type, listener) {
-    this._eventTargets = this._eventTargets || [];
-    this._eventsCache = this._eventsCache || [];
-    var index = this._eventTargets.indexOf(target);
-    if(index < 0) {
-      index = this._eventTargets.push(target) - 1;
-    }
-    this._eventsCache[index] = this._eventsCache[index] || {};
-    this._eventsCache[index][type] = this._eventsCache[index][type] || [];
-    this._eventsCache[index][type].push(listener);
+  function addListener(ctx, target, type, listener) {
+    ctx._eventTargets = ctx._eventTargets || [];
+    ctx._eventsCache = ctx._eventsCache || [];
+    var index = ctx._eventTargets.indexOf(target);
+    if(index < 0) index = ctx._eventTargets.push(target) - 1;
+    ctx._eventsCache[index] = ctx._eventsCache[index] || {};
+    ctx._eventsCache[index][type] = ctx._eventsCache[index][type] || [];
+    ctx._eventsCache[index][type].push(listener);
 
     target.addEventListener(type, listener, false);
-    return this;
+    return ctx;
   }
 
-  function removeAllListeners() {
-    var that = this;
-    if (!that._eventsCache) return that;
-    utils.forEach(that._eventsCache, function (events, index) {
-      var target = that._eventTargets[index];
+  function removeAllListeners(ctx) {
+    if (!ctx._eventsCache) return ctx;
+    utils.forEach(ctx._eventsCache, function (events, index) {
+      var target = ctx._eventTargets[index];
       utils.forEach(events, function (listeners, type) {
         utils.forEach(listeners, function (listener) {
           target.removeEventListener(type, listener, false);
-        }, null, true);
-      }, null, false);
-    }, null, true);
-    that._eventTargets = [];
-    that._eventsCache = [];
-    return that;
+        }, true);
+      }, false);
+    }, true);
+    ctx._eventTargets = [];
+    ctx._eventsCache = [];
+    return ctx;
   }
 
   // node effects
-  function effectNode(el, returnAsNodeName) {
+  function effectNode(ctx, el, returnAsNodeName) {
     var nodes = [];
-    while(el !== this.config.editor) {
+    while(el !== ctx.config.editor) {
       if(el.nodeName.match(effectNodeReg)) {
         nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
       }
@@ -307,13 +295,13 @@
     this._sel = doc.getSelection();
 
     // enable toolbar
-    initToolbar.call(this);
+    initToolbar(this);
 
     // init placeholder
-    initPlaceholder.call(this);
+    initPlaceholder(this);
 
     // init events
-    initEvents.call(this);
+    initEvents(this);
 
     // enable markdown covert
     if (this.markdown) this.markdown.init(this);
@@ -324,7 +312,7 @@
   };
 
   Pen.prototype.on = function(type, listener) {
-    addListener.call(this, this.config.editor, type, listener);
+    addListener(this, this.config.editor, type, listener);
     return this;
   };
 
@@ -354,6 +342,7 @@
 
   Pen.prototype.setContent = function(html) {
     this.config.editor.innerHTML = html;
+    this.cleanContent();
     this.placeholder();
     return this;
   };
@@ -385,31 +374,38 @@
 
   Pen.prototype.execCommand = function(name, value) {
     if(name.match(commandsReg.block)) {
-      commandBlock.call(this, name);
+      commandBlock(this, name);
     } else if(name.match(commandsReg.inline) || name.match(commandsReg.source)) {
-      commandOverall.call(this, name, value);
+      commandOverall(this, name, value);
     } else if(name.match(commandsReg.insert)) {
-      commandInsert.call(this, name);
+      commandInsert(this, name);
     } else if(name.match(commandsReg.wrap)) {
-      commandWrap.call(this, name);
+      commandWrap(this, name);
     } else {
       utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''), true);
     }
   };
 
-  // remove style attr
-  Pen.prototype.clearAttr = function(attr) {
-    var els = this.config.editor.querySelectorAll('[' + attr + ']');
-    utils.forEach(els, function(item) {
-      item.removeAttribute(attr);
-    }, null, true);
+  // remove attr
+  Pen.prototype.cleanContent = function() {
+    var config = this.config;
+    utils.forEach(config.cleanAttrs, function (attr) {
+      utils.forEach(config.editor.querySelectorAll('[' + attr + ']'), function(item) {
+        item.removeAttribute(attr);
+      }, true);
+    }, true);
+    utils.forEach(config.cleanTags, function (tag) {
+      utils.forEach(config.editor.querySelectorAll(tag), function(item) {
+        item.parentNode.removeChild(item);
+      }, true);
+    }, true);
     return this;
   };
 
   // highlight menu
   Pen.prototype.highlight = function() {
     var node = this._sel.focusNode
-      , effects = effectNode.call(this, node)
+      , effects = effectNode(this, node)
       , menu = this._menu
       , linkInput = menu.querySelector('input')
       , highlight;
@@ -417,7 +413,7 @@
     // remove all highlights
     utils.forEach(menu.querySelectorAll('.active'), function(el) {
       el.classList.remove('active');
-    }, null, true);
+    }, true);
 
     if (linkInput) {
       // display link input if createlink enabled
@@ -465,7 +461,7 @@
           break;
       }
       highlight(tag);
-    }, null, true);
+    }, true);
 
     return this;
   };
@@ -478,7 +474,7 @@
       , top = offset.top - menuPadding
       , left = offset.left + (offset.width / 2)
       , menu = this._menu
-      , menuOffset = { x: 0, y: 0 }
+      , menuOffset = {x: 0, y: 0}
       , stylesheet = this._stylesheet;
 
     // store the stylesheet used for positioning the menu horizontally
@@ -490,7 +486,7 @@
     // display block to caculate its width & height
     menu.style.display = 'block';
 
-    menuOffset.x = left - (menu.clientWidth/2);
+    menuOffset.x = left - (menu.clientWidth / 2);
     menuOffset.y = top - menu.clientHeight;
 
     // check to see if menu has over-extended its bounding box. if it has,
@@ -501,9 +497,9 @@
     }
     if(menuOffset.x < 0) {
       menuOffset.x = 0;
-      stylesheet.insertRule('.pen-menu:after { left: ' + left + 'px; }',0);
+      stylesheet.insertRule('.pen-menu:after {left: ' + left + 'px;}', 0);
     } else {
-      stylesheet.insertRule('.pen-menu:after { left: 50%; }',0);
+      stylesheet.insertRule('.pen-menu:after {left: 50%; }', 0);
     }
     if(menuOffset.y < 0) {
       menu.classList.toggle('pen-menu-below', true);
@@ -518,10 +514,10 @@
   };
 
   Pen.prototype.stay = function(config) {
-    var that = this;
+    var ctx = this;
     if (!window.onbeforeunload) {
       window.onbeforeunload = function() {
-        if(!that._isDestroyed) return config.stayMsg;
+        if(!ctx._isDestroyed) return config.stayMsg;
       };
     }
   };
@@ -531,13 +527,13 @@
       , attr = isAJoke ? 'setAttribute' : 'removeAttribute';
 
     if(!isAJoke) {
-      removeAllListeners.call(this);
+      removeAllListeners(this);
       this._sel.removeAllRanges();
       this._menu.parentNode.removeChild(this._menu);
     } else {
-      initToolbar.call(this);
-      initPlaceholder.call(this);
-      initEvents.call(this);
+      initToolbar(this);
+      initPlaceholder(this);
+      initEvents(this);
     }
     this._isDestroyed = destroy;
     this.config.editor[attr]('contenteditable', '');
