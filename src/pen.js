@@ -3,6 +3,7 @@
 
   var Pen, FakePen, debugMode, utils = {};
   var toString = Object.prototype.toString;
+  var slice = Array.prototype.slice;
 
   // allow command list
   var commandsReg = {
@@ -49,6 +50,16 @@
   // log
   utils.log = function(message, force) {
     if(debugMode || force) console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
+  };
+
+  utils.delayExec = function (fn) {
+    var timer = null;
+    return function (delay) {
+      clearTimeout(timer);
+      timer = setTimeout(function() {
+        fn();
+      }, delay || 1);
+    };
   };
 
   // merge: make it easy to have a fallback
@@ -129,7 +140,7 @@
 
     utils.forEach(ctx.config.list, function (name) {
       var klass = 'pen-icon icon-' + name;
-      icons += '<i class="' + klass + '" data-action="' + name + '">' + (name.match(/^h[1-6]|p$/i) ? name.toUpperCase() : '') + '</i>';
+      icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
       if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
     }, true);
 
@@ -142,7 +153,7 @@
   }
 
   function initEvents(ctx) {
-    var timer, menu = ctx._menu, editor = ctx.config.editor, sel = ctx._sel;
+    var menu = ctx._menu, editor = ctx.config.editor, sel = ctx._sel;
 
     var setpos = function() {
       if(menu.style.display === 'block') ctx.menu();
@@ -152,29 +163,43 @@
     addListener(ctx, window, 'resize', setpos);
     addListener(ctx, window, 'scroll', setpos);
 
-    var toggle = function() {
-      ctx._range = sel.getRangeAt(0);
+    var toggleMenu = utils.delayExec(function() {
+      if(!sel.isCollapsed) {
+        //show menu
+        ctx.menu().highlight();
+      } else {
+        //hide menu
+        ctx._menu.style.display = 'none';
+      }
+    });
 
-      clearTimeout(timer);
-      timer = setTimeout(function() {
-        if(!sel.isCollapsed) {
-          //show menu
-          ctx.menu().highlight();
-        } else {
-          //hide menu
-          ctx._menu.style.display = 'none';
-        }
-      }, 100);
+    var toggle = function(delay) {
+      ctx._range = ctx.getRange();
+      toggleMenu(delay);
     };
 
     // toggle toolbar on mouse select
-    addListener(ctx, editor, 'mouseup', toggle);
+    var selecting = false;
+    addListener(ctx, editor, 'mousedown', function () {
+      selecting = true;
+    });
+    addListener(ctx, editor, 'mouseleave', function () {
+      if (selecting) toggle(400);
+      selecting = false;
+    });
+    addListener(ctx, editor, 'mouseup', function () {
+      if (selecting) toggle(0);
+      selecting = false;
+    });
 
     // toggle toolbar on key select
-    addListener(ctx, editor, 'keyup', toggle);
+    addListener(ctx, editor, 'keyup', function () {
+      toggle(400);
+      // check for content change
+      ctx.checkContentChange(400);
+    });
 
     var menuApply = function(action, value) {
-      ctx.setRange();
       ctx.execCommand(action, value);
       ctx._range = ctx.getRange();
       if(!sel.isCollapsed) ctx.highlight().menu();
@@ -230,19 +255,35 @@
   }
 
   function addListener(ctx, target, type, listener) {
-    ctx._eventTargets = ctx._eventTargets || [];
-    ctx._eventsCache = ctx._eventsCache || [];
-    var index = ctx._eventTargets.indexOf(target);
-    if(index < 0) index = ctx._eventTargets.push(target) - 1;
-    ctx._eventsCache[index] = ctx._eventsCache[index] || {};
-    ctx._eventsCache[index][type] = ctx._eventsCache[index][type] || [];
-    ctx._eventsCache[index][type].push(listener);
+    if (ctx._events.hasOwnProperty(type)) {
+      ctx._events[type].push(listener);
+    } else {
+      ctx._eventTargets = ctx._eventTargets || [];
+      ctx._eventsCache = ctx._eventsCache || [];
+      var index = ctx._eventTargets.indexOf(target);
+      if(index < 0) index = ctx._eventTargets.push(target) - 1;
+      ctx._eventsCache[index] = ctx._eventsCache[index] || {};
+      ctx._eventsCache[index][type] = ctx._eventsCache[index][type] || [];
+      ctx._eventsCache[index][type].push(listener);
 
-    target.addEventListener(type, listener, false);
+      target.addEventListener(type, listener, false);
+    }
     return ctx;
   }
 
+  // trigger local events
+  function triggerListener(ctx, type) {
+    if (!ctx._events.hasOwnProperty(type)) return;
+    var args = slice.call(arguments, 2);
+    utils.forEach(ctx._events[type], function (listener) {
+      listener.apply(ctx, args);
+    });
+  }
+
   function removeAllListeners(ctx) {
+    utils.forEach(this._events, function (events) {
+      events.length = 0;
+    }, false);
     if (!ctx._eventsCache) return ctx;
     utils.forEach(ctx._eventsCache, function (events, index) {
       var target = ctx._eventTargets[index];
@@ -294,6 +335,9 @@
     // save the selection obj
     this._sel = doc.getSelection();
 
+    // define local events
+    this._events = {change: []};
+
     // enable toolbar
     initToolbar(this);
 
@@ -308,6 +352,16 @@
 
     // stay on the page
     if (this.config.stay) this.stay(this.config);
+
+    // to check content change
+    var ctx = this;
+    this._prevContent = this.getContent();
+    this.checkContentChange = utils.delayExec(function () {
+      var prevContent = ctx._prevContent, currentContent = ctx.getContent();
+      if (prevContent === currentContent) return;
+      ctx._prevContent = currentContent;
+      triggerListener(ctx, 'change', currentContent, prevContent);
+    });
 
   };
 
@@ -336,14 +390,13 @@
 
   Pen.prototype.getContent = function() {
     var editor = this.config.editor;
-    if(editor.classList.contains('pen-placeholder')) return '';
+    if(editor.classList.contains('pen-placeholder') || this.isEmpty()) return '';
     return editor.innerHTML;
   };
 
   Pen.prototype.setContent = function(html) {
     this.config.editor.innerHTML = html;
     this.cleanContent();
-    this.placeholder();
     return this;
   };
 
@@ -373,6 +426,8 @@
   };
 
   Pen.prototype.execCommand = function(name, value) {
+    name = name.toLowerCase();
+    this.setRange();
     if(name.match(commandsReg.block)) {
       commandBlock(this, name);
     } else if(name.match(commandsReg.inline) || name.match(commandsReg.source)) {
@@ -384,6 +439,7 @@
     } else {
       utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''), true);
     }
+    this.checkContentChange(0);
   };
 
   // remove attr
@@ -399,6 +455,9 @@
         item.parentNode.removeChild(item);
       }, true);
     }, true);
+
+    this.placeholder();
+    this.checkContentChange(0);
     return this;
   };
 

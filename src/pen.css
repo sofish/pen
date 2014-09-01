@@ -109,6 +109,13 @@
 .pen-menu .icon-inserthorizontalrule:before { content: '\e818'; } /* '' */
 .pen-menu .icon-pin:before { content: '\e812'; } /* '' */
 .pen-menu .icon-createlink:before { content: '\e810'; } /* '' */
+.pen-menu .icon-h1:before { content: 'H1'; }
+.pen-menu .icon-h2:before { content: 'H2'; }
+.pen-menu .icon-h3:before { content: 'H3'; }
+.pen-menu .icon-h4:before { content: 'H4'; }
+.pen-menu .icon-h5:before { content: 'H5'; }
+.pen-menu .icon-h6:before { content: 'H6'; }
+.pen-menu .icon-p:before { content: 'P'; }
 
 .pen {
   position: relative;
