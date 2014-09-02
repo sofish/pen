@@ -195,8 +195,6 @@
     // toggle toolbar on key select
     addListener(ctx, editor, 'keyup', function () {
       toggle(400);
-      // check for content change
-      ctx.checkContentChange(400);
     });
 
     var menuApply = function(action, value) {
@@ -244,6 +242,7 @@
 
     addListener(ctx, editor, 'blur', function() {
       ctx.placeholder();
+      ctx.checkContentChange();
     });
 
     // listen for paste and clear style
@@ -347,21 +346,14 @@
     // init events
     initEvents(this);
 
+    // to check content change
+    this._prevContent = this.getContent();
+
     // enable markdown covert
     if (this.markdown) this.markdown.init(this);
 
     // stay on the page
     if (this.config.stay) this.stay(this.config);
-
-    // to check content change
-    var ctx = this;
-    this._prevContent = this.getContent();
-    this.checkContentChange = utils.delayExec(function () {
-      var prevContent = ctx._prevContent, currentContent = ctx.getContent();
-      if (prevContent === currentContent) return;
-      ctx._prevContent = currentContent;
-      triggerListener(ctx, 'change', currentContent, prevContent);
-    });
 
   };
 
@@ -398,6 +390,13 @@
     this.config.editor.innerHTML = html;
     this.cleanContent();
     return this;
+  };
+
+  Pen.prototype.checkContentChange = function () {
+    var prevContent = this._prevContent, currentContent = this.getContent();
+    if (prevContent === currentContent) return;
+    this._prevContent = currentContent;
+    triggerListener(this, 'change', currentContent, prevContent);
   };
 
   Pen.prototype.getRange = function() {
@@ -439,7 +438,7 @@
     } else {
       utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''), true);
     }
-    this.checkContentChange(0);
+    this.checkContentChange();
   };
 
   // remove attr
@@ -457,7 +456,7 @@
     }, true);
 
     this.placeholder();
-    this.checkContentChange(0);
+    this.checkContentChange();
     return this;
   };
 
