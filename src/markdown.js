@@ -1,8 +1,8 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-(function() {
+(function(root) {
 
   // only works with Pen
-  if(!this.Pen) return;
+  if(!root.Pen) return;
 
   // markdown covertor obj
   var covertor = {
@@ -67,6 +67,6 @@
   };
 
   // append to Pen
-  window.Pen.prototype.markdown = covertor;
+  root.Pen.prototype.markdown = covertor;
 
-}());
+}(window));
