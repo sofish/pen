@@ -7,29 +7,10 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     jshint: {
-      files: ['Gruntfile.js', 'src/**/*.js'],
       options: {
-        globals: { 'console': false },
-        bitwise: true,
-        camelcase: false,
-        curly: false,
-        eqeqeq: true,
-        forin: true,
-        immed: true,
-        indent: 2,
-        latedef: true,
-        laxcomma: true,
-        newcap: true,
-        noarg: true,
-        nonew: true,
-        noempty: true,
-        undef: true,
-        unused: true,
-        strict: false,
-        trailing: true,
-        maxlen: 200,
-        browser: true
-      }
+        jshintrc: true
+      },
+      files: ['Gruntfile.js', 'src/**/*.js'],
     },
 
     uglify: {

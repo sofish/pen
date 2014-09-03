@@ -19,7 +19,7 @@
   #hinted:before{content: '\e816';}
 
   #fork{position:fixed;right:0;top:0;}
-  
+
   /*
   When the webpage is printed
   this media query hides extra elements,
@@ -48,7 +48,7 @@
   <span id="hinted" class="icon-pre disabled" title="Toggle Markdown Hints"></span>
 </div>
 
-<div data-toggle="pen" placeholder="im a placeholder">
+<div data-toggle="pen" data-placeholder="im a placeholder">
   <h2>Enjoy live editing (+markdown)</h2>
 
   <p><b><i>Click to edit, Select to apply effect, click items of toolbar to toggle effects.</i></b></p>
@@ -85,7 +85,7 @@
   };
 
   // create editor
-  var pen = new Pen(options);
+  var pen = window.pen = new Pen(options);
 
 
   // toggle editor mode
