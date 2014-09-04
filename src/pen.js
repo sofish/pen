@@ -14,6 +14,8 @@
     wrap: /^(?:code)$/
   };
 
+  var lineBreakReg = /^(?:blockquote|pre|div)$/i;
+
   var effectNodeReg = /(?:[pubia]|h[1-6]|blockquote|[uo]l|li)/i;
 
   var strReg = {
@@ -28,6 +30,7 @@
   };
 
   utils.forEach = function(obj, iterator, arrayLike) {
+    if (!obj) return;
     if (arrayLike == null) arrayLike = utils.is(obj, 'Array');
     if(arrayLike) {
       for (var i = 0, l = obj.length; i < l; i++) iterator(obj[i], i, obj);
@@ -94,7 +97,7 @@
 
   function commandOverall(ctx, cmd, val) {
     var message = ' to exec 「' + cmd + '」 command' + (val ? (' with value: ' + val) : '');
-    if(document.execCommand(cmd, false, val)) {
+    if(doc.execCommand(cmd, false, val)) {
       utils.log('success' + message);
     } else {
       utils.log('fail' + message, true);
@@ -102,23 +105,16 @@
   }
 
   function commandInsert(ctx, name) {
-    var range = ctx._sel.getRangeAt(0)
-      , node = range.startContainer;
-
-    while(node.nodeType !== 1) {
-      node = node.parentNode;
-    }
-
-    range.selectNode(node);
-    range.collapse(false);
+    var node = currentNode(ctx);
+    if (!node) return;
+    ctx._range.selectNode(node);
+    ctx._range.collapse(false);
     return commandOverall(ctx, name);
   }
 
   function commandBlock(ctx, name) {
-    if(effectNode(ctx, ctx._sel.getRangeAt(0).startContainer, true).indexOf(name) !== -1) {
-      if(name === 'blockquote') return document.execCommand('outdent', false, null);
-      name = 'p';
-    }
+    var list = effectNode(ctx, currentNode(ctx), true);
+    if(list.indexOf(name) !== -1) name = 'p';
     return commandOverall(ctx, 'formatblock', name);
   }
 
@@ -193,8 +189,36 @@
     });
 
     // toggle toolbar on key select
-    addListener(ctx, editor, 'keyup', function () {
-      toggle(400);
+    addListener(ctx, editor, 'keyup', function (e) {
+      if (e.which === 8 && ctx.isEmpty()) {
+        editor.innerHTML = '<p><br></p>';
+        ctx._menu.style.display = 'none';
+        ctx.setRange();
+      } else toggle(400);
+    });
+
+    // breakout from node
+    var lineBreak = function (ctx, node) {
+      var range = ctx._range;
+      range.setStartAfter(node);
+      range.setEndAfter(node);
+      node = doc.createElement('p');
+      node.innerHTML = '<br>';
+      range.insertNode(node);
+      range.setStartAfter(node);
+      range.setEndAfter(node);
+      ctx.setRange(range);
+      commandOverall(ctx, 'formatblock', 'p');
+    };
+
+    // check line break
+    addListener(ctx, editor, 'keydown', function (e) {
+      if (e.which !== 13 || e.shiftKey) return;
+      var node = currentNode(ctx, true);
+      if (lineBreakReg.test(node.nodeName)) {
+        e.preventDefault();
+        lineBreak(ctx, node);
+      }
     });
 
     var menuApply = function(action, value) {
@@ -236,7 +260,7 @@
 
     // listen for placeholder
     addListener(ctx, editor, 'focus', function() {
-      if(editor.classList.contains('pen-placeholder') || ctx.isEmpty()) editor.innerHTML = '<div><br></div>';
+      if(editor.classList.contains('pen-placeholder') || ctx.isEmpty()) editor.innerHTML = '<p><br></p>';
       editor.classList.remove('pen-placeholder');
     });
 
@@ -297,9 +321,20 @@
     return ctx;
   }
 
+  function currentNode(ctx, byRoot) {
+    var node, root = ctx.config.editor;
+    ctx._range = ctx._range || ctx.getRange();
+    node = ctx._range.startContainer;
+    if (node === root) return node;
+    while(node && (node.nodeType !== 1) && (node.parentNode !== root)) node = node.parentNode;
+    while(node && byRoot && (node.parentNode !== root)) node = node.parentNode;
+    return node;
+  }
+
   // node effects
   function effectNode(ctx, el, returnAsNodeName) {
     var nodes = [];
+    el = el || ctx.config.editor;
     while(el !== ctx.config.editor) {
       if(el.nodeName.match(effectNodeReg)) {
         nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
@@ -375,9 +410,9 @@
     return false;
   };
 
-  Pen.prototype.isEmpty = function() {
-    var editor = this.config.editor;
-    return !(editor.innerText.trim() || editor.querySelectorAll('img').length);
+  Pen.prototype.isEmpty = function(node) {
+    node = node || this.config.editor;
+    return !(!node.innerText || node.innerText.trim() || node.querySelectorAll('img').length);
   };
 
   Pen.prototype.getContent = function() {
@@ -427,30 +462,34 @@
   Pen.prototype.execCommand = function(name, value) {
     name = name.toLowerCase();
     this.setRange();
-    if(name.match(commandsReg.block)) {
+    if(commandsReg.block.test(name)) {
       commandBlock(this, name);
-    } else if(name.match(commandsReg.inline) || name.match(commandsReg.source)) {
+    } else if(commandsReg.inline.test(name) || commandsReg.source.test(name)) {
       commandOverall(this, name, value);
-    } else if(name.match(commandsReg.insert)) {
+    } else if(commandsReg.insert.test(name)) {
       commandInsert(this, name);
-    } else if(name.match(commandsReg.wrap)) {
+    } else if(commandsReg.wrap.test(name)) {
       commandWrap(this, name);
     } else {
       utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''), true);
     }
-    this.checkContentChange();
+    if (name === 'indent') this.checkContentChange();
+    else this.cleanContent({cleanAttrs: ['style']});
   };
 
-  // remove attr
-  Pen.prototype.cleanContent = function() {
-    var config = this.config;
-    utils.forEach(config.cleanAttrs, function (attr) {
-      utils.forEach(config.editor.querySelectorAll('[' + attr + ']'), function(item) {
+  // remove attrs and tags
+  // pen.cleanContent({cleanAttrs: ['style'], cleanTags: ['id']})
+  Pen.prototype.cleanContent = function(options) {
+    var editor = this.config.editor;
+
+    if (!options) options = this.config;
+    utils.forEach(options.cleanAttrs, function (attr) {
+      utils.forEach(editor.querySelectorAll('[' + attr + ']'), function(item) {
         item.removeAttribute(attr);
       }, true);
     }, true);
-    utils.forEach(config.cleanTags, function (tag) {
-      utils.forEach(config.editor.querySelectorAll(tag), function(item) {
+    utils.forEach(options.cleanTags, function (tag) {
+      utils.forEach(editor.querySelectorAll(tag), function(item) {
         item.parentNode.removeChild(item);
       }, true);
     }, true);
