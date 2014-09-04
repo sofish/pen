@@ -1,7 +1,7 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
 (function(root, doc) {
 
-  var Pen, FakePen, debugMode, utils = {};
+  var Pen, debugMode, selection, utils = {};
   var toString = Object.prototype.toString;
   var slice = Array.prototype.slice;
 
@@ -105,7 +105,7 @@
   }
 
   function commandInsert(ctx, name) {
-    var node = currentNode(ctx);
+    var node = getNode(ctx);
     if (!node) return;
     ctx._range.selectNode(node);
     ctx._range.collapse(false);
@@ -113,13 +113,13 @@
   }
 
   function commandBlock(ctx, name) {
-    var list = effectNode(ctx, currentNode(ctx), true);
+    var list = effectNode(ctx, getNode(ctx), true);
     if(list.indexOf(name) !== -1) name = 'p';
     return commandOverall(ctx, 'formatblock', name);
   }
 
   function commandWrap(ctx, tag) {
-    var val = '<' + tag + '>' + ctx._sel + '</' + tag + '>';
+    var val = '<' + tag + '>' + selection + '</' + tag + '>';
     return commandOverall(ctx, 'insertHTML', val);
   }
 
@@ -149,7 +149,7 @@
   }
 
   function initEvents(ctx) {
-    var menu = ctx._menu, editor = ctx.config.editor, sel = ctx._sel;
+    var menu = ctx._menu, editor = ctx.config.editor;
 
     var setpos = function() {
       if(menu.style.display === 'block') ctx.menu();
@@ -160,7 +160,7 @@
     addListener(ctx, window, 'scroll', setpos);
 
     var toggleMenu = utils.delayExec(function() {
-      if(!sel.isCollapsed) {
+      if(!selection.isCollapsed) {
         //show menu
         ctx.menu().highlight();
       } else {
@@ -190,41 +190,31 @@
 
     // toggle toolbar on key select
     addListener(ctx, editor, 'keyup', function (e) {
-      if (e.which === 8 && ctx.isEmpty()) {
-        editor.innerHTML = '<p><br></p>';
-        ctx._menu.style.display = 'none';
-        ctx.setRange();
-      } else toggle(400);
+      if (e.which === 8 && ctx.isEmpty()) lineBreak(ctx, true);
+      else toggle(400);
     });
-
-    // breakout from node
-    var lineBreak = function (ctx, node) {
-      var range = ctx._range;
-      range.setStartAfter(node);
-      range.setEndAfter(node);
-      node = doc.createElement('p');
-      node.innerHTML = '<br>';
-      range.insertNode(node);
-      range.setStartAfter(node);
-      range.setEndAfter(node);
-      ctx.setRange(range);
-      commandOverall(ctx, 'formatblock', 'p');
-    };
 
     // check line break
     addListener(ctx, editor, 'keydown', function (e) {
       if (e.which !== 13 || e.shiftKey) return;
-      var node = currentNode(ctx, true);
-      if (lineBreakReg.test(node.nodeName)) {
+      var node = getNode(ctx, true);
+      if (node && lineBreakReg.test(node.nodeName)) {
         e.preventDefault();
-        lineBreak(ctx, node);
+        var p = doc.createElement('p');
+        p.innerHTML = '<br>';
+        if (!node.nextSibling) {
+          editor.appendChild(p);
+        } else {
+          editor.insertBefore(p, node.nextSibling);
+        }
+        focusNode(ctx, p, ctx.getRange());
       }
     });
 
     var menuApply = function(action, value) {
       ctx.execCommand(action, value);
       ctx._range = ctx.getRange();
-      if(!sel.isCollapsed) ctx.highlight().menu();
+      if(!selection.isCollapsed) ctx.highlight().menu();
     };
 
     // toggle toolbar on key select
@@ -260,7 +250,7 @@
 
     // listen for placeholder
     addListener(ctx, editor, 'focus', function() {
-      if(editor.classList.contains('pen-placeholder') || ctx.isEmpty()) editor.innerHTML = '<p><br></p>';
+      if(editor.classList.contains('pen-placeholder') || ctx.isEmpty()) lineBreak(ctx, true);
       editor.classList.remove('pen-placeholder');
     });
 
@@ -321,14 +311,14 @@
     return ctx;
   }
 
-  function currentNode(ctx, byRoot) {
+  function getNode(ctx, byRoot) {
     var node, root = ctx.config.editor;
-    ctx._range = ctx._range || ctx.getRange();
-    node = ctx._range.startContainer;
-    if (node === root) return node;
+    ctx._range = ctx.getRange();
+    node = ctx._range.commonAncestorContainer;
+    if (!node || node === root) return null;
     while(node && (node.nodeType !== 1) && (node.parentNode !== root)) node = node.parentNode;
     while(node && byRoot && (node.parentNode !== root)) node = node.parentNode;
-    return node;
+    return root.contains(node) ? node : null;
   }
 
   // node effects
@@ -342,6 +332,22 @@
       el = el.parentNode;
     }
     return nodes;
+  }
+
+  // breakout from node
+  function lineBreak(ctx, empty) {
+    var range = ctx._range = ctx.getRange(), node = doc.createElement('p');
+    if (empty) ctx.config.editor.innerHTML = '';
+    node.innerHTML = '<br>';
+    range.insertNode(node);
+    focusNode(ctx, node.childNodes[0], range);
+  }
+
+  function focusNode(ctx, node, range) {
+    range.setStartAfter(node);
+    range.setEndBefore(node);
+    range.collapse(false);
+    ctx.setRange(range);
   }
 
   Pen = function(config) {
@@ -365,9 +371,6 @@
 
     // assign config
     this.config = defaults;
-
-    // save the selection obj
-    this._sel = doc.getSelection();
 
     // define local events
     this._events = {change: []};
@@ -412,7 +415,8 @@
 
   Pen.prototype.isEmpty = function(node) {
     node = node || this.config.editor;
-    return !(!node.innerText || node.innerText.trim() || node.querySelectorAll('img').length);
+    var content = node.textContent && node.textContent.trim();
+    return !content && !node.querySelectorAll('img').length;
   };
 
   Pen.prototype.getContent = function() {
@@ -435,27 +439,29 @@
   };
 
   Pen.prototype.getRange = function() {
-    var sel = this._sel;
-    return (sel.rangeCount && sel.getRangeAt(0)) || null;
+    var editor = this.config.editor, range = selection.rangeCount && selection.getRangeAt(0);
+    if (!range) range = doc.createRange();
+    if (!editor.contains(range.commonAncestorContainer)) {
+      range.selectNodeContents(editor);
+      range.collapse(false);
+    }
+    return range;
   };
 
   Pen.prototype.setRange = function(range) {
-    var sel = this._sel;
     range = range || this._range;
     if (!range) {
       range = this.getRange();
-      if (range) range.collapse(false); // set to end
+      range.collapse(false); // set to end
     }
-    if (range) {
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
+    selection.removeAllRanges();
+    selection.addRange(range);
     return this;
   };
 
   Pen.prototype.focus = function(focusStart) {
-    this.config.editor.focus();
     if(!focusStart) this.setRange();
+    this.config.editor.focus();
     return this;
   };
 
@@ -501,7 +507,7 @@
 
   // highlight menu
   Pen.prototype.highlight = function() {
-    var node = this._sel.focusNode
+    var node = selection.focusNode
       , effects = effectNode(this, node)
       , menu = this._menu
       , linkInput = menu.querySelector('input')
@@ -625,7 +631,7 @@
 
     if(!isAJoke) {
       removeAllListeners(this);
-      this._sel.removeAllRanges();
+      selection.removeAllRanges();
       this._menu.parentNode.removeChild(this._menu);
     } else {
       initToolbar(this);
@@ -643,7 +649,7 @@
   };
 
   // a fallback for old browers
-  FakePen = function(config) {
+  root.Pen = function(config) {
     if(!config) return utils.log('can\'t find config', true);
 
     var defaults = utils.merge(config)
@@ -656,6 +662,9 @@
   };
 
   // make it accessible
-  root.Pen = doc.getSelection ? Pen : FakePen;
+  if (doc.getSelection) {
+    selection = doc.getSelection();
+    root.Pen = Pen;
+  }
 
 }(window, document));
