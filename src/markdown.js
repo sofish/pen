@@ -54,13 +54,12 @@
 
     var node = pen._sel.focusNode;
     node.textContent = node.textContent.slice(cmd[1]);
-    pen._actions(cmd[0]);
-    pen.nostyle();
+    pen.execCommand(cmd[0]);
   };
 
   // init covertor
   covertor.init = function(pen) {
-    pen.config.editor.addEventListener('keypress', function(e) {
+    pen.on('keypress', function(e) {
       var cmd = covertor.parse(e);
       if(cmd) return covertor.action(pen, cmd);
     });
