@@ -87,6 +87,10 @@
   // create editor
   var pen = window.pen = new Pen(options);
 
+  // setTimeout(function () {
+    pen.focus();
+  // }, 100);
+
 
   // toggle editor mode
   document.querySelector('#mode').addEventListener('click', function() {
