@@ -32,7 +32,7 @@
   utils.forEach = function(obj, iterator, arrayLike) {
     if (!obj) return;
     if (arrayLike == null) arrayLike = utils.is(obj, 'Array');
-    if(arrayLike) {
+    if (arrayLike) {
       for (var i = 0, l = obj.length; i < l; i++) iterator(obj[i], i, obj);
     } else {
       for (var key in obj) {
@@ -52,7 +52,8 @@
 
   // log
   utils.log = function(message, force) {
-    if(debugMode || force) console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
+    if (debugMode || force)
+      console.log('%cPEN DEBUGGER: %c' + message, 'font-family:arial,sans-serif;color:#1abf89;line-height:2em;', 'font-family:cursor,monospace;color:#333;');
   };
 
   utils.delayExec = function (fn) {
@@ -84,9 +85,9 @@
     };
 
     // user-friendly config
-    if(config.nodeType === 1) {
+    if (config.nodeType === 1) {
       defaults.editor = config;
-    } else if(config.match && config.match(/^#[\S]+$/)) {
+    } else if (config.match && config.match(/^#[\S]+$/)) {
       defaults.editor = doc.getElementById(config.slice(1));
     } else {
       defaults = utils.copy(defaults, config);
@@ -97,7 +98,7 @@
 
   function commandOverall(ctx, cmd, val) {
     var message = ' to exec 「' + cmd + '」 command' + (val ? (' with value: ' + val) : '');
-    if(doc.execCommand(cmd, false, val)) {
+    if (doc.execCommand(cmd, false, val)) {
       utils.log('success' + message);
     } else {
       utils.log('fail' + message, true);
@@ -114,7 +115,7 @@
 
   function commandBlock(ctx, name) {
     var list = effectNode(ctx, getNode(ctx), true);
-    if(list.indexOf(name) !== -1) name = 'p';
+    if (list.indexOf(name) !== -1) name = 'p';
     return commandOverall(ctx, 'formatblock', name);
   }
 
@@ -137,7 +138,7 @@
     utils.forEach(ctx.config.list, function (name) {
       var klass = 'pen-icon icon-' + name;
       icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
-      if((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
+      if ((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
     }, true);
 
     ctx._menu = doc.createElement('div');
@@ -152,7 +153,7 @@
     var menu = ctx._menu, editor = ctx.config.editor;
 
     var setpos = function() {
-      if(menu.style.display === 'block') ctx.menu();
+      if (menu.style.display === 'block') ctx.menu();
     };
 
     // change menu offset when window resize / scroll
@@ -160,7 +161,7 @@
     addListener(ctx, window, 'scroll', setpos);
 
     var toggleMenu = utils.delayExec(function() {
-      if(!selection.isCollapsed) {
+      if (!selection.isCollapsed) {
         //show menu
         ctx.menu().highlight();
       } else {
@@ -214,15 +215,15 @@
     var menuApply = function(action, value) {
       ctx.execCommand(action, value);
       ctx._range = ctx.getRange();
-      if(!selection.isCollapsed) ctx.highlight().menu();
+      if (!selection.isCollapsed) ctx.highlight().menu();
     };
 
     // toggle toolbar on key select
     addListener(ctx, menu, 'click', function(e) {
       var action = e.target.getAttribute('data-action');
 
-      if(!action) return;
-      if(action !== 'createlink') return menuApply(action);
+      if (!action) return;
+      if (action !== 'createlink') return menuApply(action);
       // create link
       var input = menu.getElementsByTagName('input')[0];
 
@@ -231,7 +232,7 @@
 
       var createlink = function(input) {
         input.style.display = 'none';
-        if(input.value) {
+        if (input.value) {
           var inputValue = input.value
             .replace(strReg.whiteSpace, '')
             .replace(strReg.mailTo, 'mailto:$1')
@@ -243,14 +244,14 @@
       };
 
       input.onkeypress = function(e) {
-        if(e.which === 13) return createlink(e.target);
+        if (e.which === 13) return createlink(e.target);
       };
 
     });
 
     // listen for placeholder
     addListener(ctx, editor, 'focus', function() {
-      if(editor.classList.contains('pen-placeholder') || ctx.isEmpty()) lineBreak(ctx, true);
+      if (ctx.isEmpty()) lineBreak(ctx, true);
       editor.classList.remove('pen-placeholder');
     });
 
@@ -274,7 +275,7 @@
       ctx._eventTargets = ctx._eventTargets || [];
       ctx._eventsCache = ctx._eventsCache || [];
       var index = ctx._eventTargets.indexOf(target);
-      if(index < 0) index = ctx._eventTargets.push(target) - 1;
+      if (index < 0) index = ctx._eventTargets.push(target) - 1;
       ctx._eventsCache[index] = ctx._eventsCache[index] || {};
       ctx._eventsCache[index][type] = ctx._eventsCache[index][type] || [];
       ctx._eventsCache[index][type].push(listener);
@@ -316,8 +317,8 @@
     ctx._range = ctx.getRange();
     node = ctx._range.commonAncestorContainer;
     if (!node || node === root) return null;
-    while(node && (node.nodeType !== 1) && (node.parentNode !== root)) node = node.parentNode;
-    while(node && byRoot && (node.parentNode !== root)) node = node.parentNode;
+    while (node && (node.nodeType !== 1) && (node.parentNode !== root)) node = node.parentNode;
+    while (node && byRoot && (node.parentNode !== root)) node = node.parentNode;
     return root.contains(node) ? node : null;
   }
 
@@ -325,8 +326,8 @@
   function effectNode(ctx, el, returnAsNodeName) {
     var nodes = [];
     el = el || ctx.config.editor;
-    while(el !== ctx.config.editor) {
-      if(el.nodeName.match(effectNodeReg)) {
+    while (el !== ctx.config.editor) {
+      if (el.nodeName.match(effectNodeReg)) {
         nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
       }
       el = el.parentNode;
@@ -352,7 +353,7 @@
 
   Pen = function(config) {
 
-    if(!config) throw new Error('Can\'t find config');
+    if (!config) throw new Error('Can\'t find config');
 
     debugMode = config.debug;
 
@@ -361,7 +362,7 @@
 
     var editor = defaults.editor;
 
-    if(!editor || editor.nodeType !== 1) throw new Error('Can\'t find editor');
+    if (!editor || editor.nodeType !== 1) throw new Error('Can\'t find editor');
 
     // set default class
     editor.classList.add(defaults.class);
@@ -402,9 +403,9 @@
 
   Pen.prototype.placeholder = function(placeholder) {
     var editor = this.config.editor;
-    if(placeholder) this._placeholder = placeholder + '';
+    if (placeholder) this._placeholder = placeholder + '';
 
-    if(this._placeholder && (editor.classList.contains('pen-placeholder') || this.isEmpty())) {
+    if (this._placeholder && this.isEmpty()) {
       editor.innerHTML = this._placeholder;
       editor.classList.add('pen-placeholder');
       return true;
@@ -415,14 +416,13 @@
 
   Pen.prototype.isEmpty = function(node) {
     node = node || this.config.editor;
+    if (node.classList.contains('pen-placeholder')) return true;
     var content = node.textContent && node.textContent.trim();
     return !content && !node.querySelectorAll('img').length;
   };
 
   Pen.prototype.getContent = function() {
-    var editor = this.config.editor;
-    if(editor.classList.contains('pen-placeholder') || this.isEmpty()) return '';
-    return editor.innerHTML;
+    return this.isEmpty() ? '' : this.config.editor.innerHTML;
   };
 
   Pen.prototype.setContent = function(html) {
@@ -460,21 +460,25 @@
   };
 
   Pen.prototype.focus = function(focusStart) {
-    if(!focusStart) this.setRange();
+    if (!focusStart) this.setRange();
     this.config.editor.focus();
     return this;
   };
 
   Pen.prototype.execCommand = function(name, value) {
+    if (this.isEmpty()) {
+      this.config.editor.innerHTML = '';
+      this.config.editor.classList.remove('pen-placeholder');
+    }
     name = name.toLowerCase();
     this.setRange();
-    if(commandsReg.block.test(name)) {
+    if (commandsReg.block.test(name)) {
       commandBlock(this, name);
-    } else if(commandsReg.inline.test(name) || commandsReg.source.test(name)) {
+    } else if (commandsReg.inline.test(name) || commandsReg.source.test(name)) {
       commandOverall(this, name, value);
-    } else if(commandsReg.insert.test(name)) {
+    } else if (commandsReg.insert.test(name)) {
       commandInsert(this, name);
-    } else if(commandsReg.wrap.test(name)) {
+    } else if (commandsReg.wrap.test(name)) {
       commandWrap(this, name);
     } else {
       utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''), true);
@@ -581,7 +585,7 @@
       , stylesheet = this._stylesheet;
 
     // store the stylesheet used for positioning the menu horizontally
-    if(this._stylesheet === undefined) {
+    if (this._stylesheet === undefined) {
       var style = document.createElement("style");
       document.head.appendChild(style);
       this._stylesheet = stylesheet = style.sheet;
@@ -595,16 +599,16 @@
     // check to see if menu has over-extended its bounding box. if it has,
     // 1) apply a new class if overflowed on top;
     // 2) apply a new rule if overflowed on the left
-    if(stylesheet.cssRules.length > 0) {
+    if (stylesheet.cssRules.length > 0) {
       stylesheet.deleteRule(0);
     }
-    if(menuOffset.x < 0) {
+    if (menuOffset.x < 0) {
       menuOffset.x = 0;
       stylesheet.insertRule('.pen-menu:after {left: ' + left + 'px;}', 0);
     } else {
       stylesheet.insertRule('.pen-menu:after {left: 50%; }', 0);
     }
-    if(menuOffset.y < 0) {
+    if (menuOffset.y < 0) {
       menu.classList.toggle('pen-menu-below', true);
       menuOffset.y = offset.top + offset.height + menuPadding;
     } else {
@@ -620,7 +624,7 @@
     var ctx = this;
     if (!window.onbeforeunload) {
       window.onbeforeunload = function() {
-        if(!ctx._isDestroyed) return config.stayMsg;
+        if (!ctx._isDestroyed) return config.stayMsg;
       };
     }
   };
@@ -629,7 +633,7 @@
     var destroy = isAJoke ? false : true
       , attr = isAJoke ? 'setAttribute' : 'removeAttribute';
 
-    if(!isAJoke) {
+    if (!isAJoke) {
       removeAllListeners(this);
       selection.removeAllRanges();
       this._menu.parentNode.removeChild(this._menu);
@@ -650,7 +654,7 @@
 
   // a fallback for old browers
   root.Pen = function(config) {
-    if(!config) return utils.log('can\'t find config', true);
+    if (!config) return utils.log('can\'t find config', true);
 
     var defaults = utils.merge(config)
       , klass = defaults.editor.getAttribute('class');
