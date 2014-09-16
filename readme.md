@@ -149,4 +149,4 @@ Licensed under MIT.
 
 ## 5. trusted by *
 
-![Teambition](https://dn-project-site.qbox.me/images/logo.png)
+[![Teambition](https://dn-project-site.qbox.me/images/logo.png)](https://github.com/teambition)
