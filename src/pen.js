@@ -24,6 +24,13 @@
     http: /^(?!\w+?:\/\/|mailto:|\/|\.\/|\?|#)(.*)$/
   };
 
+  var autoLinkReg = {
+    url: /((https?|ftp):\/\/|www\.)[^\s<]{3,}/gi,
+    prefix: /^(?:https?|ftp):\/\//i,
+    notLink: /^(?:img|a|input|audio|video|source|code|pre|script|head|title|style)$/i,
+    maxLength: 100,
+  };
+
   // type detect
   utils.is = function(obj, type) {
     return toString.call(obj).slice(8, -1) === type;
@@ -351,6 +358,36 @@
     ctx.setRange(range);
   }
 
+  function autoLink(node) {
+    if (node.nodeType === 1) {
+      if (autoLinkReg.notLink.test(node.tagName)) return;
+      utils.forEach(node.childNodes, function (child) {
+        autoLink(child);
+      }, true);
+    } else if (node.nodeType === 3) {
+      var result = urlToLink(node.nodeValue || '');
+      if (!result.links) return;
+      var frag = doc.createDocumentFragment(),
+        div = doc.createElement('div');
+      div.innerHTML = result.text;
+      while (div.childNodes.length) frag.appendChild(div.childNodes[0]);
+      node.parentNode.replaceChild(frag, node);
+    }
+  }
+
+  function urlToLink(str) {
+    var count = 0;
+    str = str.replace(autoLinkReg.url, function(url) {
+      var realUrl = url, displayUrl = url;
+      count++;
+      if (url.length > autoLinkReg.maxLength) displayUrl = url.slice(0, autoLinkReg.maxLength) + '...';
+      // Add http prefix if necessary
+      if (!autoLinkReg.prefix.test(realUrl)) realUrl = 'http://' + realUrl;
+      return '<a href="' + realUrl + '">' + displayUrl + '</a>';
+    });
+    return {links: count, text: str};
+  }
+
   Pen = function(config) {
 
     if (!config) throw new Error('Can\'t find config');
@@ -507,6 +544,12 @@
     this.placeholder();
     this.checkContentChange();
     return this;
+  };
+
+  // auto link content, return content
+  Pen.prototype.autoLink = function() {
+    autoLink(this.config.editor);
+    return this.getContent();
   };
 
   // highlight menu
