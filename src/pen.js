@@ -28,7 +28,7 @@
     url: /((https?|ftp):\/\/|www\.)[^\s<]{3,}/gi,
     prefix: /^(?:https?|ftp):\/\//i,
     notLink: /^(?:img|a|input|audio|video|source|code|pre|script|head|title|style)$/i,
-    maxLength: 100,
+    maxLength: 100
   };
 
   // type detect
@@ -409,6 +409,9 @@
 
     // assign config
     this.config = defaults;
+
+    // save the selection obj
+    this.selection = selection;
 
     // define local events
     this._events = {change: []};
