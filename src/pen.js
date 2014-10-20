@@ -16,7 +16,7 @@
 
   var lineBreakReg = /^(?:blockquote|pre|div)$/i;
 
-  var effectNodeReg = /(?:[pubia]|h[1-6]|blockquote|[uo]l|li)/i;
+  var effectNodeReg = /(?:[pubia]|[em]|[strong]|h[1-6]|blockquote|[uo]l|li)/i;
 
   var strReg = {
     whiteSpace: /(^\s+)|(\s+$)/g,
@@ -588,12 +588,14 @@
           menu.querySelector('input').value = item.getAttribute('href');
           tag = 'createlink';
           break;
+        case 'em':
         case 'i':
           tag = 'italic';
           break;
         case 'u':
           tag = 'underline';
           break;
+        case 'strong':
         case 'b':
           tag = 'bold';
           break;
