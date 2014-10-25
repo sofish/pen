@@ -606,9 +606,6 @@
         case 'ol':
           tag = 'insertorderedlist';
           break;
-        case 'ol':
-          tag = 'insertorderedlist';
-          break;
         case 'li':
           tag = 'indent';
           break;
