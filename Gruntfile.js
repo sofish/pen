@@ -10,7 +10,7 @@ module.exports = function(grunt) {
       options: {
         jshintrc: true
       },
-      files: ['Gruntfile.js', 'src/**/*.js'],
+      files: ['Gruntfile.js', 'src/**/*.js']
     },
 
     uglify: {
