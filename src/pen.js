@@ -319,6 +319,16 @@
     return ctx;
   }
 
+  // node.contains is not implemented in IE10/IE11
+  function containsNode(parent, child) {
+    child = child.parentNode;
+    while (child) {
+      if (child === parent) return true;
+      child = child.parentNode;
+    }
+    return false;
+  }
+
   function getNode(ctx, byRoot) {
     var node, root = ctx.config.editor;
     ctx._range = ctx.getRange();
@@ -326,7 +336,7 @@
     if (!node || node === root) return null;
     while (node && (node.nodeType !== 1) && (node.parentNode !== root)) node = node.parentNode;
     while (node && byRoot && (node.parentNode !== root)) node = node.parentNode;
-    return root.contains(node) ? node : null;
+    return containsNode(root, node) ? node : null;
   }
 
   // node effects
@@ -481,7 +491,7 @@
   Pen.prototype.getRange = function() {
     var editor = this.config.editor, range = selection.rangeCount && selection.getRangeAt(0);
     if (!range) range = doc.createRange();
-    if (!editor.contains(range.commonAncestorContainer)) {
+    if (!containsNode(editor, range.commonAncestorContainer)) {
       range.selectNodeContents(editor);
       range.collapse(false);
     }
@@ -652,10 +662,10 @@
       stylesheet.insertRule('.pen-menu:after {left: 50%; }', 0);
     }
     if (menuOffset.y < 0) {
-      menu.classList.toggle('pen-menu-below', true);
+      menu.classList.add('pen-menu-below');
       menuOffset.y = offset.top + offset.height + menuPadding;
     } else {
-      menu.classList.toggle('pen-menu-below', false);
+      menu.classList.remove('pen-menu-below');
     }
 
     menu.style.top = menuOffset.y + 'px';
