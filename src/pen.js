@@ -135,11 +135,7 @@
   }
 
   function commandWrap(ctx, tag, value) {
-    if(tag === 'insertimage') {
-      value = '<img src="' + value + '">' + selection.toString();
-    } else {
-      value = '<' + tag + '>' + value + '</' + tag + '>';
-    }
+    value = '<' + tag + '>' + value + '</' + tag + '>';
     return commandOverall(ctx, 'insertHTML', value);
   }
 
