@@ -9,8 +9,8 @@
   var commandsReg = {
     block: /^(?:p|h[1-6]|blockquote|pre)$/,
     inline: /^(?:bold|italic|underline|insertorderedlist|insertunorderedlist|indent|outdent)$/,
-    source: /^(?:insertimage|createlink|unlink)$/,
-    insert: /^(?:inserthorizontalrule|insert)$/,
+    source: /^(?:createlink|unlink)$/,
+    insert: /^(?:inserthorizontalrule|insertimage|insert)$/,
     wrap: /^(?:code)$/
   };
 
@@ -85,7 +85,7 @@
       textarea: '<textarea name="content"></textarea>',
       list: [
         'blockquote', 'h2', 'h3', 'p', 'code', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
-        'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
+        'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink', 'insertimage'
       ],
       cleanAttrs: ['id', 'class', 'style', 'name'],
       cleanTags: ['script']
@@ -105,19 +105,27 @@
 
   function commandOverall(ctx, cmd, val) {
     var message = ' to exec 「' + cmd + '」 command' + (val ? (' with value: ' + val) : '');
-    if (doc.execCommand(cmd, false, val)) {
-      utils.log('success' + message);
-    } else {
-      utils.log('fail' + message, true);
+
+    try {
+      doc.execCommand(cmd, false, val);
+    } catch(err) {
+      // TODO: there's an error when insert a image to document, bug not a bug
+      return utils.log('fail' + message, true);
     }
+
+    utils.log('success' + message);
   }
 
-  function commandInsert(ctx, name) {
+  function commandInsert(ctx, name, val) {
     var node = getNode(ctx);
     if (!node) return;
     ctx._range.selectNode(node);
     ctx._range.collapse(false);
-    return commandOverall(ctx, name);
+
+    // hide menu when a image was inserted
+    if(name === 'insertimage') ctx._menu.style.display = 'none';
+
+    return commandOverall(ctx, name, val);
   }
 
   function commandBlock(ctx, name) {
@@ -126,9 +134,13 @@
     return commandOverall(ctx, 'formatblock', name);
   }
 
-  function commandWrap(ctx, tag) {
-    var val = '<' + tag + '>' + selection + '</' + tag + '>';
-    return commandOverall(ctx, 'insertHTML', val);
+  function commandWrap(ctx, tag, value) {
+    if(tag === 'insertimage') {
+      value = '<img src="' + value + '">' + selection.toString();
+    } else {
+      value = '<' + tag + '>' + value + '</' + tag + '>';
+    }
+    return commandOverall(ctx, 'insertHTML', value);
   }
 
   // placeholder
@@ -145,7 +157,7 @@
     utils.forEach(ctx.config.list, function (name) {
       var klass = 'pen-icon icon-' + name;
       icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
-      if ((name === 'createlink')) icons += '<input class="pen-input" placeholder="http://" />';
+      if (/(?:createlink)|(?:insertimage)/.test(name)) icons += '<input class="pen-input" placeholder="http://" />';
     }, true);
 
     ctx._menu = doc.createElement('div');
@@ -230,7 +242,8 @@
       var action = e.target.getAttribute('data-action');
 
       if (!action) return;
-      if (action !== 'createlink') return menuApply(action);
+      if (!/(?:createlink)|(?:insertimage)/.test(action)) return menuApply(action);
+
       // create link
       var input = menu.getElementsByTagName('input')[0];
 
@@ -239,13 +252,16 @@
 
       var createlink = function(input) {
         input.style.display = 'none';
+
         if (input.value) {
           var inputValue = input.value
             .replace(strReg.whiteSpace, '')
             .replace(strReg.mailTo, 'mailto:$1')
             .replace(strReg.http, 'http://$1');
+
           return menuApply(action, inputValue);
         }
+
         action = 'unlink';
         menuApply(action);
       };
@@ -522,14 +538,15 @@
     }
     name = name.toLowerCase();
     this.setRange();
+
     if (commandsReg.block.test(name)) {
       commandBlock(this, name);
     } else if (commandsReg.inline.test(name) || commandsReg.source.test(name)) {
       commandOverall(this, name, value);
     } else if (commandsReg.insert.test(name)) {
-      commandInsert(this, name);
+      commandInsert(this, name, value);
     } else if (commandsReg.wrap.test(name)) {
-      commandWrap(this, name);
+      commandWrap(this, name, value);
     } else {
       utils.log('can not find command function for name: ' + name + (value ? (', value: ' + value) : ''), true);
     }
@@ -597,6 +614,10 @@
         case 'a':
           menu.querySelector('input').value = item.getAttribute('href');
           tag = 'createlink';
+          break;
+        case 'img':
+          menu.querySelector('input').value = item.getAttribute('src');
+          tag = 'insertimage';
           break;
         case 'i':
           tag = 'italic';

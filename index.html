@@ -81,16 +81,17 @@
   // config
   var options = {
     editor: document.querySelector('[data-toggle="pen"]'),
-    debug: true
+    debug: true,
+    list: [
+      'insertimage', 'blockquote', 'h2', 'h3', 'p', 'code', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
+      'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
+    ]
   };
 
   // create editor
   var pen = window.pen = new Pen(options);
 
-  // setTimeout(function () {
-    pen.focus();
-  // }, 100);
-
+  pen.focus();
 
   // toggle editor mode
   document.querySelector('#mode').addEventListener('click', function() {

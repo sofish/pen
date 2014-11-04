@@ -116,6 +116,7 @@
 .pen-menu .icon-h5:before { content: 'H5'; }
 .pen-menu .icon-h6:before { content: 'H6'; }
 .pen-menu .icon-p:before { content: 'P'; }
+.pen-menu .icon-insertimage:before { width:1.8em;margin:0;position:relative;top:-2px;content:'IMG';font-size:12px;border:1px solid #fff;padding:2px;border-radius:2px; }
 
 .pen {
   position: relative;
