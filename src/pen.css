@@ -174,4 +174,4 @@
 .pen.hinted a:before {content: "["; color: #ddd; }
 .pen.hinted a:after { content: "](" attr(href) ")"; color: #ddd; }
 
-.pen-placeholder { color: #999; }
+.pen-placeholder:after { position: absolute; top: 0; left: 0; content: attr(data-placeholder); color: #999; cursor: text; }
