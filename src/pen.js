@@ -273,6 +273,7 @@
 
     addListener(ctx, editor, 'blur', function() {
       checkPlaceholder(ctx);
+      ctx.checkContentChange();
     });
 
     // listen for paste and clear style
@@ -507,8 +508,10 @@
       range = this.getRange();
       range.collapse(false); // set to end
     }
-    selection.removeAllRanges();
-    selection.addRange(range);
+    try {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } catch (e) {/* IE throws error sometimes*/}
     return this;
   };
 
@@ -696,8 +699,10 @@
 
     if (!isAJoke) {
       removeAllListeners(this);
-      selection.removeAllRanges();
-      this._menu.parentNode.removeChild(this._menu);
+      try {
+        selection.removeAllRanges();
+        this._menu.parentNode.removeChild(this._menu);
+      } catch (e) {/* IE throws error sometimes*/}
     } else {
       initToolbar(this);
       initEvents(this);
