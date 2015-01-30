@@ -80,7 +80,7 @@
     var defaults = {
       class: 'pen',
       debug: false,
-      fixedMenu: false,
+      toolbar: null, // custom toolbar
       stay: config.stay || !config.debug,
       stayMsg: 'Are you going to leave here?',
       textarea: '<textarea name="content"></textarea>',
@@ -124,7 +124,7 @@
     ctx._range.collapse(false);
 
     // hide menu when a image was inserted
-    if(name === 'insertimage') ctx._menu.style.display = 'none';
+    if(name === 'insertimage' && ctx._menu) toggleNode(ctx._menu, true);
 
     return commandOverall(ctx, name, val);
   }
@@ -141,75 +141,89 @@
   }
 
   function initToolbar(ctx) {
-    var icons = '';
+    var icons = '', inputStr = '<input class="pen-input" placeholder="http://" />';
 
-    utils.forEach(ctx.config.list, function (name) {
-      var klass = 'pen-icon icon-' + name;
-      icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
-      if (/(?:createlink)|(?:insertimage)/.test(name)) icons += '<input class="pen-input" placeholder="http://" />';
-    }, true);
+    ctx._toolbar = ctx.config.toolbar;
+    if (!ctx._toolbar) {
+      var toolList = ctx.config.list;
+      utils.forEach(toolList, function (name) {
+        var klass = 'pen-icon icon-' + name;
+        icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
+      }, true);
+      if (toolList.indexOf('createlink') >= 0 || toolList.indexOf('createlink') >= 0)
+        icons += inputStr;
+    } else if (ctx._toolbar.querySelectorAll('[data-action=createlink]').length ||
+      ctx._toolbar.querySelectorAll('[data-action=insertimage]').length) {
+      icons += inputStr;
+    }
 
-    ctx._menu = doc.createElement('div');
-    ctx._menu.setAttribute('class', ctx.config.class + '-menu pen-menu');
-    ctx._menu.innerHTML = icons;
-    ctx._menu.style.display = ctx.config.fixedMenu ? 'block' : 'none';
-
-    doc.body.appendChild(ctx._menu);
+    if (icons) {
+      ctx._menu = doc.createElement('div');
+      ctx._menu.setAttribute('class', ctx.config.class + '-menu pen-menu');
+      ctx._menu.innerHTML = icons;
+      ctx._inputBar = ctx._menu.querySelector('input');
+      toggleNode(ctx._menu, true);
+      doc.body.appendChild(ctx._menu);
+    }
+    if (ctx._toolbar && ctx._inputBar) toggleNode(ctx._inputBar);
   }
 
   function initEvents(ctx) {
-    var menu = ctx._menu, editor = ctx.config.editor;
-
-    var setpos = function() {
-      if (menu.style.display === 'block') ctx.menu();
-    };
-
-    // change menu offset when window resize / scroll
-    addListener(ctx, root, 'resize', setpos);
-    addListener(ctx, root, 'scroll', setpos);
+    var toolbar = ctx._toolbar || ctx._menu, editor = ctx.config.editor;
 
     var toggleMenu = utils.delayExec(function() {
-      if (!selection.isCollapsed) {
-        //show menu
-        ctx.menu().highlight();
-      } else if (!ctx.config.fixedMenu) {
-        //hide menu
-        ctx._menu.style.display = 'none';
-      } else ctx.highlight();
+      ctx.highlight().menu();
     });
+    var outsideClick = function() {};
 
-    var toggle = function(delay) {
+    function updateStatus(delay) {
       ctx._range = ctx.getRange();
       toggleMenu(delay);
-    };
+    }
 
-    // toggle toolbar on mouse select
-    var selecting = false;
-    addListener(ctx, editor, 'mousedown', function() {
-      selecting = true;
-    });
-    addListener(ctx, editor, 'mouseleave', function() {
-      if (selecting) toggle(800);
-      selecting = false;
-    });
-    addListener(ctx, editor, 'mouseup', function() {
-      if (selecting) toggle(100);
-      selecting = false;
-    });
+    if (ctx._menu) {
+      var setpos = function() {
+        if (ctx._menu.style.display === 'block') ctx.menu();
+      };
 
-    // Hide menu when focusing outside of editor
-    addListener(ctx, doc, 'click', function(e) {
-      if (!containsNode(editor, e.target) && !containsNode(menu, e.target)) toggleMenu(100);
-    });
+      // change menu offset when window resize / scroll
+      addListener(ctx, root, 'resize', setpos);
+      addListener(ctx, root, 'scroll', setpos);
+
+      // toggle toolbar on mouse select
+      var selecting = false;
+      addListener(ctx, editor, 'mousedown', function() {
+        selecting = true;
+      });
+      addListener(ctx, editor, 'mouseleave', function() {
+        if (selecting) updateStatus(800);
+        selecting = false;
+      });
+      addListener(ctx, editor, 'mouseup', function() {
+        if (selecting) updateStatus(100);
+        selecting = false;
+      });
+      // Hide menu when focusing outside of editor
+      outsideClick = function(e) {
+        if (ctx._menu && !containsNode(editor, e.target) && !containsNode(ctx._menu, e.target)) {
+          removeListener(ctx, doc, 'click', outsideClick);
+          toggleMenu(100);
+        }
+      };
+    } else {
+      addListener(ctx, editor, 'click', function() {
+        updateStatus(0);
+      });
+    }
 
     addListener(ctx, editor, 'keyup', function(e) {
       if (e.which === 8 && ctx.isEmpty()) return lineBreak(ctx, true);
       // toggle toolbar on key select
-      if (e.which !== 13 || e.shiftKey) return toggle(400);
+      if (e.which !== 13 || e.shiftKey) return updateStatus(400);
       var node = getNode(ctx, true);
-      if (!node || !lineBreakReg.test(node.nodeName)) return;
+      if (!node || !node.nextSibling || !lineBreakReg.test(node.nodeName)) return;
       if (node.nodeName !== node.nextSibling.nodeName) return;
-      // hack for webkit make 'enter' like as firefox.
+      // hack for webkit, make 'enter' behavior like as firefox.
       if (node.lastChild.nodeName !== 'BR') node.appendChild(doc.createElement('br'));
       utils.forEach(node.nextSibling.childNodes, function(child) {
         if (child) node.appendChild(child);
@@ -240,40 +254,44 @@
     var menuApply = function(action, value) {
       ctx.execCommand(action, value);
       ctx._range = ctx.getRange();
-      if (!selection.isCollapsed) ctx.highlight().menu();
+      ctx.highlight().menu();
     };
 
     // toggle toolbar on key select
-    addListener(ctx, menu, 'click', function(e) {
+    addListener(ctx, toolbar, 'click', function(e) {
       var action = e.target.getAttribute('data-action');
 
       if (!action) return;
       if (!/(?:createlink)|(?:insertimage)/.test(action)) return menuApply(action);
+      if (!ctx._inputBar) return;
 
       // create link
-      var input = menu.getElementsByTagName('input')[0];
+      var input = ctx._inputBar;
+      if (toolbar === ctx._menu) toggleNode(input);
+      else {
+        ctx._inputActive = true;
+        ctx.menu();
+      }
+      if (ctx._menu.style.display === 'none') return;
 
-      input.style.display = 'block';
-      input.focus();
+      setTimeout(function() { input.focus(); }, 400);
+      var createlink = function() {
+        var inputValue = input.value;
 
-      var createlink = function(input) {
-        input.style.display = 'none';
-
-        if (input.value) {
-          var inputValue = input.value
+        if (!inputValue) action = 'unlink';
+        else {
+          inputValue = input.value
             .replace(strReg.whiteSpace, '')
             .replace(strReg.mailTo, 'mailto:$1')
             .replace(strReg.http, 'http://$1');
-
-          return menuApply(action, inputValue);
         }
-
-        action = 'unlink';
-        menuApply(action);
+        menuApply(action, inputValue);
+        if (toolbar === ctx._menu) toggleNode(input, false);
+        else toggleNode(ctx._menu, true);
       };
 
       input.onkeypress = function(e) {
-        if (e.which === 13) return createlink(e.target);
+        if (e.which === 13) return createlink();
       };
 
     });
@@ -281,6 +299,7 @@
     // listen for placeholder
     addListener(ctx, editor, 'focus', function() {
       if (ctx.isEmpty()) lineBreak(ctx, true);
+      addListener(ctx, doc, 'click', outsideClick);
     });
 
     addListener(ctx, editor, 'blur', function() {
@@ -320,6 +339,19 @@
     utils.forEach(ctx._events[type], function (listener) {
       listener.apply(ctx, args);
     });
+  }
+
+  function removeListener(ctx, target, type, listener) {
+    var events = events = ctx._events[type];
+    if (!events) {
+      var _index = ctx._eventTargets.indexOf(target);
+      if (_index >= 0) events = ctx._eventsCache[_index][type]
+    }
+    if (!events) return ctx;
+    var index = events.indexOf(listener);
+    if (index >= 0) events.splice(index, 1);
+    target.removeEventListener(type, listener, false);
+    return ctx;
   }
 
   function removeAllListeners(ctx) {
@@ -428,6 +460,10 @@
     return {links: count, text: str};
   }
 
+  function toggleNode(node, hide) {
+    node.style.display = hide ? 'none' : 'block';
+  }
+
   Pen = function(config) {
 
     if (!config) throw new Error('Can\'t find config');
@@ -484,7 +520,8 @@
 
   Pen.prototype.isEmpty = function(node) {
     node = node || this.config.editor;
-    return !(node.querySelector('img')) && !(node.querySelector('blockquote')) && !trim(node.textContent);
+    return !(node.querySelector('img')) && !(node.querySelector('blockquote')) &&
+      !(node.querySelector('li')) && !trim(node.textContent);
   };
 
   Pen.prototype.getContent = function() {
@@ -582,39 +619,40 @@
 
   // highlight menu
   Pen.prototype.highlight = function() {
-    var node = selection.focusNode
-      , effects = effectNode(this, node)
-      , menu = this._menu
-      , linkInput = menu.querySelector('input')
-      , highlight;
-
+    var toolbar = this._toolbar || this._menu
+      , node = getNode(this);
     // remove all highlights
-    utils.forEach(menu.querySelectorAll('.active'), function(el) {
+    utils.forEach(toolbar.querySelectorAll('.active'), function(el) {
       el.classList.remove('active');
     }, true);
 
-    if (linkInput) {
+    if (!node) return this;
+
+    var effects = effectNode(this, node)
+      , inputBar = this._inputBar
+      , highlight;
+
+    if (inputBar && toolbar === this._menu) {
       // display link input if createlink enabled
-      linkInput.style.display = 'none';
-      // reset link input value
-      linkInput.value = '';
+      inputBar.style.display = 'none';
     }
+    // reset link input value
+    inputBar.value = '';
 
     highlight = function(str) {
-      var selector = '.icon-' + str
-        , el = menu.querySelector(selector);
+      if (!str) return;
+      var el = toolbar.querySelector('[data-action=' + str + ']');
       return el && el.classList.add('active');
     };
-
     utils.forEach(effects, function(item) {
       var tag = item.nodeName.toLowerCase();
       switch(tag) {
         case 'a':
-          menu.querySelector('input').value = item.getAttribute('href');
+          if (inputBar) inputBar.value = item.getAttribute('href');
           tag = 'createlink';
           break;
         case 'img':
-          menu.querySelector('input').value = item.getAttribute('src');
+          if (inputBar) inputBar.value = item.getAttribute('src');
           tag = 'insertimage';
           break;
         case 'i':
@@ -648,7 +686,15 @@
 
   // show menu
   Pen.prototype.menu = function() {
-    if (this.config.fixedMenu) return this;
+    if (!this._menu) return this;
+    if (selection.isCollapsed) {
+      this._menu.style.display = 'none'; //hide menu
+      this._inputActive = false;
+      return this;
+    }
+    if (this._toolbar) {
+      if (!this._inputBar || !this._inputActive) return this;
+    }
     var offset = this._range.getBoundingClientRect()
       , menuPadding = 10
       , top = offset.top - menuPadding
@@ -710,7 +756,7 @@
       removeAllListeners(this);
       try {
         selection.removeAllRanges();
-        this._menu.parentNode.removeChild(this._menu);
+        if (this._menu) this._menu.parentNode.removeChild(this._menu);
       } catch (e) {/* IE throws error sometimes*/}
     } else {
       initToolbar(this);
