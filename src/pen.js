@@ -1,5 +1,5 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-(function(root, doc) {
+;(function(root, doc) {
 
   var Pen, debugMode, selection, utils = {};
   var toString = Object.prototype.toString;
@@ -80,6 +80,7 @@
     var defaults = {
       class: 'pen',
       debug: false,
+      fixedMenu: false,
       stay: config.stay || !config.debug,
       stayMsg: 'Are you going to leave here?',
       textarea: '<textarea name="content"></textarea>',
@@ -151,7 +152,7 @@
     ctx._menu = doc.createElement('div');
     ctx._menu.setAttribute('class', ctx.config.class + '-menu pen-menu');
     ctx._menu.innerHTML = icons;
-    ctx._menu.style.display = 'none';
+    ctx._menu.style.display = ctx.config.fixedMenu ? 'block' : 'none';
 
     doc.body.appendChild(ctx._menu);
   }
@@ -171,10 +172,10 @@
       if (!selection.isCollapsed) {
         //show menu
         ctx.menu().highlight();
-      } else {
+      } else if (!ctx.config.fixedMenu) {
         //hide menu
         ctx._menu.style.display = 'none';
-      }
+      } else ctx.highlight();
     });
 
     var toggle = function(delay) {
@@ -201,10 +202,20 @@
       if (!containsNode(editor, e.target) && !containsNode(menu, e.target)) toggleMenu(100);
     });
 
-    // toggle toolbar on key select
     addListener(ctx, editor, 'keyup', function(e) {
-      if (e.which === 8 && ctx.isEmpty()) lineBreak(ctx, true);
-      else toggle(400);
+      if (e.which === 8 && ctx.isEmpty()) return lineBreak(ctx, true);
+      // toggle toolbar on key select
+      if (e.which !== 13 || e.shiftKey) return toggle(400);
+      var node = getNode(ctx, true);
+      if (!node || !lineBreakReg.test(node.nodeName)) return;
+      if (node.nodeName !== node.nextSibling.nodeName) return;
+      // hack for webkit make 'enter' like as firefox.
+      if (node.lastChild.nodeName !== 'BR') node.appendChild(doc.createElement('br'));
+      utils.forEach(node.nextSibling.childNodes, function(child) {
+        if (child) node.appendChild(child);
+      }, true);
+      node.parentNode.removeChild(node.nextSibling);
+      focusNode(ctx, node.lastChild, ctx.getRange());
     });
 
     // check line break
@@ -212,17 +223,18 @@
       editor.classList.remove('pen-placeholder');
       if (e.which !== 13 || e.shiftKey) return;
       var node = getNode(ctx, true);
-      if (node && lineBreakReg.test(node.nodeName)) {
-        e.preventDefault();
-        var p = doc.createElement('p');
-        p.innerHTML = '<br>';
-        if (!node.nextSibling) {
-          editor.appendChild(p);
-        } else {
-          editor.insertBefore(p, node.nextSibling);
-        }
-        focusNode(ctx, p, ctx.getRange());
-      }
+      if (!node || !lineBreakReg.test(node.nodeName)) return;
+      var lastChild = node.lastChild;
+      if (!lastChild || !lastChild.previousSibling) return;
+      if (lastChild.previousSibling.textContent || lastChild.textContent) return;
+      // quit block mode for 2 'enter'
+      e.preventDefault();
+      var p = doc.createElement('p');
+      p.innerHTML = '<br>';
+      node.removeChild(lastChild);
+      if (!node.nextSibling) node.parentNode.appendChild(p);
+      else node.parentNode.insertBefore(p, node.nextSibling);
+      focusNode(ctx, p, ctx.getRange());
     });
 
     var menuApply = function(action, value) {
@@ -361,7 +373,7 @@
   function effectNode(ctx, el, returnAsNodeName) {
     var nodes = [];
     el = el || ctx.config.editor;
-    while (el !== ctx.config.editor) {
+    while (el && el !== ctx.config.editor) {
       if (el.nodeName.match(effectNodeReg)) {
         nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
       }
@@ -522,10 +534,6 @@
   };
 
   Pen.prototype.execCommand = function(name, value) {
-    // if (this.isEmpty()) {
-    //   this.config.editor.innerHTML = '';
-    //   this.config.editor.classList.remove('pen-placeholder');
-    // }
     name = name.toLowerCase();
     this.setRange();
 
@@ -618,6 +626,7 @@
         case 'b':
           tag = 'bold';
           break;
+        case 'pre':
         case 'code':
           tag = 'code';
           break;
@@ -639,7 +648,7 @@
 
   // show menu
   Pen.prototype.menu = function() {
-
+    if (this.config.fixedMenu) return this;
     var offset = this._range.getBoundingClientRect()
       , menuPadding = 10
       , top = offset.top - menuPadding
