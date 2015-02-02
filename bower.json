@@ -1,9 +1,9 @@
 {
   "name": "pen",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "https://github.com/sofish/pen",
   "description": "enjoy live editing(+markdown)",
-  "main": "pen.js",
+  "main": "src/pen.js",
   "keywords": [
     "editor",
     "wysiwyg",

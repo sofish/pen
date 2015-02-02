@@ -1,6 +1,6 @@
 {
   "name": "pen",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "main": "src/pen.js",
   "author": "sofish <sofish@icloud.com>",
   "description": "enjoy live editing (+markdown) http://sofish.github.io/pen",
