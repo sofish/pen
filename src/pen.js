@@ -1,5 +1,5 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-;(function(root, doc) {
+(function(root, doc) {
 
   var Pen, debugMode, selection, utils = {};
   var toString = Object.prototype.toString;
@@ -342,10 +342,10 @@
   }
 
   function removeListener(ctx, target, type, listener) {
-    var events = events = ctx._events[type];
+    var events = ctx._events[type];
     if (!events) {
       var _index = ctx._eventTargets.indexOf(target);
-      if (_index >= 0) events = ctx._eventsCache[_index][type]
+      if (_index >= 0) events = ctx._eventsCache[_index][type];
     }
     if (!events) return ctx;
     var index = events.indexOf(listener);
@@ -525,7 +525,7 @@
   };
 
   Pen.prototype.getContent = function() {
-    return trim(this.config.editor.innerHTML);
+    return this.isEmpty() ?  '' : trim(this.config.editor.innerHTML);
   };
 
   Pen.prototype.setContent = function(html) {
