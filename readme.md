@@ -146,3 +146,7 @@ The following cmds are allowed:
 ## 4. license
 
 Licensed under MIT.
+
+## 5. trusted by *
+
+[![Teambition](https://dn-project-site.qbox.me/images/logo.png)](https://github.com/teambition)

@@ -19,7 +19,7 @@
   #hinted:before{content: '\e816';}
 
   #fork{position:fixed;right:0;top:0;}
-  
+
   /*
   When the webpage is printed
   this media query hides extra elements,
@@ -48,13 +48,14 @@
   <span id="hinted" class="icon-pre disabled" title="Toggle Markdown Hints"></span>
 </div>
 
-<div data-toggle="pen" placeholder="im a placeholder">
+<div data-toggle="pen" data-placeholder="im a placeholder">
   <h2>Enjoy live editing (+markdown)</h2>
 
   <p><b><i>Click to edit, Select to apply effect, click items of toolbar to toggle effects.</i></b></p>
   <hr>
   <p>Horizontal-Rule can be inserted by click「...」on the toolbar or just type「... 」/「--- 」/「*** 」at line start. Note that
     there's a SPACE at the end of a command.</p>
+  <p><img src="https://files.slack.com/files-pri/T02SY1UGK-F02UKR9HH/61fecdffjw1em2euxugtdg208w06okjm.gif" alt="oh my god"/></p>
   <hr>
   <p>To link or unlink, please press the <i>ENTER</i> key after you filled the input field with your a link. A <a
     href="/sofish">link</a> can be unlink by applying an empty value to the input field.
@@ -81,12 +82,17 @@
   // config
   var options = {
     editor: document.querySelector('[data-toggle="pen"]'),
-    debug: true
+    debug: true,
+    list: [
+      'insertimage', 'blockquote', 'h2', 'h3', 'p', 'code', 'insertorderedlist', 'insertunorderedlist', 'inserthorizontalrule',
+      'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
+    ]
   };
 
   // create editor
-  var pen = new Pen(options);
+  var pen = window.pen = new Pen(options);
 
+  pen.focus();
 
   // toggle editor mode
   document.querySelector('#mode').addEventListener('click', function() {

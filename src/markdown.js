@@ -1,8 +1,8 @@
 /*! Licensed under MIT, https://github.com/sofish/pen */
-(function() {
+(function(root) {
 
   // only works with Pen
-  if(!this.Pen) return;
+  if(!root.Pen) return;
 
   // markdown covertor obj
   var covertor = {
@@ -50,23 +50,22 @@
   covertor.action = function(pen, cmd) {
 
     // only apply effect at line start
-    if(pen._sel.focusOffset > cmd[1]) return;
+    if(pen.selection.focusOffset > cmd[1]) return;
 
-    var node = pen._sel.focusNode;
+    var node = pen.selection.focusNode;
     node.textContent = node.textContent.slice(cmd[1]);
-    pen._actions(cmd[0]);
-    pen.nostyle();
+    pen.execCommand(cmd[0]);
   };
 
   // init covertor
   covertor.init = function(pen) {
-    pen.config.editor.addEventListener('keypress', function(e) {
+    pen.on('keypress', function(e) {
       var cmd = covertor.parse(e);
       if(cmd) return covertor.action(pen, cmd);
     });
   };
 
   // append to Pen
-  window.Pen.prototype.markdown = covertor;
+  root.Pen.prototype.markdown = covertor;
 
-}());
+}(window));
