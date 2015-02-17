@@ -702,6 +702,7 @@
       , menu = this._menu
       , menuOffset = {x: 0, y: 0}
       , stylesheet = this._stylesheet;
+    if (offset.width === 0 && offset.height === 0) return this;
 
     // store the stylesheet used for positioning the menu horizontally
     if (this._stylesheet === undefined) {
