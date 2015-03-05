@@ -702,6 +702,9 @@
       , menu = this._menu
       , menuOffset = {x: 0, y: 0}
       , stylesheet = this._stylesheet;
+    
+    // fixes some browser double click visual discontinuity
+    // if the offset has no width or height it should not be used
     if (offset.width === 0 && offset.height === 0) return this;
 
     // store the stylesheet used for positioning the menu horizontally
