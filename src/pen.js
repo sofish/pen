@@ -136,7 +136,7 @@
   }
 
   function commandWrap(ctx, tag, value) {
-    value = '<' + tag + '>' + (value||'') + '</' + tag + '>';
+    value = '<' + tag + '>' + (value||selection.toString()) + '</' + tag + '>';
     return commandOverall(ctx, 'insertHTML', value);
   }
 
