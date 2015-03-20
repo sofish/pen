@@ -635,9 +635,9 @@
     if (inputBar && toolbar === this._menu) {
       // display link input if createlink enabled
       inputBar.style.display = 'none';
+      // reset link input value
+      inputBar.value = '';
     }
-    // reset link input value
-    inputBar.value = '';
 
     highlight = function(str) {
       if (!str) return;
