@@ -261,7 +261,7 @@
     addListener(ctx, toolbar, 'click', function(e) {
       var node = e.target, action;
 
-      while (node != toolbar && !(action = node.getAttribute('data-action'))) {
+      while (node !== toolbar && !(action = node.getAttribute('data-action'))) {
         node = node.parentNode;
       }
 
