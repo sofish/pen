@@ -259,7 +259,11 @@
 
     // toggle toolbar on key select
     addListener(ctx, toolbar, 'click', function(e) {
-      var action = e.target.getAttribute('data-action');
+      var node = e.target, action;
+
+      while (node != toolbar && !(action = node.getAttribute('data-action'))) {
+        node = node.parentNode;
+      }
 
       if (!action) return;
       if (!/(?:createlink)|(?:insertimage)/.test(action)) return menuApply(action);
