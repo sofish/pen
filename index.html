@@ -9,6 +9,8 @@
   body{width:800px;margin:0 auto;padding:5% 20px 20px;font-family:Palatino, Optima, Georgia, serif;}
   @media all and (max-width:1024px){ body, pre a{width:60%;} }
   small{color:#999;}
+  pre{white-space:pre-wrap;}
+
   #toolbar{margin-bottom:1em;position:fixed;left:20px;margin-top:5px;}
   #toolbar [class^="icon-"]:before, #toolbar [class*=" icon-"]:before{font-family:'pen'}
   #mode{color:#1abf89;;cursor:pointer;}
@@ -17,6 +19,7 @@
   #hinted{color:#1abf89;cursor:pointer;}
   #hinted.disabled{color:#666;}
   #hinted:before{content: '\e816';}
+  #tomd{color:#fff;border-radius:2px;line-height:1;padding:1px 3px 0; font-size:0.8em;background:#000;cursor:pointer;}
 
   #fork{position:fixed;right:0;top:0;}
 
@@ -46,6 +49,7 @@
 <div id="toolbar">
   <span id="mode" class="icon-mode"></span>
   <span id="hinted" class="icon-pre disabled" title="Toggle Markdown Hints"></span>
+  <span id="tomd" title="to markdown">MD</span>
 </div>
 
 <!-- <div id="custom-toolbar" class="pen-menu pen-menu" style="display: block; top: 20px; left: 10px;">
@@ -124,6 +128,12 @@
       this.classList.add('disabled');
       pen.destroy();
     }
+  });
+
+  // export content as markdown
+  document.querySelector('#tomd').addEventListener('click', function() {
+    var text = pen.toMd();
+    document.body.innerHTML = '<a href="javascript:location.reload()">&larr;back to editor</a><br><br><pre>' + text + '</pre>';
   });
 
   // toggle editor mode

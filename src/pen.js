@@ -706,7 +706,7 @@
       , menu = this._menu
       , menuOffset = {x: 0, y: 0}
       , stylesheet = this._stylesheet;
-    
+
     // fixes some browser double click visual discontinuity
     // if the offset has no width or height it should not be used
     if (offset.width === 0 && offset.height === 0) return this;
@@ -791,6 +791,33 @@
     defaults.editor.setAttribute('class', klass);
     defaults.editor.innerHTML = defaults.textarea;
     return defaults.editor;
+  };
+
+  // export content as markdown
+  var regs = {
+    a: [/<a\b[^>]*href=["']([^"]+|[^']+)\b[^>]*>(.*?)<\/a>/ig, '[$2]($1)'],
+    img: [/<img\b[^>]*src=["']([^\"+|[^']+)[^>]*>/ig, '![]($1)'],
+    b: [/<b\b[^>]*>(.*?)<\/b>/ig, '**$1**'],
+    i: [/<i\b[^>]*>(.*?)<\/i>/ig, '***$1***'],
+    h: [/<h([1-6])\b[^>]*>(.*?)<\/h\1>/ig, function(a, b, c) {
+      return '\n' + ('######'.slice(0, b)) + ' ' + c + '\n';
+    }],
+    li: [/<(li)\b[^>]*>(.*?)<\/\1>/ig, '* $2\n'],
+    blockquote: [/<(blockquote)\b[^>]*>(.*?)<\/\1>/ig, '\n> $2\n'],
+    pre: [/<pre\b[^>]*>(.*?)<\/pre>/ig, '\n```\n$1\n```\n'],
+    p: [/<p\b[^>]*>(.*?)<\/p>/ig, '\n$1\n'],
+    hr: [/<hr\b[^>]*>/ig, '\n---\n']
+  };
+
+  Pen.prototype.toMd = function() {
+    var html = this.getContent()
+          .replace(/\n+/g, '') // remove line break
+          .replace(/<ul\b[^>]*>(.*?)<\/ul>/ig, '$1'); // remove ul/ol
+
+    for(var p in regs) {
+      html = html.replace.apply(html, regs[p]);
+    }
+    return html.replace(/\*{5}/g, '**');
   };
 
   // make it accessible
