@@ -815,7 +815,8 @@
           .replace(/<([uo])l\b[^>]*>(.*?)<\/\1l>/ig, '$2'); // remove ul/ol
 
     for(var p in regs) {
-      html = html.replace.apply(html, regs[p]);
+      if (regs.hasOwnProperty(p))
+        html = html.replace.apply(html, regs[p]);
     }
     return html.replace(/\*{5}/g, '**');
   };
