@@ -43,7 +43,7 @@
       if (cmd) {
         // prevents leading space after executing command
         e.preventDefault();
-        return this.valid(cmd);
+        return cmd;
       }
     }
 
