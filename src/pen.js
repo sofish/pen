@@ -150,7 +150,7 @@
         var klass = 'pen-icon icon-' + name;
         icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
       }, true);
-      if (toolList.indexOf('createlink') >= 0 || toolList.indexOf('createlink') >= 0)
+      if (toolList.indexOf('createlink') >= 0)
         icons += inputStr;
     } else if (ctx._toolbar.querySelectorAll('[data-action=createlink]').length ||
       ctx._toolbar.querySelectorAll('[data-action=insertimage]').length) {
