@@ -146,9 +146,12 @@
     ctx._toolbar = ctx.config.toolbar;
     if (!ctx._toolbar) {
       var toolList = ctx.config.list;
-      utils.forEach(toolList, function (name) {
+      utils.forEach(toolList, function (listname) {
+        var parts = listname.split('|'),
+            name = parts[0] || listname,
+            tooltip = parts[1] || '';
         var klass = 'pen-icon icon-' + name;
-        icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
+        icons += '<i class="' + klass + '" data-action="' + name + '" title="' + tooltip + '"></i>';
       }, true);
       if (toolList.indexOf('createlink') >= 0 || toolList.indexOf('createlink') >= 0)
         icons += inputStr;
