@@ -94,14 +94,32 @@ You can set `options.list` to an `Array`, add the following strings to make your
 - `underline`: wrap the text selection in a `u` tag
 - `createlink`: insert link to the text selection
 - `inserthorizontalrule`: insert a `hr` tag
+- `insertimage`: insert an image (`img`) tag
 
-#### 2.5 Prevent unsafe page redirect
+#### 2.5 Add tooltips to the toolbar icons
+
+You can set `options.titles` to an object with properties that match the toolbar actions. The value of each property
+will be used as the title attribute on the icon. Most browsers will display the title attribute as a tooltip when
+the mouse hovers over the icon.
+
+```js
+options.title = {
+    'blockquote': 'Blockquote'
+    'createlink': 'Hyperlink'
+    'insertimage': 'Image'
+}
+```
+
+If you are using Bootstrap or jQueryUI, you can standardize the tooltip style by adding `$('i.pen-icon').tooltip()`
+to your JavaScript.
+
+#### 2.6 Prevent unsafe page redirect
 
 By default, Pen will prevent unsafe page redirect when editing, to shut down it, specific `options.stay` to `false`.
 
 __NOTE:__ if `defaults.debug` is set to `true` and `default.stay` is not set: `defaults.stay == !defaults.debug`.
 
-#### 2.6 Disable and Re-enable editor
+#### 2.7 Disable and Re-enable editor
 
 You can disable the pen editor by call `destroy()` method of the `var pen = new Pen(options)` object. like:
 
@@ -117,7 +135,7 @@ And, there's a corresponding method called `rebuild()` to re-enable the editor:
 pen.rebuild(); // return itself
 ```
 
-#### 2.7 Export content as markdown
+#### 2.8 Export content as markdown
 
 It's an experimental feature
 
