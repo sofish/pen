@@ -533,7 +533,7 @@
     form.addEventListener("submit", function() {
       inputElement.value = me.config.editor.innerHTML;
     });
-  }
+  };
 
   Pen.prototype.isEmpty = function(node) {
     node = node || this.config.editor;
