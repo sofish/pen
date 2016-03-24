@@ -111,7 +111,7 @@
     try {
       doc.execCommand(cmd, false, val);
     } catch(err) {
-      // TODO: there's an error when insert a image to document, bug not a bug
+      // TODO: there's an error when insert a image to document, but not a bug
       return utils.log('fail' + message, true);
     }
 
