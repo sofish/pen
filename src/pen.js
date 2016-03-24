@@ -531,7 +531,7 @@
     var form = inputElement.form;
     var me = this;
     form.addEventListener("submit", function() {
-      inputElement.value = me.config.editor.innerHTML;
+      inputElement.value = me.config.saveAsMarkdown ? me.toMd(me.config.editor.innerHTML) : me.config.editor.innerHTML;
     });
   };
 
