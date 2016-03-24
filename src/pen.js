@@ -517,11 +517,22 @@
     // stay on the page
     if (this.config.stay) this.stay(this.config);
 
+    if(this.config.input) {
+      this.addOnSubmitListener(this.config.input);
+    }
   };
 
   Pen.prototype.on = function(type, listener) {
     addListener(this, this.config.editor, type, listener);
     return this;
+  };
+
+  Pen.prototype.addOnSubmitListener = function(inputElement) {
+    var form = inputElement.form;
+    var me = this;
+    form.addEventListener("submit", function() {
+      inputElement.value = me.config.saveAsMarkdown ? me.toMd(me.config.editor.innerHTML) : me.config.editor.innerHTML;
+    });
   };
 
   Pen.prototype.isEmpty = function(node) {
