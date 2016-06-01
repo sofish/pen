@@ -147,7 +147,7 @@
       value = '< a href="' + value + '" target="_blank">' + (selection.toString()) + '</a>';
       return commandOverall(ctx, 'insertHTML', value);
     } else {
-      return commandOverall(ctx, tag, val);
+      return commandOverall(ctx, tag, value);
     }
   }
 
