@@ -90,7 +90,8 @@
       ],
       titles: {},
       cleanAttrs: ['id', 'class', 'style', 'name'],
-      cleanTags: ['script']
+      cleanTags: ['script'],
+      linksInNewWindow: false
     };
 
     // user-friendly config
@@ -139,6 +140,15 @@
   function commandWrap(ctx, tag, value) {
     value = '<' + tag + '>' + (value||selection.toString()) + '</' + tag + '>';
     return commandOverall(ctx, 'insertHTML', value);
+  }
+
+  function commandLink(ctx, tag, value) {
+    if (this.config.linksInNewWindow) {
+      value = '< a href="' + value + '" target="_blank">' + (selection.toString()) + '</a>';
+      return commandOverall(ctx, 'insertHTML', value);
+    } else {
+      return commandOverall(ctx, tag, value);
+    }
   }
 
   function initToolbar(ctx) {
@@ -593,8 +603,10 @@
 
     if (commandsReg.block.test(name)) {
       commandBlock(this, name);
-    } else if (commandsReg.inline.test(name) || commandsReg.source.test(name)) {
+    } else if (commandsReg.inline.test(name)) {
       commandOverall(this, name, value);
+    } else if (commandsReg.source.test(name)) {
+      commandLink(this, name, value);
     } else if (commandsReg.insert.test(name)) {
       commandInsert(this, name, value);
     } else if (commandsReg.wrap.test(name)) {

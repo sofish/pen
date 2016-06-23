@@ -41,7 +41,8 @@ var options = {
   class: 'pen', // {String} class of the editor,
   debug: false, // {Boolean} false by default
   textarea: '<textarea name="content"></textarea>', // fallback for old browsers
-  list: ['bold', 'italic', 'underline'] // editor menu list
+  list: ['bold', 'italic', 'underline'], // editor menu list
+  linksInNewWindow: true // open hyperlinks in a new windows/tab
 }
 
 var editor = new Pen(options);
@@ -60,7 +61,8 @@ defaults = {
     'blockquote', 'h2', 'h3', 'p', 'insertorderedlist', 'insertunorderedlist',
     'indent', 'outdent', 'bold', 'italic', 'underline', 'createlink'
   ],
-  stay: true
+  stay: true,
+  linksInNewWindow: false
 }
 ```
 
