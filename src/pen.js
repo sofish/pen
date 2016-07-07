@@ -78,7 +78,7 @@
 
     // default settings
     var defaults = {
-      class: 'pen',
+      'class': 'pen',
       debug: false,
       toolbar: null, // custom toolbar
       stay: config.stay || !config.debug,
@@ -171,7 +171,7 @@
 
     if (icons) {
       ctx._menu = doc.createElement('div');
-      ctx._menu.setAttribute('class', ctx.config.class + '-menu pen-menu');
+      ctx._menu.setAttribute('class', ctx.config['class'] + '-menu pen-menu');
       ctx._menu.innerHTML = icons;
       ctx._inputBar = ctx._menu.querySelector('input');
       toggleNode(ctx._menu, true);
@@ -494,7 +494,7 @@
     if (!editor || editor.nodeType !== 1) throw new Error('Can\'t find editor');
 
     // set default class
-    editor.classList.add(defaults.class);
+    editor.classList.add(defaults['class']);
 
     // set contenteditable
     editor.setAttribute('contenteditable', 'true');
@@ -812,7 +812,7 @@
     var defaults = utils.merge(config)
       , klass = defaults.editor.getAttribute('class');
 
-    klass = klass ? klass.replace(/\bpen\b/g, '') + ' pen-textarea ' + defaults.class : 'pen pen-textarea';
+    klass = klass ? klass.replace(/\bpen\b/g, '') + ' pen-textarea ' + defaults['class'] : 'pen pen-textarea';
     defaults.editor.setAttribute('class', klass);
     defaults.editor.innerHTML = defaults.textarea;
     return defaults.editor;
