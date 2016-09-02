@@ -34,10 +34,17 @@
     var code = e.keyCode || e.which;
 
     // when `space` is pressed
-    if(code === 32) {
-      var cmd = this.stack.join('');
-      this.stack.length = 0;
-      return this.valid(cmd);
+    if (code === 32) {
+      var markdownSyntax = this.stack.join('');
+      // reset stack
+      this.stack = [];
+
+      var cmd = this.valid(markdownSyntax);
+      if (cmd) {
+        // prevents leading space after executing command
+        e.preventDefault();
+        return cmd;
+      }
     }
 
     // make cmd

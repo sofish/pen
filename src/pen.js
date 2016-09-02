@@ -80,6 +80,7 @@
     var defaults = {
       class: 'pen',
       debug: false,
+      toolbar: null, // custom toolbar
       stay: config.stay || !config.debug,
       stayMsg: 'Are you going to leave here?',
       textarea: '<textarea name="content"></textarea>',
@@ -123,7 +124,7 @@
     ctx._range.collapse(false);
 
     // hide menu when a image was inserted
-    if(name === 'insertimage') ctx._menu.style.display = 'none';
+    if(name === 'insertimage' && ctx._menu) toggleNode(ctx._menu, true);
 
     return commandOverall(ctx, name, val);
   }
@@ -135,76 +136,100 @@
   }
 
   function commandWrap(ctx, tag, value) {
-    value = '<' + tag + '>' + (value||'') + '</' + tag + '>';
+    value = '<' + tag + '>' + (value||selection.toString()) + '</' + tag + '>';
     return commandOverall(ctx, 'insertHTML', value);
   }
 
   function initToolbar(ctx) {
-    var icons = '';
+    var icons = '', inputStr = '<input class="pen-input" placeholder="http://" />';
 
-    utils.forEach(ctx.config.list, function (name) {
-      var klass = 'pen-icon icon-' + name;
-      icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
-      if (/(?:createlink)|(?:insertimage)/.test(name)) icons += '<input class="pen-input" placeholder="http://" />';
-    }, true);
+    ctx._toolbar = ctx.config.toolbar;
+    if (!ctx._toolbar) {
+      var toolList = ctx.config.list;
+      utils.forEach(toolList, function (name) {
+        var klass = 'pen-icon icon-' + name;
+        icons += '<i class="' + klass + '" data-action="' + name + '"></i>';
+      }, true);
+      if (toolList.indexOf('createlink') >= 0 || toolList.indexOf('createlink') >= 0)
+        icons += inputStr;
+    } else if (ctx._toolbar.querySelectorAll('[data-action=createlink]').length ||
+      ctx._toolbar.querySelectorAll('[data-action=insertimage]').length) {
+      icons += inputStr;
+    }
 
-    ctx._menu = doc.createElement('div');
-    ctx._menu.setAttribute('class', ctx.config.class + '-menu pen-menu');
-    ctx._menu.innerHTML = icons;
-    ctx._menu.style.display = 'none';
-
-    doc.body.appendChild(ctx._menu);
+    if (icons) {
+      ctx._menu = doc.createElement('div');
+      ctx._menu.setAttribute('class', ctx.config.class + '-menu pen-menu');
+      ctx._menu.innerHTML = icons;
+      ctx._inputBar = ctx._menu.querySelector('input');
+      toggleNode(ctx._menu, true);
+      doc.body.appendChild(ctx._menu);
+    }
+    if (ctx._toolbar && ctx._inputBar) toggleNode(ctx._inputBar);
   }
 
   function initEvents(ctx) {
-    var menu = ctx._menu, editor = ctx.config.editor;
-
-    var setpos = function() {
-      if (menu.style.display === 'block') ctx.menu();
-    };
-
-    // change menu offset when window resize / scroll
-    addListener(ctx, root, 'resize', setpos);
-    addListener(ctx, root, 'scroll', setpos);
+    var toolbar = ctx._toolbar || ctx._menu, editor = ctx.config.editor;
 
     var toggleMenu = utils.delayExec(function() {
-      if (!selection.isCollapsed) {
-        //show menu
-        ctx.menu().highlight();
-      } else {
-        //hide menu
-        ctx._menu.style.display = 'none';
-      }
+      ctx.highlight().menu();
     });
+    var outsideClick = function() {};
 
-    var toggle = function(delay) {
+    function updateStatus(delay) {
       ctx._range = ctx.getRange();
       toggleMenu(delay);
-    };
+    }
 
-    // toggle toolbar on mouse select
-    var selecting = false;
-    addListener(ctx, editor, 'mousedown', function() {
-      selecting = true;
-    });
-    addListener(ctx, editor, 'mouseleave', function() {
-      if (selecting) toggle(800);
-      selecting = false;
-    });
-    addListener(ctx, editor, 'mouseup', function() {
-      if (selecting) toggle(100);
-      selecting = false;
-    });
+    if (ctx._menu) {
+      var setpos = function() {
+        if (ctx._menu.style.display === 'block') ctx.menu();
+      };
 
-    // Hide menu when focusing outside of editor
-    addListener(ctx, doc, 'click', function(e) {
-      if (!containsNode(editor, e.target) && !containsNode(menu, e.target)) toggleMenu(100);
-    });
+      // change menu offset when window resize / scroll
+      addListener(ctx, root, 'resize', setpos);
+      addListener(ctx, root, 'scroll', setpos);
 
-    // toggle toolbar on key select
+      // toggle toolbar on mouse select
+      var selecting = false;
+      addListener(ctx, editor, 'mousedown', function() {
+        selecting = true;
+      });
+      addListener(ctx, editor, 'mouseleave', function() {
+        if (selecting) updateStatus(800);
+        selecting = false;
+      });
+      addListener(ctx, editor, 'mouseup', function() {
+        if (selecting) updateStatus(100);
+        selecting = false;
+      });
+      // Hide menu when focusing outside of editor
+      outsideClick = function(e) {
+        if (ctx._menu && !containsNode(editor, e.target) && !containsNode(ctx._menu, e.target)) {
+          removeListener(ctx, doc, 'click', outsideClick);
+          toggleMenu(100);
+        }
+      };
+    } else {
+      addListener(ctx, editor, 'click', function() {
+        updateStatus(0);
+      });
+    }
+
     addListener(ctx, editor, 'keyup', function(e) {
-      if (e.which === 8 && ctx.isEmpty()) lineBreak(ctx, true);
-      else toggle(400);
+      if (e.which === 8 && ctx.isEmpty()) return lineBreak(ctx, true);
+      // toggle toolbar on key select
+      if (e.which !== 13 || e.shiftKey) return updateStatus(400);
+      var node = getNode(ctx, true);
+      if (!node || !node.nextSibling || !lineBreakReg.test(node.nodeName)) return;
+      if (node.nodeName !== node.nextSibling.nodeName) return;
+      // hack for webkit, make 'enter' behavior like as firefox.
+      if (node.lastChild.nodeName !== 'BR') node.appendChild(doc.createElement('br'));
+      utils.forEach(node.nextSibling.childNodes, function(child) {
+        if (child) node.appendChild(child);
+      }, true);
+      node.parentNode.removeChild(node.nextSibling);
+      focusNode(ctx, node.lastChild, ctx.getRange());
     });
 
     // check line break
@@ -212,56 +237,65 @@
       editor.classList.remove('pen-placeholder');
       if (e.which !== 13 || e.shiftKey) return;
       var node = getNode(ctx, true);
-      if (node && lineBreakReg.test(node.nodeName)) {
-        e.preventDefault();
-        var p = doc.createElement('p');
-        p.innerHTML = '<br>';
-        if (!node.nextSibling) {
-          editor.appendChild(p);
-        } else {
-          editor.insertBefore(p, node.nextSibling);
-        }
-        focusNode(ctx, p, ctx.getRange());
-      }
+      if (!node || !lineBreakReg.test(node.nodeName)) return;
+      var lastChild = node.lastChild;
+      if (!lastChild || !lastChild.previousSibling) return;
+      if (lastChild.previousSibling.textContent || lastChild.textContent) return;
+      // quit block mode for 2 'enter'
+      e.preventDefault();
+      var p = doc.createElement('p');
+      p.innerHTML = '<br>';
+      node.removeChild(lastChild);
+      if (!node.nextSibling) node.parentNode.appendChild(p);
+      else node.parentNode.insertBefore(p, node.nextSibling);
+      focusNode(ctx, p, ctx.getRange());
     });
 
     var menuApply = function(action, value) {
       ctx.execCommand(action, value);
       ctx._range = ctx.getRange();
-      if (!selection.isCollapsed) ctx.highlight().menu();
+      ctx.highlight().menu();
     };
 
     // toggle toolbar on key select
-    addListener(ctx, menu, 'click', function(e) {
-      var action = e.target.getAttribute('data-action');
+    addListener(ctx, toolbar, 'click', function(e) {
+      var node = e.target, action;
+
+      while (node !== toolbar && !(action = node.getAttribute('data-action'))) {
+        node = node.parentNode;
+      }
 
       if (!action) return;
       if (!/(?:createlink)|(?:insertimage)/.test(action)) return menuApply(action);
+      if (!ctx._inputBar) return;
 
       // create link
-      var input = menu.getElementsByTagName('input')[0];
+      var input = ctx._inputBar;
+      if (toolbar === ctx._menu) toggleNode(input);
+      else {
+        ctx._inputActive = true;
+        ctx.menu();
+      }
+      if (ctx._menu.style.display === 'none') return;
 
-      input.style.display = 'block';
-      input.focus();
+      setTimeout(function() { input.focus(); }, 400);
+      var createlink = function() {
+        var inputValue = input.value;
 
-      var createlink = function(input) {
-        input.style.display = 'none';
-
-        if (input.value) {
-          var inputValue = input.value
+        if (!inputValue) action = 'unlink';
+        else {
+          inputValue = input.value
             .replace(strReg.whiteSpace, '')
             .replace(strReg.mailTo, 'mailto:$1')
             .replace(strReg.http, 'http://$1');
-
-          return menuApply(action, inputValue);
         }
-
-        action = 'unlink';
-        menuApply(action);
+        menuApply(action, inputValue);
+        if (toolbar === ctx._menu) toggleNode(input, false);
+        else toggleNode(ctx._menu, true);
       };
 
       input.onkeypress = function(e) {
-        if (e.which === 13) return createlink(e.target);
+        if (e.which === 13) return createlink();
       };
 
     });
@@ -269,6 +303,7 @@
     // listen for placeholder
     addListener(ctx, editor, 'focus', function() {
       if (ctx.isEmpty()) lineBreak(ctx, true);
+      addListener(ctx, doc, 'click', outsideClick);
     });
 
     addListener(ctx, editor, 'blur', function() {
@@ -308,6 +343,19 @@
     utils.forEach(ctx._events[type], function (listener) {
       listener.apply(ctx, args);
     });
+  }
+
+  function removeListener(ctx, target, type, listener) {
+    var events = ctx._events[type];
+    if (!events) {
+      var _index = ctx._eventTargets.indexOf(target);
+      if (_index >= 0) events = ctx._eventsCache[_index][type];
+    }
+    if (!events) return ctx;
+    var index = events.indexOf(listener);
+    if (index >= 0) events.splice(index, 1);
+    target.removeEventListener(type, listener, false);
+    return ctx;
   }
 
   function removeAllListeners(ctx) {
@@ -361,7 +409,7 @@
   function effectNode(ctx, el, returnAsNodeName) {
     var nodes = [];
     el = el || ctx.config.editor;
-    while (el !== ctx.config.editor) {
+    while (el && el !== ctx.config.editor) {
       if (el.nodeName.match(effectNodeReg)) {
         nodes.push(returnAsNodeName ? el.nodeName.toLowerCase() : el);
       }
@@ -414,6 +462,10 @@
       return '<a href="' + realUrl + '">' + displayUrl + '</a>';
     });
     return {links: count, text: str};
+  }
+
+  function toggleNode(node, hide) {
+    node.style.display = hide ? 'none' : 'block';
   }
 
   Pen = function(config) {
@@ -472,11 +524,12 @@
 
   Pen.prototype.isEmpty = function(node) {
     node = node || this.config.editor;
-    return !(node.querySelector('img')) && !(node.querySelector('blockquote')) && !trim(node.textContent);
+    return !(node.querySelector('img')) && !(node.querySelector('blockquote')) &&
+      !(node.querySelector('li')) && !trim(node.textContent);
   };
 
   Pen.prototype.getContent = function() {
-    return trim(this.config.editor.innerHTML);
+    return this.isEmpty() ?  '' : trim(this.config.editor.innerHTML);
   };
 
   Pen.prototype.setContent = function(html) {
@@ -522,10 +575,6 @@
   };
 
   Pen.prototype.execCommand = function(name, value) {
-    // if (this.isEmpty()) {
-    //   this.config.editor.innerHTML = '';
-    //   this.config.editor.classList.remove('pen-placeholder');
-    // }
     name = name.toLowerCase();
     this.setRange();
 
@@ -574,39 +623,40 @@
 
   // highlight menu
   Pen.prototype.highlight = function() {
-    var node = selection.focusNode
-      , effects = effectNode(this, node)
-      , menu = this._menu
-      , linkInput = menu.querySelector('input')
-      , highlight;
-
+    var toolbar = this._toolbar || this._menu
+      , node = getNode(this);
     // remove all highlights
-    utils.forEach(menu.querySelectorAll('.active'), function(el) {
+    utils.forEach(toolbar.querySelectorAll('.active'), function(el) {
       el.classList.remove('active');
     }, true);
 
-    if (linkInput) {
+    if (!node) return this;
+
+    var effects = effectNode(this, node)
+      , inputBar = this._inputBar
+      , highlight;
+
+    if (inputBar && toolbar === this._menu) {
       // display link input if createlink enabled
-      linkInput.style.display = 'none';
+      inputBar.style.display = 'none';
       // reset link input value
-      linkInput.value = '';
+      inputBar.value = '';
     }
 
     highlight = function(str) {
-      var selector = '.icon-' + str
-        , el = menu.querySelector(selector);
+      if (!str) return;
+      var el = toolbar.querySelector('[data-action=' + str + ']');
       return el && el.classList.add('active');
     };
-
     utils.forEach(effects, function(item) {
       var tag = item.nodeName.toLowerCase();
       switch(tag) {
         case 'a':
-          menu.querySelector('input').value = item.getAttribute('href');
+          if (inputBar) inputBar.value = item.getAttribute('href');
           tag = 'createlink';
           break;
         case 'img':
-          menu.querySelector('input').value = item.getAttribute('src');
+          if (inputBar) inputBar.value = item.getAttribute('src');
           tag = 'insertimage';
           break;
         case 'i':
@@ -618,6 +668,7 @@
         case 'b':
           tag = 'bold';
           break;
+        case 'pre':
         case 'code':
           tag = 'code';
           break;
@@ -639,7 +690,15 @@
 
   // show menu
   Pen.prototype.menu = function() {
-
+    if (!this._menu) return this;
+    if (selection.isCollapsed) {
+      this._menu.style.display = 'none'; //hide menu
+      this._inputActive = false;
+      return this;
+    }
+    if (this._toolbar) {
+      if (!this._inputBar || !this._inputActive) return this;
+    }
     var offset = this._range.getBoundingClientRect()
       , menuPadding = 10
       , top = offset.top - menuPadding
@@ -647,6 +706,10 @@
       , menu = this._menu
       , menuOffset = {x: 0, y: 0}
       , stylesheet = this._stylesheet;
+
+    // fixes some browser double click visual discontinuity
+    // if the offset has no width or height it should not be used
+    if (offset.width === 0 && offset.height === 0) return this;
 
     // store the stylesheet used for positioning the menu horizontally
     if (this._stylesheet === undefined) {
@@ -701,7 +764,7 @@
       removeAllListeners(this);
       try {
         selection.removeAllRanges();
-        this._menu.parentNode.removeChild(this._menu);
+        if (this._menu) this._menu.parentNode.removeChild(this._menu);
       } catch (e) {/* IE throws error sometimes*/}
     } else {
       initToolbar(this);
@@ -728,6 +791,34 @@
     defaults.editor.setAttribute('class', klass);
     defaults.editor.innerHTML = defaults.textarea;
     return defaults.editor;
+  };
+
+  // export content as markdown
+  var regs = {
+    a: [/<a\b[^>]*href=["']([^"]+|[^']+)\b[^>]*>(.*?)<\/a>/ig, '[$2]($1)'],
+    img: [/<img\b[^>]*src=["']([^\"+|[^']+)[^>]*>/ig, '![]($1)'],
+    b: [/<b\b[^>]*>(.*?)<\/b>/ig, '**$1**'],
+    i: [/<i\b[^>]*>(.*?)<\/i>/ig, '***$1***'],
+    h: [/<h([1-6])\b[^>]*>(.*?)<\/h\1>/ig, function(a, b, c) {
+      return '\n' + ('######'.slice(0, b)) + ' ' + c + '\n';
+    }],
+    li: [/<(li)\b[^>]*>(.*?)<\/\1>/ig, '* $2\n'],
+    blockquote: [/<(blockquote)\b[^>]*>(.*?)<\/\1>/ig, '\n> $2\n'],
+    pre: [/<pre\b[^>]*>(.*?)<\/pre>/ig, '\n```\n$1\n```\n'],
+    p: [/<p\b[^>]*>(.*?)<\/p>/ig, '\n$1\n'],
+    hr: [/<hr\b[^>]*>/ig, '\n---\n']
+  };
+
+  Pen.prototype.toMd = function() {
+    var html = this.getContent()
+          .replace(/\n+/g, '') // remove line break
+          .replace(/<([uo])l\b[^>]*>(.*?)<\/\1l>/ig, '$2'); // remove ul/ol
+
+    for(var p in regs) {
+      if (regs.hasOwnProperty(p))
+        html = html.replace.apply(html, regs[p]);
+    }
+    return html.replace(/\*{5}/g, '**');
   };
 
   // make it accessible

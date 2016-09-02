@@ -21,5 +21,16 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "version": "0.2.2",
+  "_release": "0.2.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.2.2",
+    "commit": "81a05052a0f7536a22f6fa5a59785ccae4bf91b3"
+  },
+  "_source": "https://github.com/sofish/pen.git",
+  "_target": "0.2.2",
+  "_originalSource": "pen",
+  "_direct": true
 }
