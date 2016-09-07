@@ -117,10 +117,21 @@ And, there's a corresponding method called `rebuild()` to re-enable the editor:
 pen.rebuild(); // return itself
 ```
 
+#### 2.7 Export content as markdown
+
+It's an experimental feature
+
+```js
+var pen = new Pen('#editor');
+
+pen.toMd(); // return a markdown string
+```
+
+
 ## 3. markdown syntax support
 
 #### 3.1 install
-The syntax convertor will be enabled automatically by linking `markdown.js` after `pen.js: 
+The syntax convertor will be enabled automatically by linking `markdown.js` after `pen.js:
 
 ```html
 <script src="src/pen.js"></script>
@@ -128,13 +139,13 @@ The syntax convertor will be enabled automatically by linking `markdown.js` afte
 ```
 
 #### 3.2 usage
-To use it, you can type `action cmd` + `space key` at a line start. like: 
+To use it, you can type `action cmd` + `space key` at a line start. like:
 
 ```
 ### This will create a h3 tag
 ```
 
-The following cmds are allowed: 
+The following cmds are allowed:
 
 - Headings: type 1~6 `#` at the line start
 - Unordered List: type `- ` or `* `

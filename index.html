@@ -9,6 +9,8 @@
   body{width:800px;margin:0 auto;padding:5% 20px 20px;font-family:Palatino, Optima, Georgia, serif;}
   @media all and (max-width:1024px){ body, pre a{width:60%;} }
   small{color:#999;}
+  pre{white-space:pre-wrap;}
+
   #toolbar{margin-bottom:1em;position:fixed;left:20px;margin-top:5px;}
   #toolbar [class^="icon-"]:before, #toolbar [class*=" icon-"]:before{font-family:'pen'}
   #mode{color:#1abf89;;cursor:pointer;}
@@ -17,6 +19,7 @@
   #hinted{color:#1abf89;cursor:pointer;}
   #hinted.disabled{color:#666;}
   #hinted:before{content: '\e816';}
+  #tomd{color:#fff;border-radius:2px;line-height:1;padding:1px 3px 0; font-size:0.8em;background:#000;cursor:pointer;}
 
   #fork{position:fixed;right:0;top:0;}
 
@@ -46,7 +49,26 @@
 <div id="toolbar">
   <span id="mode" class="icon-mode"></span>
   <span id="hinted" class="icon-pre disabled" title="Toggle Markdown Hints"></span>
+  <span id="tomd" title="to markdown">MD</span>
 </div>
+
+<!-- <div id="custom-toolbar" class="pen-menu pen-menu" style="display: block; top: 20px; left: 10px;">
+  <i class="pen-icon icon-insertimage" data-action="insertimage"></i>
+  <i class="pen-icon icon-blockquote" data-action="blockquote"></i>
+  <i class="pen-icon icon-h2" data-action="h2"></i>
+  <i class="pen-icon icon-h3" data-action="h3"></i>
+  <i class="pen-icon icon-p active" data-action="p"></i>
+  <i class="pen-icon icon-code" data-action="code"></i>
+  <i class="pen-icon icon-insertorderedlist" data-action="insertorderedlist"></i>
+  <i class="pen-icon icon-insertunorderedlist" data-action="insertunorderedlist"></i>
+  <i class="pen-icon icon-inserthorizontalrule" data-action="inserthorizontalrule"></i>
+  <i class="pen-icon icon-indent" data-action="indent"></i>
+  <i class="pen-icon icon-outdent" data-action="outdent"></i>
+  <i class="pen-icon icon-bold" data-action="bold"></i>
+  <i class="pen-icon icon-italic" data-action="italic"></i>
+  <i class="pen-icon icon-underline" data-action="underline"></i>
+  <i class="pen-icon icon-createlink" data-action="createlink"></i>
+</div> -->
 
 <div data-toggle="pen" data-placeholder="im a placeholder">
   <h2>Enjoy live editing (+markdown)</h2>
@@ -81,6 +103,7 @@
 
   // config
   var options = {
+    // toolbar: document.getElementById('custom-toolbar'),
     editor: document.querySelector('[data-toggle="pen"]'),
     debug: true,
     list: [
@@ -105,6 +128,12 @@
       this.classList.add('disabled');
       pen.destroy();
     }
+  });
+
+  // export content as markdown
+  document.querySelector('#tomd').addEventListener('click', function() {
+    var text = pen.toMd();
+    document.body.innerHTML = '<a href="javascript:location.reload()">&larr;back to editor</a><br><br><pre>' + text + '</pre>';
   });
 
   // toggle editor mode
