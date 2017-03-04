@@ -838,7 +838,7 @@
   Pen.prototype.toMd = function() {
     var html = this.getContent()
           .replace(/\n+/g, '') // remove line break
-          .replace(/<([uo])l\b[^>]*>(.*?)<\/\1l>/ig, '$2'); // remove ul/ol
+          .replace(/<([uo])l\b[^>]*>(.*?)<\/\1l>/ig, '\n$2'); // remove ul/ol
 
     for(var p in regs) {
       if (regs.hasOwnProperty(p))
