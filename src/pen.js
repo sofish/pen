@@ -143,7 +143,7 @@
   }
 
   function commandLink(ctx, tag, value) {
-    if (this.config.linksInNewWindow) {
+    if (ctx.config.linksInNewWindow) {
       value = '< a href="' + value + '" target="_blank">' + (selection.toString()) + '</a>';
       return commandOverall(ctx, 'insertHTML', value);
     } else {
