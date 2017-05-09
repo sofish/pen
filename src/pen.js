@@ -818,7 +818,7 @@
     return defaults.editor;
   };
 
-  (function(root) {
+  (function() {
     var PenHtmlToMarkdown = function(editorNode) {
       if (!editorNode) throw new Error('Invalid argument - undefined editor DOM node');
 
@@ -945,7 +945,7 @@
         this._state.href = node.attributes.getNamedItem("href").value;
         this._markdown += '[';
       },
-      beforeExit: function (node) {
+      beforeExit: function () {
         this._markdown += '](' + this._state.href + ')';
       },
     };
@@ -1051,7 +1051,7 @@
     };
 
     PenHtmlToMarkdown.prototype._visit = function(node) {
-      var action = this._selectAction(node)
+      var action = this._selectAction(node);
       if (action) {
         if (action.beforeEnter)
           action.beforeEnter.call(this, node);
@@ -1074,13 +1074,13 @@
         if (action.afterExit)
           action.afterExit.call(this, node);
       }
-    }
+    };
 
     Pen.prototype.toMd = function() {
       var converter = new PenHtmlToMarkdown(this.config.editor);
       return converter.toMd();
     };
-  }(root));
+  }());
 
   // make it accessible
   if (doc.getSelection) {
