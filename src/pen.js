@@ -819,7 +819,7 @@
   };
 
   (function(root) {
-    let PenHtmlToMarkdown = function(editorNode) {
+    var PenHtmlToMarkdown = function(editorNode) {
       if (!editorNode) throw new Error('Invalid argument - undefined editor DOM node');
 
       this._states = [];
@@ -839,7 +839,7 @@
     };
 
     PenHtmlToMarkdown.prototype._pushState = function() {
-      let newState = Object.assign({}, this._state);
+      var newState = Object.assign({}, this._state);
       this._states.push(this._state);
       this._state = newState;
     };
@@ -894,7 +894,7 @@
 
     PenHtmlToMarkdown.prototype.actionText = {
       afterEnter: function (node) {
-        let text = node.wholeText;
+        var text = node.wholeText;
         if (!this._state.isInsideCode) {
           text = text.replace(/\n+/g, ' ');
         }
@@ -970,9 +970,9 @@
 
     PenHtmlToMarkdown.prototype.actionImg = {
       afterEnter: function (node) {
-        let src = node.attributes.getNamedItem("src").value;
-        let alt = node.attributes.getNamedItem("alt").value;
-        let parser = document.createElement('a');
+        var src = node.attributes.getNamedItem("src").value;
+        var alt = node.attributes.getNamedItem("alt").value;
+        var parser = document.createElement('a');
         parser.href = src;
         src = parser.pathname + parser.search + parser.hash;
 
@@ -1000,17 +1000,18 @@
         afterExit: function () {
           this._markdown += '\n\n';
         }
-      }
+      };
     }
-    PenHtmlToMarkdown.prototype.actionH1 = makeHeaderAction(1)
-    PenHtmlToMarkdown.prototype.actionH2 = makeHeaderAction(2)
-    PenHtmlToMarkdown.prototype.actionH3 = makeHeaderAction(3)
-    PenHtmlToMarkdown.prototype.actionH4 = makeHeaderAction(4)
-    PenHtmlToMarkdown.prototype.actionH5 = makeHeaderAction(5)
-    PenHtmlToMarkdown.prototype.actionH6 = makeHeaderAction(6)
+
+    PenHtmlToMarkdown.prototype.actionH1 = makeHeaderAction(1);
+    PenHtmlToMarkdown.prototype.actionH2 = makeHeaderAction(2);
+    PenHtmlToMarkdown.prototype.actionH3 = makeHeaderAction(3);
+    PenHtmlToMarkdown.prototype.actionH4 = makeHeaderAction(4);
+    PenHtmlToMarkdown.prototype.actionH5 = makeHeaderAction(5);
+    PenHtmlToMarkdown.prototype.actionH6 = makeHeaderAction(6);
 
     PenHtmlToMarkdown.prototype._selectAction = function(node) {
-      let dispatchTable = {
+      var dispatchTable = {
         'CODE': this.actionCode,
         'PRE': this.actionPre,
         'P': this.actionParagraph,
@@ -1039,7 +1040,7 @@
       case Node.TEXT_NODE:
         return this.actionText;
       case Node.ELEMENT_NODE:
-        let action = dispatchTable[node.tagName];
+        var action = dispatchTable[node.tagName];
         if (action !== undefined) {
           return action;
         }
@@ -1047,10 +1048,10 @@
         break;
       }
       return null;
-    }
+    };
 
     PenHtmlToMarkdown.prototype._visit = function(node) {
-      let action = this._selectAction(node)
+      var action = this._selectAction(node)
       if (action) {
         if (action.beforeEnter)
           action.beforeEnter.call(this, node);
@@ -1059,11 +1060,12 @@
           action.afterEnter.call(this, node);
       }
 
-      for (let child of node.childNodes) {
-        this._visit(child);
+      var self = this;
+      node.childNodes.forEach(function (child) {
+        self._visit(child);
         if (action && action.afterChild)
-          action.afterChil.call(this, node);
-      }
+          action.afterChil.call(self, node);
+      });
 
       if (action) {
         if (action.beforeExit)
@@ -1075,8 +1077,8 @@
     }
 
     Pen.prototype.toMd = function() {
-      let converter = new PenHtmlToMarkdown(this.config.editor)
-      return converter.toMd()
+      var converter = new PenHtmlToMarkdown(this.config.editor);
+      return converter.toMd();
     };
   }(root));
 
