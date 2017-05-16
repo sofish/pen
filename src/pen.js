@@ -207,11 +207,26 @@
       addListener(ctx, editor, 'mousedown', function() {
         selecting = true;
       });
+      addListener(ctx, editor, 'touchstart', function() {
+        selecting = true;
+      });
       addListener(ctx, editor, 'mouseleave', function() {
         if (selecting) updateStatus(800);
         selecting = false;
       });
+      addListener(ctx, editor, 'touchleave', function() {
+        if (selecting) updateStatus(800);
+        selecting = false;
+      });
       addListener(ctx, editor, 'mouseup', function() {
+        if (selecting) updateStatus(100);
+        selecting = false;
+      });
+      addListener(ctx, editor, 'touchend', function() {
+        if (selecting) updateStatus(100);
+        selecting = false;
+      });
+      addListener(ctx, editor, 'touchcancel', function() {
         if (selecting) updateStatus(100);
         selecting = false;
       });
@@ -725,7 +740,7 @@
       if (!this._inputBar || !this._inputActive) return this;
     }
     var offset = this._range.getBoundingClientRect()
-      , menuPadding = 10
+      , menuPadding = 'ontouchstart' in window ? 20 : 10
       , top = offset.top - menuPadding
       , left = offset.left + (offset.width / 2)
       , menu = this._menu
@@ -760,7 +775,7 @@
     } else {
       stylesheet.insertRule('.pen-menu:after {left: 50%; }', 0);
     }
-    if (menuOffset.y < 0) {
+    if (menuOffset.y < 0 || 'ontouchstart' in window) {
       menu.classList.add('pen-menu-below');
       menuOffset.y = offset.top + offset.height + menuPadding;
     } else {
