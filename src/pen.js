@@ -541,7 +541,7 @@
     var form = inputElement.form;
     var me = this;
     form.addEventListener("submit", function() {
-      inputElement.value = me.config.saveAsMarkdown ? me.toMd(me.config.editor.innerHTML) : me.config.editor.innerHTML;
+      inputElement.value = me.config.saveAsMarkdown ? me.toMd() : me.config.editor.innerHTML;
     });
   };
 
@@ -818,34 +818,269 @@
     return defaults.editor;
   };
 
-  // export content as markdown
-  var regs = {
-    a: [/<a\b[^>]*href=["']([^"]+|[^']+)\b[^>]*>(.*?)<\/a>/ig, '[$2]($1)'],
-    img: [/<img\b[^>]*src=["']([^\"+|[^']+)[^>]*>/ig, '![]($1)'],
-    b: [/<b\b[^>]*>(.*?)<\/b>/ig, '**$1**'],
-    i: [/<i\b[^>]*>(.*?)<\/i>/ig, '***$1***'],
-    h: [/<h([1-6])\b[^>]*>(.*?)<\/h\1>/ig, function(a, b, c) {
-      return '\n' + ('######'.slice(0, b)) + ' ' + c + '\n';
-    }],
-    li: [/<(li)\b[^>]*>(.*?)<\/\1>/ig, '* $2\n'],
-    blockquote: [/<(blockquote)\b[^>]*>(.*?)<\/\1>/ig, '\n> $2\n'],
-    pre: [/<pre\b[^>]*>(.*?)<\/pre>/ig, '\n```\n$1\n```\n'],
-    code: [/<code\b[^>]*>(.*?)<\/code>/ig, '\n`\n$1\n`\n'],
-    p: [/<p\b[^>]*>(.*?)<\/p>/ig, '\n$1\n'],
-    hr: [/<hr\b[^>]*>/ig, '\n---\n']
-  };
+  (function() {
+    var PenHtmlToMarkdown = function(editorNode) {
+      if (!editorNode) throw new Error('Invalid argument - undefined editor DOM node');
 
-  Pen.prototype.toMd = function() {
-    var html = this.getContent()
-          .replace(/\n+/g, '') // remove line break
-          .replace(/<([uo])l\b[^>]*>(.*?)<\/\1l>/ig, '$2'); // remove ul/ol
+      this._states = [];
+      this._state = {
+        isInsideCode: false,
+        marker: ' ',
+        markerNo: 0,
+        listLevel: 0,
+        listIndent: '',
+        href: '',
+      };
+      this._markdown = '';
+      this.toMd = function() {
+        this._visit(editorNode);
+        return this._markdown.trim();
+      };
+    };
 
-    for(var p in regs) {
-      if (regs.hasOwnProperty(p))
-        html = html.replace.apply(html, regs[p]);
+    PenHtmlToMarkdown.prototype._pushState = function() {
+      var newState = Object.assign({}, this._state);
+      this._states.push(this._state);
+      this._state = newState;
+    };
+
+    PenHtmlToMarkdown.prototype._popState = function() {
+      this._state = this._states.pop();
+    };
+
+    PenHtmlToMarkdown.prototype.actionCode = {
+      beforeEnter: function () {
+        if (!this._state.isInsideCode)
+          this._markdown += '`';
+      },
+      afterEnter: function () {
+        this._state.isInsideCode = true;
+      },
+      afterExit: function () {
+        if (!this._state.isInsideCode)
+          this._markdown += '`';
+      },
+    };
+
+    PenHtmlToMarkdown.prototype.actionPre = {
+      beforeEnter: function () {
+        if (!this._state.isInsideCode)
+          this._markdown += '\n```\n';
+      },
+      afterEnter: function () {
+        this._state.isInsideCode = true;
+      },
+      afterExit: function () {
+        if (!this._state.isInsideCode)
+          this._markdown += '```\n\n';
+      },
+    };
+
+    PenHtmlToMarkdown.prototype.actionParagraph = {
+      afterExit: function () {
+        if (!this._state.isInsideCode)
+          this._markdown += '\n';
+      }
+    };
+
+    PenHtmlToMarkdown.prototype.actionBlockquote = {
+      afterEnter: function () {
+        this._markdown += '>';
+      },
+      afterExit: function () {
+        this._markdown += '\n';
+      }
+    };
+
+    PenHtmlToMarkdown.prototype.actionText = {
+      afterEnter: function (node) {
+        var text = node.wholeText;
+        if (!this._state.isInsideCode) {
+          text = text.replace(/\n+/g, ' ');
+        }
+        this._markdown += text;
+      }
+    };
+
+    PenHtmlToMarkdown.prototype.actionUnorderedList = {
+      afterEnter: function () {
+        this._markdown += '\n';
+        this._state.marker = '*';
+        this._state.listIndent = ' '.repeat(4 * this._state.listLevel);
+        this._state.listLevel += 1;
+      },
+      afterExit: function () {
+        this._markdown += '\n';
+      },
+    };
+
+    PenHtmlToMarkdown.prototype.actionOrderedList = {
+      afterEnter: function () {
+        this._markdown += '\n';
+        this._state.marker = '1.';
+        this._state.markerNo = 1;
+        this._state.listIndent = ' '.repeat(4 * this._state.listLevel);
+        this._state.listLevel += 1;
+      },
+      afterChild: function () {
+        this._state.markerNo += 1;
+        this._state.marker = this._state.markerNo.toString() + '.';
+      },
+      afterExit: function () {
+        this._markdown += '\n';
+      },
+    };
+
+    PenHtmlToMarkdown.prototype.actionListItem = {
+      afterEnter: function () {
+        this._markdown += this._state.listIndent + this._state.marker + " ";
+      },
+      afterExit: function () {
+        this._markdown += '\n';
+      }
+    };
+    
+    PenHtmlToMarkdown.prototype.actionLink = {
+      afterEnter: function (node) {
+        this._state.href = node.attributes.getNamedItem("href").value;
+        this._markdown += '[';
+      },
+      beforeExit: function () {
+        this._markdown += '](' + this._state.href + ')';
+      },
+    };
+
+    PenHtmlToMarkdown.prototype.actionBold = {
+      afterEnter: function () {
+        this._markdown += '**';
+      },
+      beforeExit: function () {
+        this._markdown += '**';
+      }
+    };
+
+    PenHtmlToMarkdown.prototype.actionItalic = {
+      afterEnter: function () {
+        this._markdown += '***';
+      },
+      beforeExit: function () {
+        this._markdown += '***';
+      }
+    };
+
+    PenHtmlToMarkdown.prototype.actionImg = {
+      afterEnter: function (node) {
+        var src = node.attributes.getNamedItem("src").value;
+        var alt = node.attributes.getNamedItem("alt").value;
+        var parser = document.createElement('a');
+        parser.href = src;
+        src = parser.pathname + parser.search + parser.hash;
+
+        this._markdown += '![' + alt + '](' + src + ')';
+      },
+    };
+    
+    PenHtmlToMarkdown.prototype.actionHorizontalLine = {
+      afterEnter: function () {
+        this._markdown += '\n---\n';
+      },
+    };
+
+    PenHtmlToMarkdown.prototype.actionLinebreak = {
+      afterEnter: function () {
+        this._markdown += '\n';
+      },
+    };
+
+    function makeHeaderAction(level) {
+      return {
+        beforeEnter: function () {
+          this._markdown += '\n' + '#'.repeat(level) + ' ';
+        },
+        afterExit: function () {
+          this._markdown += '\n\n';
+        }
+      };
     }
-    return html.replace(/\*{5}/g, '**');
-  };
+
+    PenHtmlToMarkdown.prototype.actionH1 = makeHeaderAction(1);
+    PenHtmlToMarkdown.prototype.actionH2 = makeHeaderAction(2);
+    PenHtmlToMarkdown.prototype.actionH3 = makeHeaderAction(3);
+    PenHtmlToMarkdown.prototype.actionH4 = makeHeaderAction(4);
+    PenHtmlToMarkdown.prototype.actionH5 = makeHeaderAction(5);
+    PenHtmlToMarkdown.prototype.actionH6 = makeHeaderAction(6);
+
+    PenHtmlToMarkdown.prototype._selectAction = function(node) {
+      var dispatchTable = {
+        'CODE': this.actionCode,
+        'PRE': this.actionPre,
+        'P': this.actionParagraph,
+        'BLOCKQUOTE': this.actionBlockquote,
+        'UL': this.actionUnorderedList,
+        'OL': this.actionOrderedList,
+        'LI': this.actionListItem,
+        'A': this.actionLink,
+        'IMG': this.actionImg,
+        'B': this.actionBold,
+        'I': this.actionItalic,
+        'HR': this.actionHorizontalLine,
+        'BR': this.actionLinebreak,
+        'H1': this.actionH1,
+        'H2': this.actionH2,
+        'H3': this.actionH3,
+        'H4': this.actionH4,
+        'H5': this.actionH5,
+        'H6': this.actionH6,
+        'DIV': null,
+        'SPAN': null,
+      };
+
+      switch (node.nodeType)
+      {
+      case Node.TEXT_NODE:
+        return this.actionText;
+      case Node.ELEMENT_NODE:
+        var action = dispatchTable[node.tagName];
+        if (action !== undefined) {
+          return action;
+        }
+        console.log("unhandled tag:", node.tagName);
+        break;
+      }
+      return null;
+    };
+
+    PenHtmlToMarkdown.prototype._visit = function(node) {
+      var action = this._selectAction(node);
+      if (action) {
+        if (action.beforeEnter)
+          action.beforeEnter.call(this, node);
+        this._pushState();
+        if (action.afterEnter)
+          action.afterEnter.call(this, node);
+      }
+
+      var self = this;
+      node.childNodes.forEach(function (child) {
+        self._visit(child);
+        if (action && action.afterChild)
+          action.afterChil.call(self, node);
+      });
+
+      if (action) {
+        if (action.beforeExit)
+          action.beforeExit.call(this, node);
+        this._popState();
+        if (action.afterExit)
+          action.afterExit.call(this, node);
+      }
+    };
+
+    Pen.prototype.toMd = function() {
+      var converter = new PenHtmlToMarkdown(this.config.editor);
+      return converter.toMd();
+    };
+  }());
 
   // make it accessible
   if (doc.getSelection) {
