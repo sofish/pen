@@ -522,7 +522,7 @@
     this._prevContent = this.getContent();
 
     // enable markdown covert
-    if (this.markdown) this.markdown.init(this);
+    //if (this.markdown) this.markdown.init(this);
 
     // stay on the page
     if (this.config.stay) this.stay(this.config);
@@ -794,6 +794,7 @@
     } else {
       initToolbar(this);
       initEvents(this);
+      if (this.markdown) this.markdown.init(this);
     }
     this._isDestroyed = destroy;
     this.config.editor[attr]('contenteditable', '');
